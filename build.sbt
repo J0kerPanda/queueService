@@ -30,4 +30,8 @@ libraryDependencies ++= Seq(
   "org.tpolecat" %% "doobie-scalatest" % Version.doobie  // ScalaTest support for typechecking statements.
 )
 
+libraryDependencies ++= Seq(
+  "org.flywaydb" %% "flyway-play" % "5.0.0"
+)
+
       
