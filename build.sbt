@@ -14,7 +14,7 @@ scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(jdbc, ehcache, ws, specs2 % Test, guice)
 
-unmanagedResourceDirectories in Test <+=  baseDirectory (_/"target/web/public/test")
+unmanagedResourceDirectories in Test <+= baseDirectory (_/"target/web/public/test")
 
 lazy val Version = new {
   val doobie = "0.5.2"
@@ -24,7 +24,6 @@ libraryDependencies ++= Seq(
 
   "org.tpolecat" %% "doobie-core"      % Version.doobie,
 
-//  "org.tpolecat" %% "doobie-hikari"    % Version.doobie, // HikariCP transactor.
   "org.tpolecat" %% "doobie-postgres"  % Version.doobie, // Postgres driver 42.2.2 + type mappings.
   "org.tpolecat" %% "doobie-specs2"    % Version.doobie, // Specs2 support for typechecking statements.
   "org.tpolecat" %% "doobie-scalatest" % Version.doobie  // ScalaTest support for typechecking statements.
