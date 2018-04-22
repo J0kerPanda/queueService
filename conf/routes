@@ -12,4 +12,6 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET     /api/register               controllers.ApiController.register
+
+GET     /api/user/:userId        controllers.ApiController.getUser(userId: Long)
       

@@ -12,15 +12,15 @@ SELECT EXISTS(
 $$ LANGUAGE sql;
 
 CREATE TABLE "User" (
-  id bigint NOT NULL PRIMARY KEY,
+  id BIGINT NOT NULL PRIMARY KEY,
   firstName VARCHAR(255) NOT NULL,
   surname VARCHAR(255) NOT NULL,
   lastName VARCHAR(255) NOT NULL,
-  email varchar(255) NOT NULL UNIQUE,
-  password varchar(255) NOT NULL,
-  googleId bigint NOT NULL,
-  isSuperuser boolean NOT NULL DEFAULT false,
-  isBlocked boolean NOT NULL DEFAULT false,
+  email VARCHAR(255) NOT NULL UNIQUE,
+  password VARCHAR(255) NOT NULL,
+  googleId BIGINT NOT NULL,
+  isSuperuser BOOLEAN NOT NULL DEFAULT false,
+  isBlocked BOOLEAN NOT NULL DEFAULT false,
   categoryId INTEGER NOT NULL REFERENCES "Category" (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT FinalCategory_check CHECK (is_final_category(categoryId))
 );
