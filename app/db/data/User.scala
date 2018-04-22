@@ -13,7 +13,6 @@ object User {
   private type tupleType = User.type
 
   def insert(u: User): ConnectionIO[Int] = {
-
     sql"""INSERT INTO "User"
          |(id, firstname, surname, lastname, email, password, googleid, issuperuser, isblocked)
          |VALUES (${u.id}, ${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email},
@@ -25,12 +24,10 @@ object User {
 
   def selectByIds(ids: NonEmptyList[Long], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
     val idsFr = Fragments.in(fr"id", ids)
-
     (fr"""SELECT * FROM "User" WHERE""" ++ idsFr ++ fr"""AND isblocked = $isBlocked""")
       .query[User]
       .to[List]
   }
-
 }
 
 case class User(id: Long, firstName: String, surname: String,
