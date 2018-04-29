@@ -6,17 +6,12 @@ import db.data.User
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
-import play.api.libs.concurrent.ExecutionContextProvider
-import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
-
-import scala.concurrent.ExecutionContext
+import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
-class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec: ExecutionContextProvider) extends AbstractController(cc) {
+class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-  private implicit val _ec: ExecutionContext = ec.get()
-
-  def register: Action[AnyContent] = Action {
+  def register = Action {
     val id: Int = System.currentTimeMillis().toInt
     println(id)
     val user = User(
@@ -41,7 +36,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec
     Ok(User.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
   }
 
-  def test: Action[AnyContent] = Action {
+  def test = Action {
     Ok("")
   }
 }
