@@ -14,8 +14,10 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 GET     /api/test                   controllers.UserController.test
 
 # todo change to post
+# User
 GET     /api/user/register          controllers.UserController.register
 GET     /api/user/:userId           controllers.UserController.get(userId: Int)
 
+# Category
 GET     /api/category/create        controllers.CategoryController.create(name: String, isFinal: Boolean)
 GET     /api/category/:categoryId   controllers.CategoryController.get(categoryId: Int)

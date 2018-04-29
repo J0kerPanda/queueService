@@ -27,7 +27,7 @@ CREATE TABLE "User" (
 
 CREATE TYPE visit_status AS ENUM ('pending', 'finished', 'cancelledByUser', 'cancelledByHost');
 
-CREATE TABLE "TimeTable" (
+CREATE TABLE "Appointment" (
   id BIGSERIAL NOT NULL PRIMARY KEY,
   hostId INT NOT NULL REFERENCES "User" (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   visitorId INT NOT NULL REFERENCES "User" (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
