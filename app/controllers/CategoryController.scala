@@ -9,9 +9,9 @@ import javax.inject.{Inject, Singleton}
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
-class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
+class CategoryController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-  def register = Action {
+  def add = Action {
     val id: Int = System.currentTimeMillis().toInt
     println(id)
     val user = User(

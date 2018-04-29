@@ -12,6 +12,6 @@ GET     /message                    controllers.AsyncController.message
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
 GET     /api/user/register          controllers.UserController.register
-GET     /api/user/:userId           controllers.UserController.getUser(userId: Int)
+GET     /api/user/:userId           controllers.UserController.get(userId: Int)
 
 GET     /api/test                   controllers.UserController.test
