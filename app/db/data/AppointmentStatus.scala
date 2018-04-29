@@ -1,15 +1,16 @@
 package db.data
 
 import enumeratum.{Enum, EnumEntry}
-import doobie.postgres._
 import doobie.postgres.implicits._
 import doobie.util.meta.Meta
+
+import scala.collection.immutable
 
 sealed abstract class AppointmentStatus(val dbName: String) extends EnumEntry
 
 object AppointmentStatus extends Enum[AppointmentStatus] {
 
-  val values = findValues
+  val values: immutable.IndexedSeq[AppointmentStatus] = findValues
 
   case object Pending extends AppointmentStatus("pending")
   case object Finished extends AppointmentStatus("finished")
@@ -18,7 +19,7 @@ object AppointmentStatus extends Enum[AppointmentStatus] {
 
   implicit val AppointmentStatusMeta: Meta[AppointmentStatus] = pgEnumStringOpt(
     "visit_status",
-    name => AppointmentStatus.lowerCaseNamesToValuesMap.get(name.toLowerCase),
+    name => AppointmentStatus.namesToValuesMap.get(name),
     enum => enum.dbName
   )
 }

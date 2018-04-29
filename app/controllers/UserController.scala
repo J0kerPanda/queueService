@@ -12,7 +12,7 @@ import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponent
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ApiController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec: ExecutionContextProvider) extends AbstractController(cc) {
+class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec: ExecutionContextProvider) extends AbstractController(cc) {
 
   private implicit val _ec: ExecutionContext = ec.get()
 

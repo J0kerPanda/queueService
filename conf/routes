@@ -11,8 +11,7 @@ GET     /message                    controllers.AsyncController.message
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /api/register               controllers.ApiController.register
+GET     /api/user/register          controllers.UserController.register
+GET     /api/user/:userId           controllers.UserController.getUser(userId: Int)
 
-GET     /api/user/:userId           controllers.ApiController.getUser(userId: Int)
-
-GET     /api/test                   controllers.ApiController.test
+GET     /api/test                   controllers.UserController.test
