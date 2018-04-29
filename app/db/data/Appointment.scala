@@ -1,7 +1,5 @@
 package db.data
 
-import java.util.Date
-
 import cats.data.NonEmptyList
 import db.data.Appointment.AppointmentId
 import doobie.implicits._
@@ -9,6 +7,8 @@ import doobie._
 import db.data.AppointmentStatus._
 import db.data.User.UserId
 import doobie.free.connection.ConnectionIO
+import org.joda.time.DateTime
+import db.DatabaseUtils._
 
 object Appointment {
 
@@ -33,7 +33,7 @@ object Appointment {
       .to[List]
   }
 
-  def forInsertion(hostId: UserId, visitorId: UserId, date: Date, status: AppointmentStatus = Pending): Appointment = {
+  def forInsertion(hostId: UserId, visitorId: UserId, date: DateTime, status: AppointmentStatus = Pending): Appointment = {
     Appointment(-1, hostId, visitorId, date, status)
   }
 }
@@ -41,5 +41,5 @@ object Appointment {
 case class Appointment(id: AppointmentId,
                        hostId: UserId,
                        visitorId: UserId,
-                       date: Date,
+                       date: DateTime,
                        status: AppointmentStatus = Pending)

@@ -16,6 +16,9 @@ libraryDependencies ++= Seq(jdbc, ehcache, ws, specs2 % Test, guice)
 
 unmanagedResourceDirectories in Test <+= baseDirectory (_/"target/web/public/test")
 
+//Joda
+libraryDependencies += "joda-time" % "joda-time" % "2.9.9"
+
 //Doobie
 lazy val Version = new {
   val doobie = "0.5.2"

@@ -1,7 +1,10 @@
 package controllers
 
 import db.data.{Appointment, AppointmentStatus, Category, User}
+import org.joda.time.DateTime
 import play.api.libs.json._
+
+import scala.util.Try
 
 object HttpFormats {
 
@@ -19,6 +22,18 @@ object HttpFormats {
 
   implicit object appointmentStatusWriteFormat extends Writes[AppointmentStatus] {
     override def writes(status: AppointmentStatus): JsValue = JsString(status.dbName)
+  }
+
+  implicit object dateTimeReadFormat extends Reads[DateTime] {
+    override def reads(json: JsValue): JsResult[DateTime] = json match {
+      case JsString(value) => Try(JsSuccess(DateTime.parse(value))).toOption.getOrElse(JsError())
+
+      case _ => JsError()
+    }
+  }
+
+  implicit object dateTimeWriteFormat extends Writes[DateTime] {
+    override def writes(dt: DateTime): JsValue = JsString(dt.toString())
   }
 
   implicit val appointmentFormat: OFormat[Appointment] = Json.format[Appointment]
