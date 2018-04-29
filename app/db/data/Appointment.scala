@@ -6,6 +6,7 @@ import cats.data.NonEmptyList
 import doobie.implicits._
 import doobie._
 import db.data.AppointmentStatus._
+import db.data.AppointmentStatus.AppointmentStatusMeta
 import doobie.free.connection.ConnectionIO
 
 object Appointment {
@@ -16,13 +17,13 @@ object Appointment {
       .run
   }
 
-  def selectById(id: Int): ConnectionIO[Option[Appointment]] = {
+  def selectById(id: Long): ConnectionIO[Option[Appointment]] = {
     sql"""SELECT "id", hostid, visitorId, date, status FROM "Appointment" WHERE id = $id"""
       .query[Appointment]
       .option
   }
 
-  def selectByIds(ids: NonEmptyList[Int]): ConnectionIO[List[Appointment]] = {
+  def selectByIds(ids: NonEmptyList[Long]): ConnectionIO[List[Appointment]] = {
     (fr"""SELECT "id", hostid, visitorid, date, status FROM "Appointment" WHERE""" ++ Fragments.in(fr"id", ids))
       .stripMargin
       .query[Appointment]

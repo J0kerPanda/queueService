@@ -19,7 +19,7 @@ object AppointmentStatus extends Enum[AppointmentStatus] {
 
   implicit val AppointmentStatusMeta: Meta[AppointmentStatus] = pgEnumStringOpt(
     "visit_status",
-    name => AppointmentStatus.namesToValuesMap.get(name),
+    name => AppointmentStatus.lowerCaseNamesToValuesMap.get(name.toLowerCase),
     enum => enum.dbName
   )
 }
