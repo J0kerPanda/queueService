@@ -2,12 +2,12 @@ package controllers
 
 import java.util.Date
 
-import db.{ConnectionUtils, DatabaseUtils}
+import controllers.HttpFormats._
+import db.ConnectionUtils
 import db.data.Appointment
+import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{AbstractController, ControllerComponents}
-import doobie.implicits._
-import HttpFormats._
 
 @Singleton
 class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUtils) extends AbstractController(cc) {
@@ -16,8 +16,7 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
     val appointment = Appointment.forInsertion(hostId, visitorId, new Date())
 
     val tr = for {
-      _ <- Appointment.insert(appointment)
-      id <- DatabaseUtils.returnLastLongId
+      id <- Appointment.insert(appointment)
       a <- Appointment.selectById(id)
     } yield a
 

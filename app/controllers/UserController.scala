@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.HttpFormats._
-import db.{ConnectionUtils, DatabaseUtils}
+import db.ConnectionUtils
 import db.data.User
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -23,8 +23,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
       categoryId = 1)
 
     val tr: ConnectionIO[scala.Option[User]] = for {
-      _ <- User.insert(user)
-      id <- DatabaseUtils.returnLastIntId
+      id <- User.insert(user)
       u <- User.selectById(id)
     } yield u
 

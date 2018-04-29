@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.HttpFormats._
-import db.{ConnectionUtils, DatabaseUtils}
+import db.ConnectionUtils
 import db.data.Category
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -15,8 +15,7 @@ class CategoryController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     val category = Category.forInsertion(None, name, isFinal)
 
     val tr: ConnectionIO[scala.Option[Category]] = for {
-      _ <- Category.insert(category)
-      id <- DatabaseUtils.returnLastIntId
+      id <- Category.insert(category)
       c <- Category.selectById(id)
     } yield c
 
