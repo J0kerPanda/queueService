@@ -13,5 +13,6 @@ GET     /assets/*file               controllers.Assets.versioned(path="/public",
 
 GET     /api/register               controllers.ApiController.register
 
-GET     /api/user/:userId        controllers.ApiController.getUser(userId: Long)
-      
+GET     /api/user/:userId           controllers.ApiController.getUser(userId: Int)
+
+GET     /api/test                   controllers.ApiController.test

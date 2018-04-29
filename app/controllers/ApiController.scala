@@ -18,17 +18,17 @@ class ApiController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec:
   private implicit val _ec: ExecutionContext = ec.get()
 
   def register: Action[AnyContent] = Action {
-    val id = System.currentTimeMillis()
+    val id: Int = System.currentTimeMillis().toInt
     println(id)
     val user = User(
-      id = id,
+      id = id.toInt,
       firstName = "test",
       surname = "test",
       lastName = "test",
       password = "test",
       email = s"$id@test.com",
-      googleId = 2L,
-      categoryId = 1L)
+      googleId = 2,
+      categoryId = 1)
 
     val tr: ConnectionIO[List[User]] = for {
       _ <- User.insert(user)
@@ -36,11 +36,13 @@ class ApiController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec:
     } yield p
 
     Ok(tr.transact(cu.transactor).unsafeRunSync().toJson)
-
-//    Ok(User.insert(user).transact(cu.transactor).unsafeRunSync().toString)
   }
 
-  def getUser(id: Long) = Action {
-    Ok(User.testSelect(NonEmptyList.of(id)).transact(cu.transactor).unsafeRunSync().toString())
+  def getUser(id: Int) = Action {
+    Ok(User.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
+  }
+
+  def test: Action[AnyContent] = Action {
+    Ok(User.testSelect(NonEmptyList.of(282519388, 284456580)).transact(cu.transactor).unsafeRunSync().toString())
   }
 }
