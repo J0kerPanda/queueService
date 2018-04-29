@@ -1,8 +1,8 @@
 package controllers
 
 import controllers.HttpFormats._
-import db.ConnectionUtils
-import db.data.User
+import db.{ConnectionUtils, DatabaseUtils}
+import db.data.Category
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
@@ -11,32 +11,19 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 @Singleton
 class CategoryController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-  def add = Action {
-    val id: Int = System.currentTimeMillis().toInt
-    println(id)
-    val user = User(
-      id = id,
-      firstName = "test",
-      surname = "test",
-      lastName = "test",
-      password = "test",
-      email = s"$id@test.com",
-      googleId = id.toString,
-      categoryId = 1)
+  def create(name: String, isFinal: Boolean) = Action {
+    val category = Category.forInsertion(None, name, isFinal)
 
-    val tr: ConnectionIO[scala.Option[User]] = for {
-      _ <- User.insert(user)
-      p <- User.selectById(id)
-    } yield p
+    val tr: ConnectionIO[scala.Option[Category]] = for {
+      _ <- Category.insert(category)
+      id <- DatabaseUtils.returnLastIntId
+      c <- Category.selectById(id)
+    } yield c
 
-    Ok(tr.transact(cu.transactor).unsafeRunSync().toJson)
+    Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
   }
 
   def get(id: Int) = Action {
-    Ok(User.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
-  }
-
-  def test = Action {
-    Ok("")
+    Ok(Category.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
   }
 }

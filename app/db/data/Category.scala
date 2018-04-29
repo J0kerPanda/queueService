@@ -8,7 +8,7 @@ import doobie._
 object Category {
 
   def insert(c: Category): ConnectionIO[Int] = {
-    sql"""INSERT INTO "Category" ("id", parentid, name, isfinal) VALUES (${c.id}, ${c.parentId}, ${c.name}, ${c.isFinal})"""
+    sql"""INSERT INTO "Category" (parentid, name, isfinal) VALUES (${c.parentId}, ${c.name}, ${c.isFinal})"""
       .update()
       .run
   }
@@ -24,6 +24,10 @@ object Category {
       .stripMargin
       .query[Category]
       .to[List]
+  }
+
+  def forInsertion(parentId: Option[Int], name: String, isFinal: Boolean): Category = {
+    Category(-1, parentId, name, isFinal)
   }
 }
 

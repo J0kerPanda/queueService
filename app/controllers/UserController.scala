@@ -1,7 +1,7 @@
 package controllers
 
 import controllers.HttpFormats._
-import db.ConnectionUtils
+import db.{ConnectionUtils, DatabaseUtils}
 import db.data.User
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
@@ -12,24 +12,23 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   def register = Action {
-    val id: Int = System.currentTimeMillis().toInt
-    println(id)
-    val user = User(
-      id = id,
+    val pseudoId: Long = System.currentTimeMillis()
+    val user = User.forInsertion(
       firstName = "test",
       surname = "test",
       lastName = "test",
       password = "test",
-      email = s"$id@test.com",
-      googleId = id.toString,
+      email = s"$pseudoId@test.com",
+      googleId = pseudoId.toString,
       categoryId = 1)
 
     val tr: ConnectionIO[scala.Option[User]] = for {
       _ <- User.insert(user)
-      p <- User.selectById(id)
-    } yield p
+      id <- DatabaseUtils.returnLastIntId
+      u <- User.selectById(id)
+    } yield u
 
-    Ok(tr.transact(cu.transactor).unsafeRunSync().toJson)
+    Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
   }
 
   def get(id: Int) = Action {

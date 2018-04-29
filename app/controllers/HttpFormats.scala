@@ -1,11 +1,13 @@
 package controllers
 
-import db.data.User
+import db.data.{Category, User}
 import play.api.libs.json._
 
 object HttpFormats {
 
   implicit val userJsonFormat: OFormat[User] = Json.format[User]
+  implicit val categoryJsonFormat: OFormat[Category] = Json.format[Category]
+
 
   implicit class Converter[T](obj: T)(implicit format: OFormat[T]) {
     def toJson: JsValue = Json.toJson(obj)

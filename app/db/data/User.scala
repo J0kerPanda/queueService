@@ -25,6 +25,30 @@ object User {
       .query[User]
       .to[List]
   }
+
+  def forInsertion(firstName: String,
+                   surname: String,
+                   lastName: String,
+                   email: String,
+                   password: String,
+                   googleId: String,
+                   categoryId: Int,
+                   isSuperUser: Boolean = false,
+                   isBlocked: Boolean = false): User = {
+
+    User(
+      id = -1,
+      firstName = firstName,
+      surname = surname,
+      lastName = lastName,
+      email = email,
+      password = password,
+      googleId = googleId,
+      categoryId = categoryId,
+      isSuperUser = isSuperUser,
+      isBlocked = isBlocked
+    )
+  }
 }
 
 case class User(id: Int,
@@ -35,5 +59,5 @@ case class User(id: Int,
                 password: String,
                 googleId: String,
                 categoryId: Int,
-                isSuperUser: Boolean = false,
-                isBlocked: Boolean = false)
+                isSuperUser: Boolean,
+                isBlocked: Boolean)
