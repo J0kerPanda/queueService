@@ -1,6 +1,5 @@
 package controllers
 
-import cats.data.NonEmptyList
 import controllers.HttpFormats._
 import db.ConnectionUtils
 import db.data.User
