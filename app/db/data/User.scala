@@ -7,48 +7,26 @@ import doobie._
 
 object User {
 
-  private type tupleType = User.type
-
   def insert(u: User): ConnectionIO[Int] = {
-    sql"""INSERT INTO "User"
-         |(id, firstname, surname, lastname, email, password, googleid, issuperuser, isblocked, categoryid)
-         |VALUES (${u.id}, ${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email},
-         |${u.password}, ${u.googleId}, ${u.isSuperUser}, ${u.isBlocked}, ${u.categoryId})"""
+    sql"""INSERT INTO "User" ("id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked) VALUES
+         |(${u.id}, ${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email},
+         |${u.password}, ${u.googleId}, ${u.categoryId}, ${u.isSuperUser}, ${u.isBlocked})"""
       .stripMargin
       .update()
       .run
   }
 
-  def selectById(id: Int): ConnectionIO[User] = {
-    sql"""SELECT "id", firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked
-         |FROM "User"
-         |WHERE id = $id"""
-      .stripMargin
+  def selectById(id: Int): ConnectionIO[Option[User]] = {
+    sql"""SELECT "id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE id = $id"""
       .query[User]
-      .unique
+      .option
   }
 
   def selectByIds(ids: NonEmptyList[Int], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
-    val idsFr = Fragments.in(fr"id", ids)
-    val a = (fr"""SELECT id, firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked
-          |FROM "User" WHERE""" ++ idsFr ++ fr"""AND isblocked = $isBlocked""")
+    (fr"""SELECT "id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE isblocked = $isBlocked AND""" ++ Fragments.in(fr"id", ids))
       .stripMargin
       .query[User]
-
-    println(a.sql)
-    a.to[List]
-  }
-
-  def testSelect(ids: NonEmptyList[Long], isBlocked: Boolean = false): ConnectionIO[List[(String, Int, Boolean)]] = {
-    val idsFr = Fragments.in(fr"id", ids)
-//    val a = (fr"""SELECT (id, firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked) FROM "User" WHERE""" ++ idsFr ++ fr"""AND isblocked = $isBlocked""")
-//      .query[(Long, String, String, String, String, String, String, Long, Boolean, Boolean)]
-
-        val a = sql"""SELECT firstName, "id", isblocked FROM "User" WHERE isblocked = $isBlocked"""
-          .query[(String, Int, Boolean)]
-
-    println(a.sql)
-    a.to[List]
+      .to[List]
   }
 }
 
@@ -58,7 +36,7 @@ case class User(id: Int,
                 lastName: String,
                 email: String,
                 password: String,
-                googleId: Int,
+                googleId: String,
                 categoryId: Int,
                 isSuperUser: Boolean = false,
                 isBlocked: Boolean = false)

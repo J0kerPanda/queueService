@@ -11,6 +11,10 @@ object HttpFormats {
     def toJson: JsValue = Json.toJson(obj)
   }
 
+  implicit class Option[T](obj: scala.Option[T])(implicit format: OFormat[T]) {
+    def toJson: JsValue = Json.toJson(obj)
+  }
+
   implicit class ListConverter[T](objs: List[T])(implicit format: OFormat[T]) {
     def toJson: JsValue = Json.toJson(objs)
   }

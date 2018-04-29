@@ -27,12 +27,12 @@ class ApiController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec:
       lastName = "test",
       password = "test",
       email = s"$id@test.com",
-      googleId = 2,
+      googleId = id.toString,
       categoryId = 1)
 
-    val tr: ConnectionIO[List[User]] = for {
+    val tr: ConnectionIO[scala.Option[User]] = for {
       _ <- User.insert(user)
-      p <- User.selectByIds(NonEmptyList.of(id))
+      p <- User.selectById(id)
     } yield p
 
     Ok(tr.transact(cu.transactor).unsafeRunSync().toJson)
@@ -43,6 +43,6 @@ class ApiController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, ec:
   }
 
   def test: Action[AnyContent] = Action {
-    Ok(User.testSelect(NonEmptyList.of(282519388, 284456580)).transact(cu.transactor).unsafeRunSync().toString())
+    Ok("")
   }
 }
