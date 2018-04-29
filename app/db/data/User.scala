@@ -8,10 +8,7 @@ import doobie._
 object User {
 
   def insert(u: User): ConnectionIO[Int] = {
-    sql"""INSERT INTO "User" ("id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked) VALUES
-         |(${u.id}, ${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email},
-         |${u.password}, ${u.googleId}, ${u.categoryId}, ${u.isSuperUser}, ${u.isBlocked})"""
-      .stripMargin
+    sql"""INSERT INTO "User" ("id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked) VALUES (${u.id}, ${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, ${u.password}, ${u.googleId}, ${u.categoryId}, ${u.isSuperUser}, ${u.isBlocked})"""
       .update()
       .run
   }
