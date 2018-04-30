@@ -1,33 +1,43 @@
 package controllers
 
 import controllers.HttpFormats._
+import controllers.formats.UserInputData
 import db.ConnectionUtils
 import db.data.User
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
+import play.api.libs.json.JsObject
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   def register = Action { request =>
-    val pseudoId: Long = System.currentTimeMillis()
-    val user = User.forInsertion(
-      firstName = "test",
-      surname = "test",
-      lastName = "test",
-      password = "test",
-      email = s"$pseudoId@test.com",
-      googleId = pseudoId.toString,
-      categoryId = 1)
 
-    val tr: ConnectionIO[scala.Option[User]] = for {
-      id <- User.insert(user)
-      u <- User.selectById(id)
-    } yield u
+    request.body.asJson match {
 
-    Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+      case Some(json: JsObject) =>
+        val inputData = json.as[UserInputData]
+        val user = User.forInsertion(
+          firstName = inputData.firstName,
+          surname = inputData.surname,
+          lastName = inputData.lastName,
+          password = inputData.password,
+          email = inputData.email,
+          googleId = inputData.googleId,
+          categoryId = inputData.categoryId
+        )
+
+        val tr: ConnectionIO[scala.Option[User]] = for {
+          id <- User.insert(user)
+          u <- User.selectById(id)
+        } yield u
+
+        Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+
+      case json => Responses.invalidJson(json.toString)
+    }
   }
 
   def get(id: Int) = Action {

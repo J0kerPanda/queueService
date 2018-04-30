@@ -2,22 +2,26 @@ package controllers
 
 import db.data.Category.CategoryId
 import play.api.libs.json.Writes
+import HttpFormats._
+import play.api.mvc.Results._
 
-final case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])
+case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])
 
-final case class ErrorResponse(msg: String, field: scala.Option[String])
+case class ErrorResponse(msg: String, source: scala.Option[String])
 
 object Responses {
 
   def emailExists(email: String) =
-    ErrorResponse(msg = s"with email $email already exists", field = Some("email"))
+    Conflict(ErrorResponse(msg = s"with email $email already exists", source = Some("email")).toJson)
 
   def googleIdExists(googleId: String) =
-    ErrorResponse(s"google id $googleId already exists", field = Some("googleId"))
+    Conflict(ErrorResponse(s"google id $googleId already exists", source = Some("googleId")).toJson)
 
   def invalidCategory(categoryId: CategoryId) =
-    ErrorResponse(s"invalid category id $categoryId", field = Some("categoryId"))
+    BadRequest(ErrorResponse(s"invalid category id $categoryId", source = Some("categoryId")).toJson)
 
   def fieldIsTooLong(field: String, length: Int = 255) =
-    ErrorResponse(s"field $field is too long (max $length)", field = Some(field))
+    BadRequest(ErrorResponse(s"field $field is too long (max $length)", source = Some(field)).toJson)
+
+  def invalidJson(json: String) = BadRequest(ErrorResponse(s"invalid json", source = Some(json)).toJson)
 }

@@ -1,5 +1,6 @@
 package controllers
 
+import controllers.formats.UserInputData
 import db.data.{Appointment, AppointmentStatus, Category, User}
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -42,15 +43,17 @@ object HttpFormats {
 
   implicit val errorResponseFormat: Writes[ErrorResponse] = Json.writes[ErrorResponse]
 
-  implicit class Converter[T](obj: T)(implicit format: OFormat[T]) {
+  implicit val userInputDataReadFormat: Reads[UserInputData] = Json.reads[UserInputData]
+
+  implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 
-  implicit class OptionConverter[T](obj: scala.Option[T])(implicit format: OFormat[T]) {
+  implicit class OptionConverter[T](obj: scala.Option[T])(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 
-  implicit class ListConverter[T](objs: List[T])(implicit format: OFormat[T]) {
+  implicit class ListConverter[T](objs: List[T])(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(objs)
   }
 }
