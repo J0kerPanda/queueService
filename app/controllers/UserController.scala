@@ -36,7 +36,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
 
         Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
 
-      case json => Responses.invalidJson(json.toString)
+      case json => Responses.badJson(json.toString)
     }
   }
 

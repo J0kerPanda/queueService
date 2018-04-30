@@ -23,5 +23,7 @@ object Responses {
   def fieldIsTooLong(field: String, length: Int = 255) =
     BadRequest(ErrorResponse(s"field $field is too long (max $length)", source = Some(field)).toJson)
 
-  def invalidJson(json: String) = BadRequest(ErrorResponse(s"invalid json", source = Some(json)).toJson)
+  def badJson(json: String) = BadRequest(ErrorResponse(s"bad json", source = Some(json)).toJson)
+
+  def invalidField(field: String) = BadRequest(ErrorResponse(s"invalid field", source = Some(field)).toJson)
 }
