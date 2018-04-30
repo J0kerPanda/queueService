@@ -25,5 +25,6 @@ object Responses {
 
   def badJson(json: String) = BadRequest(ErrorResponse(s"bad json", source = Some(json)).toJson)
 
-  def invalidField(field: String) = BadRequest(ErrorResponse(s"invalid field", source = Some(field)).toJson)
+  def invalidFields(fields: List[String]) =
+    BadRequest(ErrorResponse(s"invalid fields", source = Some(s"[${fields.mkString(", ")}]")).toJson)
 }
