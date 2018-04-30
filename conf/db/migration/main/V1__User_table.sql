@@ -1,3 +1,6 @@
+-- pgcrypto must be enabled
+-- create extension if not exists pgcrypto -> superuser
+
 CREATE TABLE "Category" (
   id SERIAL NOT NULL PRIMARY KEY,
   parentId INTEGER NULL REFERENCES "Category" (id) ON UPDATE RESTRICT ON DELETE CASCADE,

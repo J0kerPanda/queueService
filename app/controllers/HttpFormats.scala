@@ -38,15 +38,15 @@ object HttpFormats {
 
   implicit val appointmentFormat: OFormat[Appointment] = Json.format[Appointment]
 
-  implicit def okResponseFormat[T]: OFormat[OkResponse[T]] = Json.format[OkResponse[T]]
+  implicit def okResponseFormat[T](implicit w: Writes[T]): Writes[OkResponse[T]] = (r: OkResponse[T]) => Json.toJson(r)
 
-  implicit val errorResponseFormat: OFormat[ErrorResponse] = Json.format[ErrorResponse]
+  implicit val errorResponseFormat: Writes[ErrorResponse] = Json.writes[ErrorResponse]
 
   implicit class Converter[T](obj: T)(implicit format: OFormat[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 
-  implicit class Option[T](obj: scala.Option[T])(implicit format: OFormat[T]) {
+  implicit class OptionConverter[T](obj: scala.Option[T])(implicit format: OFormat[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 

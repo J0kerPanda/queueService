@@ -12,19 +12,19 @@ object User {
   type UserId = Int
 
   def insert(u: User): ConnectionIO[UserId] = {
-    sql"""INSERT INTO "User" (firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, ${u.password}, ${u.googleId}, ${u.categoryId}, ${u.isSuperUser}, ${u.isBlocked})"""
+    sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isSuperUser}, ${u.isBlocked})"""
       .update()
       .withUniqueGeneratedKeys[UserId]("id")
   }
 
   def selectById(id: UserId): ConnectionIO[Option[User]] = {
-    sql"""SELECT "id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE id = $id"""
+    sql"""SELECT "id", firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE id = $id"""
       .query[User]
       .option
   }
 
   def selectByIds(ids: NonEmptyList[UserId], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
-    (fr"""SELECT "id", firstName, surname, lastName, email, "password", googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE isblocked = $isBlocked AND""" ++ Fragments.in(fr"id", ids))
+    (fr"""SELECT "id", firstName, surname, lastName, email, password, googleId, categoryId, isSuperUser, isBlocked FROM "User" WHERE isblocked = $isBlocked AND""" ++ Fragments.in(fr"id", ids))
       .stripMargin
       .query[User]
       .to[List]

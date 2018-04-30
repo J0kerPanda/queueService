@@ -11,7 +11,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-  def register = Action {
+  def register = Action { request =>
     val pseudoId: Long = System.currentTimeMillis()
     val user = User.forInsertion(
       firstName = "test",
