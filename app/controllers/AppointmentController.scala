@@ -1,7 +1,5 @@
 package controllers
 
-import java.util.Date
-
 import controllers.HttpFormats._
 import db.ConnectionUtils
 import db.data.Appointment

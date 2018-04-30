@@ -3,9 +3,9 @@ package db.data
 import cats.data.NonEmptyList
 import db.data.Category.CategoryId
 import db.data.User.UserId
+import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import doobie._
 
 object User {
 

@@ -2,9 +2,9 @@ package db.data
 
 import cats.data.NonEmptyList
 import db.data.Category.CategoryId
+import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import doobie._
 
 object Category {
 

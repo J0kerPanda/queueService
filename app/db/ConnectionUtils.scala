@@ -1,12 +1,11 @@
 package db
 
-import javax.inject.{Inject, Singleton}
-import javax.sql.DataSource
-
 import cats.effect.IO
 import doobie.util.transactor.Transactor
-import play.api.db.Database
 import doobie.util.transactor.Transactor.Aux
+import javax.inject.{Inject, Singleton}
+import javax.sql.DataSource
+import play.api.db.Database
 
 @Singleton
 class ConnectionUtils @Inject()(db: Database) {
