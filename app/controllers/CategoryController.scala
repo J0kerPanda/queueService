@@ -11,6 +11,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 @Singleton
 class CategoryController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
+  //todo unique constraint errors
   def create(name: String, isFinal: Boolean) = Action {
     val category = Category.forInsertion(None, name, isFinal)
 

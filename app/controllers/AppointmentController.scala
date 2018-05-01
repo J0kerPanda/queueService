@@ -12,6 +12,8 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 @Singleton
 class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUtils) extends AbstractController(cc) {
 
+  //todo unique constraint errors
+
   def create(hostId: Int, visitorId: Int) = Action {
     if (hostId == visitorId) {
       ErrorResponses.invalidHostUser(hostId)

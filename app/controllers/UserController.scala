@@ -14,6 +14,7 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
+  //todo unique constraint errors
   def login = Action { request =>
     extractJsObject[LoginData](request) { loginData =>
 

@@ -14,7 +14,6 @@ object Appointment {
 
   type AppointmentId = Long
 
-  //todo unique constraint errors
   def insert(a: Appointment): ConnectionIO[AppointmentId] = {
     sql"""INSERT INTO "Appointment" (hostid, visitorId, date, status) VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.status})"""
       .update()

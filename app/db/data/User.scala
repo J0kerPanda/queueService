@@ -16,8 +16,6 @@ object User {
       .query[User]
       .option
   }
-
-  //todo unique constraint errors
   def insert(u: User): ConnectionIO[UserId] = {
     sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
       .update()
