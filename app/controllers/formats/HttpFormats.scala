@@ -45,6 +45,8 @@ object HttpFormats {
 
   implicit val userInputDataReadFormat: Reads[UserInputData] = Json.reads[UserInputData]
 
+  implicit val loginDataReadFormat: Reads[LoginData] = Json.reads[LoginData]
+
   implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
