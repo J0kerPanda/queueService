@@ -23,7 +23,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
 
           case Some(user) => Ok(user.toJson)
 
-          case None => ErrorResponses.loginFailed()
+          case None => ErrorResponses.loginFailed
       }
     }
   }

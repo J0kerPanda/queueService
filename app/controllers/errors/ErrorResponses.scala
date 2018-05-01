@@ -2,6 +2,7 @@ package controllers.errors
 
 import controllers.formats.HttpFormats._
 import db.data.Category.CategoryId
+import db.data.User.UserId
 import play.api.mvc.Results._
 
 case class ErrorResponse(msg: String, source: scala.Option[String])
@@ -10,7 +11,13 @@ case class ErrorListResponse(msg: String, sources: List[String])
 
 object ErrorResponses {
 
-  def loginFailed() = BadRequest(ErrorResponse(s"invalid email or password", source = None).toJson)
+  val loginFailed = BadRequest(ErrorResponse("invalid email or password", source = None).toJson)
+
+  def invalidHostUser(hostId: UserId) =
+    BadRequest(ErrorResponse(s"invalid hostId $hostId", source = Some("hostId")).toJson)
+
+  def invalidVisitorUser(visitorId: UserId) =
+    BadRequest(ErrorResponse(s"invalid visitorId $visitorId", source = Some("visitorId")).toJson)
 
   def emailExists(email: String) =
     Conflict(ErrorResponse(msg = s"with email $email already exists", source = Some("email")).toJson)

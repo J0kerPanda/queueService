@@ -10,6 +10,7 @@ object Category {
 
   type CategoryId = Int
 
+  //todo unique constraint errors
   def insert(c: Category): ConnectionIO[CategoryId] = {
     sql"""INSERT INTO "Category" (parentid, name, isfinal) VALUES (${c.parentId}, ${c.name}, ${c.isFinal})"""
       .update()
