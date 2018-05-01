@@ -8,7 +8,7 @@ import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import controllers.util.ControllerUtils._
-import controllers.util.Responses
+import controllers.util.ErrorResponses
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
@@ -23,7 +23,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
 
           case Some(user) => Ok(user.toJson)
 
-          case None => Responses.loginFailed()
+          case None => ErrorResponses.loginFailed()
       }
     }
   }

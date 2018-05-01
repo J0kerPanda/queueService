@@ -15,6 +15,6 @@ object ControllerUtils {
 
       case Some(obj: JsObject) => extractor(obj.as[T])
 
-      case json => Responses.badJson(json.toString)
+      case json => ErrorResponses.badJson(json.toString)
   }
 }

@@ -1,6 +1,6 @@
 package controllers.formats
 
-import controllers.util.{ErrorResponse, OkResponse}
+import controllers.util.{ErrorListResponse, ErrorResponse}
 import db.data.{Appointment, AppointmentStatus, Category, User}
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -45,9 +45,9 @@ object HttpFormats {
 
   implicit val appointmentFormat: OFormat[Appointment] = Json.format[Appointment]
 
-  implicit def okResponseFormat[T](implicit w: Writes[T]): Writes[OkResponse[T]] = (r: OkResponse[T]) => Json.toJson(r)
+  implicit val errorResponseWriteFormat: Writes[ErrorResponse] = Json.writes[ErrorResponse]
 
-  implicit val errorResponseFormat: Writes[ErrorResponse] = Json.writes[ErrorResponse]
+  implicit val errorListResponseWriteFormat: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
 
   implicit val userInputDataReadFormat: Reads[UserInputData] = Json.reads[UserInputData]
 

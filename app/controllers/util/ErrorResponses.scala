@@ -2,14 +2,13 @@ package controllers.util
 
 import controllers.formats.HttpFormats._
 import db.data.Category.CategoryId
-import play.api.libs.json.Writes
 import play.api.mvc.Results._
-
-case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])
 
 case class ErrorResponse(msg: String, source: scala.Option[String])
 
-object Responses {
+case class ErrorListResponse(msg: String, sources: List[String])
+
+object ErrorResponses {
 
   def loginFailed() = BadRequest(ErrorResponse(s"invalid email or password", source = None).toJson)
 
@@ -28,5 +27,5 @@ object Responses {
   def badJson(json: String) = BadRequest(ErrorResponse(s"bad json", source = Some(json)).toJson)
 
   def invalidFieldsFormat(fields: List[String]) =
-    BadRequest(ErrorResponse(s"invalid fields format", source = Some(s"[${fields.mkString(", ")}]")).toJson)
+    BadRequest(ErrorListResponse(s"invalid fields format", sources = fields).toJson)
 }
