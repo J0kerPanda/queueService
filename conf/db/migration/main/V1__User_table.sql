@@ -56,12 +56,34 @@ $$ LANGUAGE sql;
 CREATE TABLE "HostMeta" (
   id INTEGER PRIMARY KEY REFERENCES "User"
     ON UPDATE RESTRICT
-    ON DELETE CASCADE,
-  appointmentInterval INTERVAL DAY NOT NULL DEFAULT '31 days'
+    ON DELETE CASCADE
+    CHECK (is_host_user(id)),
+  appointmentInterval INTERVAL DAY NOT NULL DEFAULT INTERVAL '31 days'
+);
+
+---- Default schedule
+CREATE TYPE day_of_week AS ENUM ('mon', 'tue', 'wen', 'thu', 'fri', 'sat', 'sun');
+
+CREATE FUNCTION day_to_int(day_of_week) RETURNS INTEGER AS $$
+SELECT (enumsortorder - 1)::integer FROM
+  (
+    SELECT enumlabel, enumsortorder FROM pg_catalog.pg_enum
+    WHERE enumtypid = 'day_of_week'::regtype ORDER BY enumsortorder
+  ) AS temp
+WHERE enumlabel = $1::text;
+$$ LANGUAGE sql;
+
+CREATE TABLE "DefaultSchedule" (
+  id INTEGER PRIMARY KEY REFERENCES "User"
+  ON UPDATE RESTRICT
+  ON DELETE CASCADE
+    CHECK (is_host_user(id)),
+
+  appointmentInterval INTERVAL DAY NOT NULL DEFAULT INTERVAL '31 days'
 );
 
 ---- Appointment
-CREATE TYPE visit_status AS ENUM ('pending', 'finished', 'cancelledByUser', 'cancelledByHost');
+CREATE TYPE appointment_status AS ENUM ('pending', 'finished', 'cancelledByUser', 'cancelledByHost');
 
 CREATE TABLE "Appointment" (
   id BIGSERIAL PRIMARY KEY,
@@ -74,7 +96,7 @@ CREATE TABLE "Appointment" (
     ON DELETE RESTRICT
     CHECK (is_active_user(visitorId)),
   date TIMESTAMP NOT NULL,
-  status visit_status NOT NULL DEFAULT 'pending',
+  status appointment_status NOT NULL DEFAULT 'pending',
   CONSTRAINT TimeTable_unique UNIQUE (hostId, date)
 )
 
