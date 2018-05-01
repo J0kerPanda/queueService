@@ -2,7 +2,7 @@ package controllers
 
 import db.data.Category.CategoryId
 import play.api.libs.json.Writes
-import HttpFormats._
+import controllers.formats.HttpFormats._
 import play.api.mvc.Results._
 
 case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])

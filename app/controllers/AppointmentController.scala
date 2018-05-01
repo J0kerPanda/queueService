@@ -1,6 +1,6 @@
 package controllers
 
-import controllers.HttpFormats._
+import controllers.formats.HttpFormats._
 import db.ConnectionUtils
 import db.data.Appointment
 import doobie.implicits._

@@ -1,6 +1,6 @@
 package controllers
 
-import controllers.HttpFormats._
+import controllers.formats.HttpFormats._
 import controllers.formats.UserInputData
 import db.ConnectionUtils
 import db.data.User
