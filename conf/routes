@@ -15,7 +15,8 @@ GET     /api/test                           controllers.UserController.test
 
 # todo change to post
 # User
-POST     /api/user/register                  controllers.UserController.register
+POST    /api/user/login                     controllers.UserController.login
+POST    /api/user/register                  controllers.UserController.register
 GET     /api/user/:userId                   controllers.UserController.get(userId: Int)
 
 # Category

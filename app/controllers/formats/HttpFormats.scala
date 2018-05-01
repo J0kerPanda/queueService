@@ -1,6 +1,6 @@
 package controllers.formats
 
-import controllers.{ErrorResponse, OkResponse}
+import controllers.util.{ErrorResponse, OkResponse}
 import db.data.{Appointment, AppointmentStatus, Category, User}
 import org.joda.time.DateTime
 import play.api.libs.json._
@@ -9,7 +9,13 @@ import scala.util.Try
 
 object HttpFormats {
 
-  implicit val userJsonFormat: OFormat[User] = Json.format[User]
+  implicit val userJsonFormat: OFormat[User] = new OFormat[User] {
+
+    override def writes(o: User): JsObject = Json.writes[User].writes(o) - "password"
+
+    override def reads(json: JsValue): JsResult[User] = Json.reads[User].reads(json)
+  }
+
   implicit val categoryJsonFormat: OFormat[Category] = Json.format[Category]
 
   implicit object appointmentStatusReadFormat extends Reads[AppointmentStatus] {

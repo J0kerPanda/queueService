@@ -1,6 +1,6 @@
 package controllers.errors
 
-import controllers.Responses
+import controllers.util.Responses
 import javax.inject.Singleton
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsResultException
@@ -21,7 +21,7 @@ class DefaultErrorHandler extends HttpErrorHandler {
   def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = exception match {
 
     case JsResultException(errors) =>
-      Future.successful(Responses.invalidFields(
+      Future.successful(Responses.invalidFieldsFormat(
         errors.map(_._1.toJsonString.substring(jsonPathPrefix.length)).toList
       ))
 

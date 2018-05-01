@@ -1,27 +1,32 @@
 package controllers
 
 import controllers.formats.HttpFormats._
-import controllers.formats.UserInputData
+import controllers.formats.{LoginData, UserInputData}
 import db.ConnectionUtils
 import db.data.User
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
-import ControllerUtils._
+import controllers.util.ControllerUtils._
+import controllers.util.Responses
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-//  def login = Action { request =>
-//
-//    request.body.asJson match {
-//
-//      case Some(json: JsObject) =>
-//
-//    }
-//
-//  }
+  def login = Action { request =>
+    extractJsObject[LoginData](request) { loginData =>
+
+      User.login(loginData.email, loginData.password)
+        .transact(cu.transactor)
+        .unsafeRunSync() match {
+
+          case Some(user) => Ok(user.toJson)
+
+          case None => Responses.loginFailed()
+      }
+    }
+  }
 
   def register = Action { request =>
     extractJsObject[UserInputData](request) { inputData =>

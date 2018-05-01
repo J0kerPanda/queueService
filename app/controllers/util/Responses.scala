@@ -1,8 +1,8 @@
-package controllers
+package controllers.util
 
+import controllers.formats.HttpFormats._
 import db.data.Category.CategoryId
 import play.api.libs.json.Writes
-import controllers.formats.HttpFormats._
 import play.api.mvc.Results._
 
 case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])
@@ -10,6 +10,8 @@ case class OkResponse[T](entity: Option[T])(implicit w: Writes[T])
 case class ErrorResponse(msg: String, source: scala.Option[String])
 
 object Responses {
+
+  def loginFailed() = BadRequest(ErrorResponse(s"invalid email or password", source = None).toJson)
 
   def emailExists(email: String) =
     Conflict(ErrorResponse(msg = s"with email $email already exists", source = Some("email")).toJson)
@@ -25,6 +27,6 @@ object Responses {
 
   def badJson(json: String) = BadRequest(ErrorResponse(s"bad json", source = Some(json)).toJson)
 
-  def invalidFields(fields: List[String]) =
-    BadRequest(ErrorResponse(s"invalid fields", source = Some(s"[${fields.mkString(", ")}]")).toJson)
+  def invalidFieldsFormat(fields: List[String]) =
+    BadRequest(ErrorResponse(s"invalid fields format", source = Some(s"[${fields.mkString(", ")}]")).toJson)
 }

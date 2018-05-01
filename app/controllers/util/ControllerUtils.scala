@@ -1,7 +1,7 @@
-package controllers
+package controllers.util
 
 import akka.actor.ActorSystem
-import play.api.libs.json.{JsObject, JsValue, Reads}
+import play.api.libs.json.{JsObject, Reads}
 import play.api.mvc.{AnyContent, Request, Result}
 
 import scala.concurrent.ExecutionContext
