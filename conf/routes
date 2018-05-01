@@ -20,9 +20,9 @@ POST    /api/user/register                  controllers.UserController.register
 GET     /api/user/:userId                   controllers.UserController.get(userId: Int)
 
 # Category
-GET     /api/category/create                controllers.CategoryController.create(name: String, isFinal: Boolean)
+POST    /api/category/create                controllers.CategoryController.create(name: String, isFinal: Boolean)
 GET     /api/category/:categoryId           controllers.CategoryController.get(categoryId: Int)
 
 # Appointment
-GET     /api/appointment/create             controllers.AppointmentController.create(hostId: Int, visitorId: Int)
+POST    /api/appointment/create             controllers.AppointmentController.create(hostId: Int, visitorId: Int)
 GET     /api/appointment/:appointmentId     controllers.AppointmentController.get(appointmentId: Long)

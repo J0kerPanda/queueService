@@ -1,5 +1,5 @@
--- pgcrypto must be enabled
--- create extension if not exists pgcrypto -> superuser
+-- Connection must be done as superuser
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 CREATE TABLE "Category" (
   id SERIAL NOT NULL PRIMARY KEY,
@@ -22,7 +22,7 @@ CREATE TABLE "User" (
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   googleId VARCHAR(255) NOT NULL UNIQUE,
-  isSuperuser BOOLEAN NOT NULL DEFAULT FALSE,
+  isHost BOOLEAN NOT NULL DEFAULT FALSE,
   isBlocked BOOLEAN NOT NULL DEFAULT FALSE,
   categoryId INTEGER NOT NULL REFERENCES "Category" (id) ON UPDATE RESTRICT ON DELETE RESTRICT,
   CONSTRAINT FinalCategory_check CHECK (is_final_category(categoryId))
