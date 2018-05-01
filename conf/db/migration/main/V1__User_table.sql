@@ -74,12 +74,28 @@ WHERE enumlabel = $1::text;
 $$ LANGUAGE sql;
 
 CREATE TABLE "DefaultSchedule" (
-  id INTEGER PRIMARY KEY REFERENCES "User"
-  ON UPDATE RESTRICT
-  ON DELETE CASCADE
+  id SERIAL PRIMARY KEY,
+  hostId INTEGER REFERENCES "User"
+    ON UPDATE RESTRICT
+    ON DELETE CASCADE
     CHECK (is_host_user(id)),
+  day day_of_week NOT NULL,
+  start time NOT NULL,
+  stop time NOT NULL
+  -- todo intersection constraint?
+);
 
-  appointmentInterval INTERVAL DAY NOT NULL DEFAULT INTERVAL '31 days'
+---- Default schedule
+CREATE TABLE "CustomSchedule" (
+  id SERIAL PRIMARY KEY,
+  hostId INTEGER REFERENCES "User"
+    ON UPDATE RESTRICT
+    ON DELETE CASCADE
+    CHECK (is_host_user(id)),
+  date date NOT NULL,
+  start time NOT NULL,
+  stop time NOT NULL
+  -- todo intersection constraint?
 );
 
 ---- Appointment
