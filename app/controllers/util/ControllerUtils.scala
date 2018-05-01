@@ -1,6 +1,7 @@
 package controllers.util
 
 import akka.actor.ActorSystem
+import controllers.errors.ErrorResponses
 import play.api.libs.json.{JsObject, Reads}
 import play.api.mvc.{AnyContent, Request, Result}
 

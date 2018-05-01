@@ -1,6 +1,6 @@
 package controllers.formats
 
-import controllers.util.{ErrorListResponse, ErrorResponse}
+import controllers.errors.{ErrorListResponse, ErrorResponse}
 import db.data.{Appointment, AppointmentStatus, Category, User}
 import org.joda.time.DateTime
 import play.api.libs.json._

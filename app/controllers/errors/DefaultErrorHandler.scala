@@ -1,6 +1,5 @@
 package controllers.errors
 
-import controllers.util.ErrorResponses
 import javax.inject.Singleton
 import play.api.http.HttpErrorHandler
 import play.api.libs.json.JsResultException

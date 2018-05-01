@@ -1,4 +1,4 @@
-package controllers.util
+package controllers.errors
 
 import controllers.formats.HttpFormats._
 import db.data.Category.CategoryId
