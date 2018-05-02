@@ -5,7 +5,7 @@ import db.data.User.UserId
 import doobie._
 import doobie.implicits._
 import org.joda.time.Period
-import db.DatabaseFormats.PeriodDaysMeta
+import db.DatabaseFormats._
 
 object HostMeta {
 

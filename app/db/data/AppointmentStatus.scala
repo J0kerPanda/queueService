@@ -1,7 +1,5 @@
 package db.data
 
-import doobie.postgres.implicits._
-import doobie.util.meta.Meta
 import enumeratum.{Enum, EnumEntry}
 
 import scala.collection.immutable

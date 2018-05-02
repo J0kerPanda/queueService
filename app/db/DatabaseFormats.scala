@@ -2,12 +2,11 @@ package db
 
 import java.sql.Timestamp
 
-import db.data.AppointmentStatus
+import db.data.{AppointmentStatus, DayOfWeek}
 import doobie.postgres.implicits.pgEnumStringOpt
 import doobie.util.meta.Meta
-import org.joda.time.{DateTime, Period}
-import org.postgresql.util.PGInterval
-
+import org.joda.time.{DateTime, LocalTime, Period}
+import org.postgresql.util.{PGInterval, PGTime}
 
 object DatabaseFormats {
 
@@ -23,9 +22,9 @@ object DatabaseFormats {
     enum => enum.dbName
   )
 
-  implicit val DayOfWeekMeta: Meta[AppointmentStatus] = pgEnumStringOpt(
+  implicit val DayOfWeekMeta: Meta[DayOfWeek] = pgEnumStringOpt(
     "appointment_status",
-    name => AppointmentStatus.lowerCaseNamesToValuesMap.get(name.toLowerCase),
+    name => DayOfWeek.lowerCaseNamesToValuesMap.get(name.toLowerCase),
     enum => enum.dbName
   )
 
@@ -36,5 +35,10 @@ object DatabaseFormats {
       i.setDays(period.toStandardDays.getDays)
       i
     }
+  )
+
+  implicit val LocalTimeMeta: Meta[LocalTime] = Meta.other[PGTime]("time").xmap(
+    pgT => LocalTime.fromMillisOfDay(pgT.getTime),
+    time => new PGTime(time.millisOfDay().get())
   )
 }
