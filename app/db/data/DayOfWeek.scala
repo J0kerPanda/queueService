@@ -1,10 +1,10 @@
 package db.data
 
 import enumeratum._
-import org.joda.time.DateTime
+import org.joda.time.DateTimeConstants._
+import org.joda.time.LocalDate
 
 import scala.collection.immutable
-import org.joda.time.DateTimeConstants._
 
 sealed abstract class DayOfWeek(val dbName: String, val number: Int) extends EnumEntry
 
@@ -22,6 +22,6 @@ object DayOfWeek extends Enum[DayOfWeek] {
 
   private def fromDayNumber(i: Int): DayOfWeek = values.map(v => v.number -> v).toMap.apply(i)
 
-  def fromDate(dateTime: DateTime): DayOfWeek = fromDayNumber(dateTime.dayOfWeek().get())
+  def fromDate(date: LocalDate): DayOfWeek = fromDayNumber(date.dayOfWeek().get())
 }
 

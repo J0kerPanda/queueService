@@ -1,11 +1,11 @@
 package db.data
 
+import db.DatabaseFormats._
 import db.data.HostMeta.UserId
 import db.data.Schedule.ScheduleId
 import doobie.free.connection.ConnectionIO
-import org.joda.time.{DateTime, LocalDate, LocalTime}
-import db.DatabaseFormats._
 import doobie.implicits._
+import org.joda.time.{LocalDate, LocalTime}
 
 object Schedule {
 
@@ -29,13 +29,13 @@ object Schedule {
       .option
   }
 
-  def selectCustomByDate(date: DateTime): ConnectionIO[Option[CustomSchedule]] = {
+  def selectCustomByDate(date: LocalDate): ConnectionIO[Option[CustomSchedule]] = {
     sql"""SELECT id, hostid, date, start, stop FROM "CustomSchedule" WHERE date = $date"""
       .query[CustomSchedule]
       .option
   }
 
-  def selectOnDate(date: DateTime): ConnectionIO[(Option[DefaultSchedule], Option[CustomSchedule])] = {
+  def selectOnDate(date: LocalDate): ConnectionIO[(Option[DefaultSchedule], Option[CustomSchedule])] = {
     for {
       d <- selectDefaultByDay(DayOfWeek.fromDate(date))
       c <- selectCustomByDate(date)

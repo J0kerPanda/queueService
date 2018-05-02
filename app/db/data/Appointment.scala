@@ -1,14 +1,14 @@
 package db.data
 
 import cats.data.NonEmptyList
+import db.DatabaseFormats._
 import db.data.Appointment.AppointmentId
+import db.data.AppointmentStatus.Pending
 import db.data.User.UserId
 import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import org.joda.time.DateTime
-import db.DatabaseFormats._
-import db.data.AppointmentStatus.Pending
 
 object Appointment {
 
