@@ -18,7 +18,11 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
     if (hostId == visitorId) {
       ErrorResponses.invalidHostUser(hostId)
     } else {
-      val appointment = AppointmentData(hostId, visitorId, DateTime.now())
+      val dateTime = DateTime.now()
+      val date = dateTime.toLocalDate
+      val start = dateTime.toLocalTime
+      val end = start.plusHours(3)
+      val appointment = AppointmentData(hostId, visitorId, date, start, end)
 
       val tr = for {
         id <- Appointment.insert(appointment)

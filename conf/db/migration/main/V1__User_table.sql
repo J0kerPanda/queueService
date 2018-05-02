@@ -52,7 +52,7 @@ CREATE TABLE "HostMeta" (
     ON UPDATE RESTRICT
     ON DELETE CASCADE
     CHECK (is_host_user(id)),
-  appointmentInterval INTERVAL DAY NOT NULL DEFAULT INTERVAL '31 days'
+  appointmentInterval BIGINT NOT NULL DEFAULT 2678400000 -- 31 days
 );
 
 ---- Default schedule
@@ -73,8 +73,10 @@ CREATE TABLE "DefaultSchedule" (
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
   day day_of_week NOT NULL,
-  start time NOT NULL,
-  "end" time NOT NULL CHECK ("end" > start)
+  start TIME NOT NULL,
+  "end" TIME NOT NULL CHECK ("end" > start),
+  place VARCHAR(255) NOT NULL,
+  interval BIGINT NOT NULL
   -- todo intersection constraint?
 );
 
@@ -84,9 +86,11 @@ CREATE TABLE "CustomSchedule" (
   hostId INTEGER REFERENCES "HostMeta"
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
-  date date NOT NULL,
+  date DATE NOT NULL,
   start time NOT NULL,
-  "end" time NOT NULL CHECK ("end" > start)
+  "end" time NOT NULL CHECK ("end" > start),
+  place VARCHAR(255) NOT NULL,
+  interval BIGINT NOT NULL
   -- todo intersection constraint?
 );
 
@@ -101,9 +105,11 @@ CREATE TABLE "Appointment" (
   visitorId INT NOT NULL REFERENCES "User" (id)
     ON UPDATE RESTRICT
     ON DELETE RESTRICT,
-  date TIMESTAMP NOT NULL,
-  status appointment_status NOT NULL DEFAULT 'pending',
-  CONSTRAINT TimeTable_unique UNIQUE (hostId, date)
+  date DATE NOT NULL,
+  start TIME NOT NULL,
+  "end" TIME NOT NULL,
+  status appointment_status NOT NULL DEFAULT 'pending'
+  -- todo intersection constraint?
 );
 
 CREATE FUNCTION appointment_user_check() RETURNS TRIGGER AS $appointment_user_check$
