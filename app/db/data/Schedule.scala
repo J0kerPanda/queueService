@@ -12,35 +12,35 @@ object Schedule {
   type ScheduleId = Long
 
   def insertDefault(s: DefaultSchedule): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, stop) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.stop})"""
+    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end") VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
 
-  def defaultForInsertion(hostId: UserId, day: DayOfWeek, start: LocalTime, stop: LocalTime): DefaultSchedule = {
-    DefaultSchedule(-1, hostId, day, start, stop)
+  def defaultForInsertion(hostId: UserId, day: DayOfWeek, start: LocalTime, end: LocalTime): DefaultSchedule = {
+    DefaultSchedule(-1, hostId, day, start, end)
   }
 
   def selectDefaultById(id: ScheduleId): ConnectionIO[Option[DefaultSchedule]] = {
-    sql"""SELECT id, hostid, day, start, stop FROM "DefaultSchedule" WHERE id = $id"""
+    sql"""SELECT id, hostid, day, start, "end" FROM "DefaultSchedule" WHERE id = $id"""
       .query[DefaultSchedule]
       .option
   }
 
   def selectDefaultByDay(day: DayOfWeek): ConnectionIO[Option[DefaultSchedule]] = {
-    sql"""SELECT id, hostid, day, start, stop FROM "DefaultSchedule" WHERE day = $day"""
+    sql"""SELECT id, hostid, day, start, "end" FROM "DefaultSchedule" WHERE day = $day"""
       .query[DefaultSchedule]
       .option
   }
 
   def selectCustomById(id: ScheduleId): ConnectionIO[Option[CustomSchedule]] = {
-    sql"""SELECT id, hostid, date, start, stop FROM "CustomSchedule" WHERE id = $id"""
+    sql"""SELECT id, hostid, date, start, "end" FROM "CustomSchedule" WHERE id = $id"""
       .query[CustomSchedule]
       .option
   }
 
   def selectCustomByDate(date: LocalDate): ConnectionIO[Option[CustomSchedule]] = {
-    sql"""SELECT id, hostid, date, start, stop FROM "CustomSchedule" WHERE date = $date"""
+    sql"""SELECT id, hostid, date, start, "end" FROM "CustomSchedule" WHERE date = $date"""
       .query[CustomSchedule]
       .option
   }
@@ -53,6 +53,6 @@ object Schedule {
   }
 }
 
-case class DefaultSchedule(id: ScheduleId, hostId: UserId, day: DayOfWeek, start: LocalTime, stop: LocalTime)
+case class DefaultSchedule(id: ScheduleId, hostId: UserId, day: DayOfWeek, start: LocalTime, end: LocalTime)
 
-case class CustomSchedule(id: ScheduleId, hostId: UserId, date: LocalDate, start: LocalTime, stop: LocalTime)
+case class CustomSchedule(id: ScheduleId, hostId: UserId, date: LocalDate, start: LocalTime, end: LocalTime)

@@ -74,7 +74,7 @@ CREATE TABLE "DefaultSchedule" (
     ON DELETE CASCADE,
   day day_of_week NOT NULL,
   start time NOT NULL,
-  stop time NOT NULL
+  "end" time NOT NULL CHECK ("end" > start)
   -- todo intersection constraint?
 );
 
@@ -86,7 +86,7 @@ CREATE TABLE "CustomSchedule" (
     ON DELETE CASCADE,
   date date NOT NULL,
   start time NOT NULL,
-  stop time NOT NULL
+  "end" time NOT NULL CHECK ("end" > start)
   -- todo intersection constraint?
 );
 

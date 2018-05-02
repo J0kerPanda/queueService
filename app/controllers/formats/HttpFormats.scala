@@ -2,7 +2,7 @@ package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
 import db.data._
-import org.joda.time.{DateTime, LocalDate, LocalTime}
+import org.joda.time.{DateTime, DateTimeZone, LocalDate, LocalTime}
 import play.api.libs.json._
 
 import scala.util.Try
@@ -61,7 +61,8 @@ object HttpFormats {
 
   implicit object localTimeRead extends Reads[LocalTime] {
     override def reads(json: JsValue): JsResult[LocalTime] = json match {
-      case JsString(value) => Try(JsSuccess(LocalTime.parse(value))).toOption.getOrElse(JsError())
+      case JsString(value) =>
+        Try(JsSuccess(LocalTime.parse(value))).toOption.getOrElse(JsError())
 
       case _ => JsError()
     }

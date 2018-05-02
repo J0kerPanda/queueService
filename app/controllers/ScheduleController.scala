@@ -15,9 +15,9 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   //todo unique constraint errors
-  def createDefaultSchedule = Action { request =>
+  def createDefault = Action { request =>
     extractJsObject[DefaultScheduleData](request) { sd =>
-      val schedule = Schedule.defaultForInsertion(sd.hostId, sd.day, sd.start, sd.stop)
+      val schedule = Schedule.defaultForInsertion(sd.hostId, sd.day, sd.start, sd.end)
 
       Schedule
         .insertDefault(schedule)
