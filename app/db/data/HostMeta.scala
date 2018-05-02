@@ -2,9 +2,10 @@ package db.data
 
 import cats.data.NonEmptyList
 import db.data.User.UserId
-import org.scalatest.concurrent.PatienceConfiguration.Interval
 import doobie._
 import doobie.implicits._
+import org.joda.time.Period
+import db.DatabaseFormats.PeriodMeta
 
 object HostMeta {
 
@@ -29,4 +30,4 @@ object HostMeta {
   }
 }
 
-case class HostMeta(id: UserId, appointmentInterval: Interval)
+case class HostMeta(id: UserId, appointmentInterval: Period)

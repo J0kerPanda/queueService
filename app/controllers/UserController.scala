@@ -3,13 +3,16 @@ package controllers
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.{LoginData, UserInputData}
+import controllers.util.ControllerUtils._
 import db.ConnectionUtils
-import db.data.User
+import db.data.User.UserId
+import db.data.{HostMeta, User}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
-import controllers.util.ControllerUtils._
+import org.joda.time.Period
 import play.api.mvc.{AbstractController, ControllerComponents}
+import scala.concurrent.duration._
 
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
@@ -42,13 +45,22 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         categoryId = inputData.categoryId
       )
 
-      val tr: ConnectionIO[scala.Option[User]] = for {
+      val tr: ConnectionIO[Option[User]] = for {
         id <- User.insert(user)
         u <- User.selectById(id)
       } yield u
 
       Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
     }
+  }
+
+  def promote(id: UserId) = Action {
+    val tr: ConnectionIO[UserId] = for {
+      _ <- User.promote(id)
+      r <- HostMeta.insert(HostMeta(id, new Period((31 day).toMillis)))
+    } yield r
+
+    Ok(tr.transact(cu.transactor).unsafeRunSync().toString)
   }
 
   def get(id: Int) = Action {

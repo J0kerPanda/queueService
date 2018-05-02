@@ -11,18 +11,19 @@ GET     /message                    controllers.AsyncController.message
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
 
-GET     /api/test                           controllers.UserController.test
+GET     /api/test                   controllers.UserController.test
 
 # todo change to post
 # User
-POST    /api/user/login                     controllers.UserController.login
-POST    /api/user/register                  controllers.UserController.register
-GET     /api/user/:userId                   controllers.UserController.get(userId: Int)
+POST    /api/user/login             controllers.UserController.login
+POST    /api/user/register          controllers.UserController.register
+POST    /api/user/promote           controllers.UserController.promote(id: Int)
+GET     /api/user/:id               controllers.UserController.get(id: Int)
 
 # Category
-POST    /api/category/create                controllers.CategoryController.create(name: String, isFinal: Boolean)
-GET     /api/category/:categoryId           controllers.CategoryController.get(categoryId: Int)
+POST    /api/category/create        controllers.CategoryController.create(name: String, isFinal: Boolean)
+GET     /api/category/:id           controllers.CategoryController.get(id: Int)
 
 # Appointment
-POST    /api/appointment/create             controllers.AppointmentController.create(hostId: Int, visitorId: Int)
-GET     /api/appointment/:appointmentId     controllers.AppointmentController.get(appointmentId: Long)
+POST    /api/appointment/create     controllers.AppointmentController.create(hostId: Int, visitorId: Int)
+GET     /api/appointment/:id        controllers.AppointmentController.get(id: Long)

@@ -5,7 +5,7 @@ import db.data.Category.CategoryId
 import db.data.User.UserId
 import play.api.mvc.Results._
 
-case class ErrorResponse(msg: String, source: scala.Option[String])
+case class ErrorResponse(msg: String, source: Option[String])
 
 case class ErrorListResponse(msg: String, sources: List[String])
 

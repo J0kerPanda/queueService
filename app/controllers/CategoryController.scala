@@ -15,7 +15,7 @@ class CategoryController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
   def create(name: String, isFinal: Boolean) = Action {
     val category = Category.forInsertion(None, name, isFinal)
 
-    val tr: ConnectionIO[scala.Option[Category]] = for {
+    val tr: ConnectionIO[Option[Category]] = for {
       id <- Category.insert(category)
       c <- Category.selectById(id)
     } yield c
