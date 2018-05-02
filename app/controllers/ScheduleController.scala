@@ -16,7 +16,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
   //todo unique constraint errors
   def createDefault = Action { request =>
     extractJsObject[DefaultScheduleData](request) { sd =>
-      val schedule = DefaultScheduleData(sd.hostId, sd.day, sd.start, sd.end)
+      val schedule = DefaultScheduleData(sd.hostId, sd.day, sd.start, sd.end, sd.interval, sd.place)
 
       Schedule
         .insertDefault(schedule)
@@ -35,7 +35,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
 
   def createCustom = Action { request =>
     extractJsObject[CustomScheduleData](request) { sd =>
-      val schedule = CustomScheduleData(sd.hostId, sd.date, sd.start, sd.end)
+      val schedule = CustomScheduleData(sd.hostId, sd.date, sd.start, sd.end, sd.interval, sd.place)
 
       Schedule
         .insertCustom(schedule)
