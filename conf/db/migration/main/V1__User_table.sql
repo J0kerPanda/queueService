@@ -56,7 +56,7 @@ CREATE TABLE "HostMeta" (
 );
 
 ---- Default schedule
-CREATE TYPE day_of_week AS ENUM ('mon', 'tue', 'wen', 'thu', 'fri', 'sat', 'sun');
+CREATE TYPE day_of_week AS ENUM ('mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun');
 
 CREATE FUNCTION day_to_int(day_of_week) RETURNS INTEGER AS $$
 SELECT (enumsortorder - 1)::integer FROM

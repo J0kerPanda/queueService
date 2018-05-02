@@ -16,10 +16,4 @@ object AppointmentStatus extends Enum[AppointmentStatus] {
   case object Finished extends AppointmentStatus("finished")
   case object CancelledByUser extends AppointmentStatus("cancelledByUser")
   case object CancelledByHost extends AppointmentStatus("cancelledByHost")
-
-  implicit val AppointmentStatusMeta: Meta[AppointmentStatus] = pgEnumStringOpt(
-    "appointment_status",
-    name => AppointmentStatus.lowerCaseNamesToValuesMap.get(name.toLowerCase),
-    enum => enum.dbName
-  )
 }
