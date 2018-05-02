@@ -107,4 +107,6 @@ object HttpFormats {
   implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]
 
   implicit val defaultScheduleData: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
+
+  implicit val customScheduleData: Reads[CustomScheduleData] = Json.reads[CustomScheduleData]
 }

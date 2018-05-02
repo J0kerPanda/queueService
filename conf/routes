@@ -30,3 +30,4 @@ GET     /api/appointment/:id        controllers.AppointmentController.get(id: Lo
 
 # Schedule
 POST    /api/schedule/createDefault controllers.ScheduleController.createDefault
+POST    /api/schedule/createCustom  controllers.ScheduleController.createCustom

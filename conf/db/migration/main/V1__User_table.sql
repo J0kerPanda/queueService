@@ -109,11 +109,11 @@ CREATE TABLE "Appointment" (
 CREATE FUNCTION appointment_user_check() RETURNS TRIGGER AS $appointment_user_check$
 BEGIN
   IF NOT is_active_user(NEW.hostid) THEN
-    RAISE EXCEPTION 'host with id % must is blocked', NEW.hostid;
+    RAISE EXCEPTION 'host with id % is blocked', NEW.hostid;
   END IF;
 
   IF NOT is_active_user(NEW.visitorid) THEN
-    RAISE EXCEPTION 'visitor with id % must is blocked', NEW.visitorid;
+    RAISE EXCEPTION 'visitor with id % is blocked', NEW.visitorid;
   END IF;
 
   RETURN NEW;

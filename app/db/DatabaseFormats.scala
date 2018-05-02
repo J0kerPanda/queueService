@@ -1,7 +1,6 @@
 package db
 
 import java.sql.{Date, Timestamp}
-import java.util.Calendar
 
 import db.data.{AppointmentStatus, DayOfWeek}
 import doobie.postgres.implicits.pgEnumStringOpt
@@ -31,11 +30,7 @@ object DatabaseFormats {
 
   implicit val PeriodDaysMeta: Meta[Period] = Meta.other[PGInterval]("interval").xmap(
     pgInterval => Period.days(pgInterval.getDays),
-    period => {
-      val i = new PGInterval()
-      i.setDays(period.toStandardDays.getDays)
-      i
-    }
+    period => new PGInterval(0, 0, period.getDays, 0, 0, 0)
   )
 
   implicit val LocalTimeMeta: Meta[LocalTime] = Meta.other[PGTime]("time").xmap(

@@ -33,6 +33,16 @@ object Schedule {
       .option
   }
 
+  def insertCustom(s: CustomSchedule): ConnectionIO[Option[ScheduleId]] = {
+    sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end") VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end})"""
+      .update
+      .withUniqueGeneratedKeys("id")
+  }
+
+  def customForInsertion(hostId: UserId, date: LocalDate, start: LocalTime, end: LocalTime): CustomSchedule = {
+    CustomSchedule(-1, hostId, date, start, end)
+  }
+
   def selectCustomById(id: ScheduleId): ConnectionIO[Option[CustomSchedule]] = {
     sql"""SELECT id, hostid, date, start, "end" FROM "CustomSchedule" WHERE id = $id"""
       .query[CustomSchedule]
@@ -45,7 +55,7 @@ object Schedule {
       .option
   }
 
-  def selectOnDate(date: LocalDate): ConnectionIO[(Option[DefaultSchedule], Option[CustomSchedule])] = {
+  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(Option[DefaultSchedule], Option[CustomSchedule])] = {
     for {
       d <- selectDefaultByDay(DayOfWeek.fromDate(date))
       c <- selectCustomByDate(date)
