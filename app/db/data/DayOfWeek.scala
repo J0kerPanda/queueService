@@ -1,7 +1,7 @@
 package db.data
 
-import akka.http.scaladsl.model.DateTime
 import enumeratum._
+import org.joda.time.DateTime
 
 import scala.collection.immutable
 import org.joda.time.DateTimeConstants._
@@ -19,9 +19,9 @@ object DayOfWeek extends Enum[DayOfWeek] {
   case object Friday extends DayOfWeek("fri", FRIDAY)
   case object Saturday extends DayOfWeek("sat", SATURDAY)
   case object Sunday extends DayOfWeek("sun", SUNDAY)
-  
+
   private def fromDayNumber(i: Int): DayOfWeek = values.map(v => v.number -> v).toMap.apply(i)
-  
-  def fromDate(dateTime: DateTime): DayOfWeek = fromDayNumber(dateTime.weekday)
+
+  def fromDate(dateTime: DateTime): DayOfWeek = fromDayNumber(dateTime.dayOfWeek().get())
 }
 
