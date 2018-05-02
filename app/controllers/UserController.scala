@@ -19,9 +19,9 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
 
   //todo unique constraint errors
   def login = Action { request =>
-    extractJsObject[LoginData](request) { loginData =>
+    extractJsObject[LoginData](request) { ld =>
 
-      User.login(loginData.email, loginData.password)
+      User.login(ld.email, ld.password)
         .transact(cu.transactor)
         .unsafeRunSync() match {
 

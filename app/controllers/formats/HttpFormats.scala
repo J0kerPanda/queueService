@@ -31,8 +31,6 @@ object HttpFormats {
     override def writes(status: AppointmentStatus): JsValue = JsString(status.dbName)
   }
 
-
-
   implicit val appointmentWrite: Writes[Appointment] = Json.writes[Appointment]
 
   implicit val errorResponseWrite: Writes[ErrorResponse] = Json.writes[ErrorResponse]
@@ -61,12 +59,23 @@ object HttpFormats {
 
   // Read formats
 
-  implicit val loginDataRead: Reads[LoginData] = Json.reads[LoginData]
+  implicit object localTimeRead extends Reads[LocalTime] {
+    override def reads(json: JsValue): JsResult[LocalTime] = json match {
+      case JsString(value) => Try(JsSuccess(LocalTime.parse(value))).toOption.getOrElse(JsError())
 
-  implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]
+      case _ => JsError()
+    }
+  }
+
+  implicit object localDateRead extends Reads[LocalDate] {
+    override def reads(json: JsValue): JsResult[LocalDate] = json match {
+      case JsString(value) => Try(JsSuccess(LocalDate.parse(value))).toOption.getOrElse(JsError())
+
+      case _ => JsError()
+    }
+  }
 
   implicit object dateTimeRead extends Reads[DateTime] {
-
     override def reads(json: JsValue): JsResult[DateTime] = json match {
       case JsString(value) => Try(JsSuccess(DateTime.parse(value))).toOption.getOrElse(JsError())
 
@@ -75,7 +84,6 @@ object HttpFormats {
   }
 
   implicit object appointmentStatusRead extends Reads[AppointmentStatus] {
-
     override def reads(json: JsValue): JsResult[AppointmentStatus] = json match {
       case JsString(value) if AppointmentStatus.lowerCaseNamesToValuesMap.contains(value.toLowerCase) =>
         JsSuccess(AppointmentStatus.lowerCaseNamesToValuesMap(value.toLowerCase))
@@ -83,4 +91,19 @@ object HttpFormats {
       case _ => JsError()
     }
   }
+
+  implicit object dayOfWeekRead extends Reads[DayOfWeek] {
+    override def reads(json: JsValue): JsResult[DayOfWeek] = json match {
+      case JsString(value) if DayOfWeek.lowerCaseNamesToValuesMap.contains(value.toLowerCase) =>
+        JsSuccess(DayOfWeek.lowerCaseNamesToValuesMap(value.toLowerCase))
+
+      case _ => JsError()
+    }
+  }
+
+  implicit val loginDataRead: Reads[LoginData] = Json.reads[LoginData]
+
+  implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]
+
+  implicit val defaultScheduleData: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
 }

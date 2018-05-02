@@ -1,29 +1,38 @@
 package controllers
 
+import controllers.errors.ErrorResponses
+import controllers.formats.DefaultScheduleData
 import controllers.formats.HttpFormats._
-import db.ConnectionUtils
-import db.data.Category
-import doobie.free.connection.ConnectionIO
 import doobie.implicits._
+import controllers.util.ControllerUtils._
+import db.ConnectionUtils
+import db.data.Schedule
 import javax.inject.{Inject, Singleton}
+import play.api.Logger
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
 class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   //todo unique constraint errors
-  def create(name: String, isFinal: Boolean) = Action {
-    val category = Category.forInsertion(None, name, isFinal)
+  def createDefaultSchedule = Action { request =>
+    extractJsObject[DefaultScheduleData](request) { sd =>
+      val schedule = Schedule.defaultForInsertion(sd.hostId, sd.day, sd.start, sd.stop)
 
-    val tr: ConnectionIO[Option[Category]] = for {
-      id <- Category.insert(category)
-      c <- Category.selectById(id)
-    } yield c
+      Schedule
+        .insertDefault(schedule)
+        .transact(cu.transactor)
+        .attempt
+        .unsafeRunSync() match {
 
-    Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+        case Left(err) =>
+          Logger.error("schedule error", err)
+          ErrorResponses.invalidScheduleData
+
+        case Right(id) => Created(id.toString)
+      }
+    }
   }
 
-  def get(id: Int) = Action {
-    Ok(Category.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
-  }
+  //todo add default, remove default -> composition
 }

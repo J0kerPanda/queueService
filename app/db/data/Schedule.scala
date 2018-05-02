@@ -11,6 +11,16 @@ object Schedule {
 
   type ScheduleId = Long
 
+  def insertDefault(s: DefaultSchedule): ConnectionIO[Option[ScheduleId]] = {
+    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, stop) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.stop})"""
+      .update
+      .withUniqueGeneratedKeys("id")
+  }
+
+  def defaultForInsertion(hostId: UserId, day: DayOfWeek, start: LocalTime, stop: LocalTime): DefaultSchedule = {
+    DefaultSchedule(-1, hostId, day, start, stop)
+  }
+
   def selectDefaultById(id: ScheduleId): ConnectionIO[Option[DefaultSchedule]] = {
     sql"""SELECT id, hostid, day, start, stop FROM "DefaultSchedule" WHERE id = $id"""
       .query[DefaultSchedule]

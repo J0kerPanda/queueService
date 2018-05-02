@@ -28,6 +28,8 @@ object ErrorResponses {
   def invalidCategory(categoryId: CategoryId) =
     BadRequest(ErrorResponse(s"invalid category id $categoryId", source = Some("categoryId")).toJson)
 
+  val invalidScheduleData = BadRequest(ErrorResponse("invalid schedule data", source = None).toJson)
+
   def fieldIsTooLong(field: String, length: Int = 255) =
     BadRequest(ErrorResponse(s"field $field is too long (max $length)", source = Some(field)).toJson)
 

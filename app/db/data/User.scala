@@ -26,7 +26,7 @@ object User {
   def insert(u: User): ConnectionIO[UserId] = {
     sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
       .update()
-      .withUniqueGeneratedKeys[UserId]("id")
+      .withUniqueGeneratedKeys("id")
   }
 
   def selectById(id: UserId): ConnectionIO[Option[User]] = {
