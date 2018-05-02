@@ -41,9 +41,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         password = inputData.password,
         email = inputData.email,
         googleId = inputData.googleId,
-        categoryId = inputData.categoryId,
-        isHost = false,
-        isBlocked = false
+        categoryId = inputData.categoryId
       )
 
       val tr: ConnectionIO[Option[User]] = for {

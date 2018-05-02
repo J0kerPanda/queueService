@@ -1,12 +1,11 @@
 package controllers
 
 import controllers.errors.ErrorResponses
-import controllers.formats.{CustomScheduleData, DefaultScheduleData}
 import controllers.formats.HttpFormats._
 import doobie.implicits._
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
-import db.data.Schedule
+import db.data.{CustomScheduleData, DefaultScheduleData, Schedule}
 import javax.inject.{Inject, Singleton}
 import play.api.Logger
 import play.api.mvc.{AbstractController, ControllerComponents}
@@ -17,7 +16,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
   //todo unique constraint errors
   def createDefault = Action { request =>
     extractJsObject[DefaultScheduleData](request) { sd =>
-      val schedule = Schedule.defaultForInsertion(sd.hostId, sd.day, sd.start, sd.end)
+      val schedule = DefaultScheduleData(sd.hostId, sd.day, sd.start, sd.end)
 
       Schedule
         .insertDefault(schedule)
@@ -36,7 +35,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
 
   def createCustom = Action { request =>
     extractJsObject[CustomScheduleData](request) { sd =>
-      val schedule = Schedule.customForInsertion(sd.hostId, sd.date, sd.start, sd.end)
+      val schedule = CustomScheduleData(sd.hostId, sd.date, sd.start, sd.end)
 
       Schedule
         .insertCustom(schedule)

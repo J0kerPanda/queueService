@@ -14,7 +14,7 @@ object Appointment {
 
   type AppointmentId = Long
 
-  def insert(a: Appointment): ConnectionIO[AppointmentId] = {
+  def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
     sql"""INSERT INTO "Appointment" (hostid, visitorId, date, status) VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.status})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
@@ -31,14 +31,12 @@ object Appointment {
       .query[Appointment]
       .to[List]
   }
-
-  def forInsertion(hostId: UserId, visitorId: UserId, date: DateTime, status: AppointmentStatus = Pending): Appointment = {
-    Appointment(-1, hostId, visitorId, date, status)
-  }
 }
 
-case class Appointment(id: AppointmentId,
-                       hostId: UserId,
-                       visitorId: UserId,
-                       date: DateTime,
-                       status: AppointmentStatus)
+case class AppointmentData(hostId: UserId,
+                           visitorId: UserId,
+                           date: DateTime,
+                           status: AppointmentStatus = Pending)
+
+case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntity[AppointmentId, AppointmentData]
+

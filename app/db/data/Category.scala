@@ -1,6 +1,7 @@
 package db.data
 
 import cats.data.NonEmptyList
+import db.DatabaseFormats.IdEntity
 import db.data.Category.CategoryId
 import doobie._
 import doobie.free.connection.ConnectionIO
@@ -10,7 +11,7 @@ object Category {
 
   type CategoryId = Int
 
-  def insert(c: Category): ConnectionIO[CategoryId] = {
+  def insert(c: CategoryData): ConnectionIO[CategoryId] = {
     sql"""INSERT INTO "Category" (parentid, name, isfinal) VALUES (${c.parentId}, ${c.name}, ${c.isFinal})"""
       .update()
       .withUniqueGeneratedKeys[CategoryId]("id")
@@ -27,10 +28,8 @@ object Category {
       .query[Category]
       .to[List]
   }
-
-  def forInsertion(parentId: Option[CategoryId], name: String, isFinal: Boolean): Category = {
-    Category(-1, parentId, name, isFinal)
-  }
 }
 
-case class Category(id: CategoryId, parentId: Option[CategoryId], name: String, isFinal: Boolean)
+case class CategoryData(parentId: Option[CategoryId], name: String, isFinal: Boolean)
+
+case class Category(id: CategoryId, data: CategoryData) extends IdEntity[CategoryId, CategoryData]

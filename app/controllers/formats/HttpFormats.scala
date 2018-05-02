@@ -27,11 +27,15 @@ object HttpFormats {
 
   implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o)
 
+  implicit val categoryDaaWrite: Writes[CategoryData] = Json.writes[CategoryData]
+
   implicit val categoryWrite: Writes[Category] = Json.writes[Category]
 
   implicit object appointmentStatusWrite extends Writes[AppointmentStatus] {
     override def writes(status: AppointmentStatus): JsValue = JsString(status.dbName)
   }
+
+  implicit val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
 
   implicit val appointmentWrite: Writes[Appointment] = Json.writes[Appointment]
 
@@ -43,7 +47,11 @@ object HttpFormats {
     override def writes(day: DayOfWeek): JsValue = JsString(day.dbName)
   }
 
+  implicit val defaultScheduleDataWrite: Writes[DefaultScheduleData] = Json.writes[DefaultScheduleData]
+
   implicit val defaultScheduleWrite: Writes[DefaultSchedule] = Json.writes[DefaultSchedule]
+
+  implicit val customScheduleDataWrite: Writes[CustomScheduleData] = Json.writes[CustomScheduleData]
 
   implicit val customScheduleWrite: Writes[CustomSchedule] = Json.writes[CustomSchedule]
 

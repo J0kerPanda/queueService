@@ -11,14 +11,10 @@ object Schedule {
 
   type ScheduleId = Long
 
-  def insertDefault(s: DefaultSchedule): ConnectionIO[Option[ScheduleId]] = {
+  def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end") VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end})"""
       .update
       .withUniqueGeneratedKeys("id")
-  }
-
-  def defaultForInsertion(hostId: UserId, day: DayOfWeek, start: LocalTime, end: LocalTime): DefaultSchedule = {
-    DefaultSchedule(-1, hostId, day, start, end)
   }
 
   def selectDefaultById(id: ScheduleId): ConnectionIO[Option[DefaultSchedule]] = {
@@ -33,14 +29,10 @@ object Schedule {
       .option
   }
 
-  def insertCustom(s: CustomSchedule): ConnectionIO[Option[ScheduleId]] = {
+  def insertCustom(s: CustomScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end") VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end})"""
       .update
       .withUniqueGeneratedKeys("id")
-  }
-
-  def customForInsertion(hostId: UserId, date: LocalDate, start: LocalTime, end: LocalTime): CustomSchedule = {
-    CustomSchedule(-1, hostId, date, start, end)
   }
 
   def selectCustomById(id: ScheduleId): ConnectionIO[Option[CustomSchedule]] = {
@@ -63,6 +55,10 @@ object Schedule {
   }
 }
 
-case class DefaultSchedule(id: ScheduleId, hostId: UserId, day: DayOfWeek, start: LocalTime, end: LocalTime)
+case class DefaultScheduleData(hostId: UserId, day: DayOfWeek, start: LocalTime, end: LocalTime)
 
-case class CustomSchedule(id: ScheduleId, hostId: UserId, date: LocalDate, start: LocalTime, end: LocalTime)
+case class DefaultSchedule(id: ScheduleId, data: DefaultScheduleData) extends IdEntity[ScheduleId, DefaultScheduleData]
+
+case class CustomScheduleData(hostId: UserId, date: LocalDate, start: LocalTime, end: LocalTime)
+
+case class CustomSchedule(id: ScheduleId, data: CustomScheduleData) extends IdEntity[ScheduleId, CustomScheduleData]

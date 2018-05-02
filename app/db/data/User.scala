@@ -50,7 +50,7 @@ case class UserData(firstName: String,
                     password: String,
                     googleId: String,
                     categoryId: CategoryId,
-                    isHost: Boolean,
-                    isBlocked: Boolean)
+                    isHost: Boolean = false,
+                    isBlocked: Boolean = false)
 
 case class User(id: UserId, data: UserData) extends IdEntity[UserId, UserData]
