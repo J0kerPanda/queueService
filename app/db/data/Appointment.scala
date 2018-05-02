@@ -8,7 +8,7 @@ import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import org.joda.time.DateTime
-import db.DatabaseUtils.DateTimeMeta
+import db.DatabaseFormats.DateTimeMeta
 
 object Appointment {
 
