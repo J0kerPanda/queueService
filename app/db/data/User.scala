@@ -1,6 +1,7 @@
 package db.data
 
 import cats.data.NonEmptyList
+import db.DatabaseFormats.IdEntity
 import db.data.Category.CategoryId
 import db.data.User.UserId
 import doobie._
@@ -23,7 +24,7 @@ object User {
       .withUniqueGeneratedKeys("id")
   }
 
-  def insert(u: User): ConnectionIO[UserId] = {
+  def insert(u: UserData): ConnectionIO[UserId] = {
     sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
       .update()
       .withUniqueGeneratedKeys("id")
@@ -40,39 +41,16 @@ object User {
       .query[User]
       .to[List]
   }
-
-  def forInsertion(firstName: String,
-                   surname: String,
-                   lastName: String,
-                   email: String,
-                   password: String,
-                   googleId: String,
-                   categoryId: CategoryId,
-                   isHost: Boolean = false,
-                   isBlocked: Boolean = false): User = {
-
-    User(
-      id = -1,
-      firstName = firstName,
-      surname = surname,
-      lastName = lastName,
-      email = email,
-      password = password,
-      googleId = googleId,
-      categoryId = categoryId,
-      isHost = isHost,
-      isBlocked = isBlocked
-    )
-  }
 }
 
-case class User(id: UserId,
-                firstName: String,
-                surname: String,
-                lastName: String,
-                email: String,
-                password: String,
-                googleId: String,
-                categoryId: CategoryId,
-                isHost: Boolean,
-                isBlocked: Boolean)
+case class UserData(firstName: String,
+                    surname: String,
+                    lastName: String,
+                    email: String,
+                    password: String,
+                    googleId: String,
+                    categoryId: CategoryId,
+                    isHost: Boolean,
+                    isBlocked: Boolean)
+
+case class User(id: UserId, data: UserData) extends IdEntity[UserId, UserData]

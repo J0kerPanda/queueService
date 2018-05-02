@@ -10,6 +10,11 @@ import org.postgresql.util.{PGInterval, PGTime}
 
 object DatabaseFormats {
 
+  trait IdEntity[K, V <: (Product with Serializable)] {
+    def id: K
+    def data: V
+  }
+
   //todo handling psql codes!
   implicit val DateTimeMeta: Meta[DateTime] = Meta[Timestamp].xmap(
     ts => new DateTime(ts.getTime),

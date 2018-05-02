@@ -6,13 +6,12 @@ import controllers.formats.{LoginData, UserInputData}
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
 import db.data.User.UserId
-import db.data.{HostMeta, User}
+import db.data.{HostMeta, User, UserData}
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.Period
 import play.api.mvc.{AbstractController, ControllerComponents}
-import scala.concurrent.duration._
 
 @Singleton
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
@@ -35,14 +34,16 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
   def register = Action { request =>
     extractJsObject[UserInputData](request) { inputData =>
 
-      val user = User.forInsertion(
+      val user = UserData(
         firstName = inputData.firstName,
         surname = inputData.surname,
         lastName = inputData.lastName,
         password = inputData.password,
         email = inputData.email,
         googleId = inputData.googleId,
-        categoryId = inputData.categoryId
+        categoryId = inputData.categoryId,
+        isHost = false,
+        isBlocked = false
       )
 
       val tr: ConnectionIO[Option[User]] = for {

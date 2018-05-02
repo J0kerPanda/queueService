@@ -2,7 +2,7 @@ package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
 import db.data._
-import org.joda.time.{DateTime, DateTimeZone, LocalDate, LocalTime}
+import org.joda.time.{DateTime, LocalDate, LocalTime}
 import play.api.libs.json._
 
 import scala.util.Try
@@ -23,7 +23,9 @@ object HttpFormats {
     override def writes(dt: DateTime): JsValue = JsString(dt.toString())
   }
 
-  implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o) - "password"
+  implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
+
+  implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o)
 
   implicit val categoryWrite: Writes[Category] = Json.writes[Category]
 
