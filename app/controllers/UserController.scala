@@ -57,7 +57,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
   def promote(id: UserId) = Action {
     val tr: ConnectionIO[UserId] = for {
       _ <- User.promote(id)
-      r <- HostMeta.insert(HostMeta(id, new Period((31 day).toMillis)))
+      r <- HostMeta.insert(HostMeta(id, Period.days(31)))
     } yield r
 
     Ok(tr.transact(cu.transactor).unsafeRunSync().toString)
