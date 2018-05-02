@@ -24,7 +24,6 @@ object Category {
 
   def selectByIds(ids: NonEmptyList[CategoryId]): ConnectionIO[List[Category]] = {
     (fr"""SELECT id, parentid, name, isfinal FROM "Category" WHERE""" ++ Fragments.in(fr"id", ids))
-      .stripMargin
       .query[Category]
       .to[List]
   }

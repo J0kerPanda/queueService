@@ -28,7 +28,6 @@ object Appointment {
 
   def selectByIds(ids: NonEmptyList[AppointmentId]): ConnectionIO[List[Appointment]] = {
     (fr"""SELECT "id", hostid, visitorid, date, status FROM "Appointment" WHERE""" ++ Fragments.in(fr"id", ids))
-      .stripMargin
       .query[Appointment]
       .to[List]
   }

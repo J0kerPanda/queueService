@@ -16,6 +16,7 @@ object User {
       .query[User]
       .option
   }
+
   def insert(u: User): ConnectionIO[UserId] = {
     sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
       .update()
@@ -30,7 +31,6 @@ object User {
 
   def selectByIds(ids: NonEmptyList[UserId], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
     (fr"""SELECT id, firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked FROM "User" WHERE isblocked = $isBlocked AND""" ++ Fragments.in(fr"id", ids))
-      .stripMargin
       .query[User]
       .to[List]
   }
