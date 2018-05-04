@@ -31,6 +31,12 @@ object Appointment {
       .query[Appointment]
       .to[List]
   }
+
+  def selectByDate(hostId: UserId, date: LocalDate): ConnectionIO[List[Appointment]] = {
+    sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment" WHERE hostid = $hostId AND date = $date"""
+      .query[Appointment]
+      .to[List]
+  }
 }
 
 case class AppointmentData(hostId: UserId,

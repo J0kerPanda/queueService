@@ -3,10 +3,11 @@ package controllers
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import db.ConnectionUtils
+import db.data.HostMeta.UserId
 import db.data.{Appointment, AppointmentData}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
-import org.joda.time.DateTime
+import org.joda.time.{DateTime, LocalDate}
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
@@ -14,7 +15,7 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
 
   //todo unique constraint errors
 
-  def create(hostId: Int, visitorId: Int) = Action {
+  def create(hostId: UserId, visitorId: UserId) = Action {
     if (hostId == visitorId) {
       ErrorResponses.invalidHostUser(hostId)
     } else {
@@ -36,4 +37,9 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
   def get(id: Long) = Action {
     Ok(Appointment.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
   }
+
+  def byHostDate(hostId: UserId, date: LocalDate) = Action {
+    Ok(Appointment.selectByDate(hostId, date).transact(cu.transactor).unsafeRunSync().toJson)
+  }
+
 }

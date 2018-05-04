@@ -4,7 +4,9 @@ version := "1.0"
 
 scalacOptions += "-Ypartial-unification"
       
-lazy val `queueservice` = (project in file(".")).enablePlugins(PlayScala)
+lazy val `queueservice` = (project in file(".")).enablePlugins(PlayScala).settings(
+  routesImport += "controllers.formats.HttpBinders._"
+)
 
 resolvers += "scalaz-bintray" at "https://dl.bintray.com/scalaz/releases"
       

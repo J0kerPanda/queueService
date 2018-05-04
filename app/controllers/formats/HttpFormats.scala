@@ -4,6 +4,7 @@ import controllers.errors.{ErrorListResponse, ErrorResponse}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime}
 import play.api.libs.json._
+import play.api.mvc.QueryStringBindable
 
 import scala.util.Try
 
