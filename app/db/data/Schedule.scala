@@ -58,11 +58,11 @@ object Schedule {
       .to[List]
   }
 
-  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[(List[DefaultSchedule], List[CustomSchedule])] = {
+  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
     for {
       d <- selectAllDefault(hostId)
       c <- selectCustomInPeriod(from, to)
-    } yield (d, c)
+    } yield (d.map(_.data), c.map(_.data))
   }
 
   def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
