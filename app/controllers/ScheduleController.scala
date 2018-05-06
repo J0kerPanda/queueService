@@ -1,20 +1,27 @@
 package controllers
 
+import akka.actor.ActorSystem
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.ScheduleDates
+import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
 import db.data.User.UserId
-import db.data.{CustomScheduleData, DefaultScheduleData, Schedule}
+import db.data.{CustomScheduleData, DefaultScheduleData, HostMeta, Schedule}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.LocalDate
 import play.api.Logger
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponents}
+
+import scala.concurrent.ExecutionContext
 
 @Singleton
-class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
+class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, system: ActorSystem)
+  extends AbstractController(cc) {
+
+  private implicit val ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
   //todo unique constraint errors
   def createDefault = Action { request =>
@@ -55,18 +62,26 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     }
   }
 
-  def getDates(hostId: UserId, from: LocalDate, to: LocalDate) = Action { request =>
+  def getDates(hostId: UserId, from: LocalDate, to: LocalDate): Action[AnyContent] = Action.async {
 
-    val (default, custom) = Schedule
-      .selectSchedules(hostId, from, to)
-      .transact(cu.transactor)
-      .unsafeRunSync()
+    val intervalF = HostMeta.selectById(hostId).transact(cu.transactor).unsafeToFuture()
+    val scheduleF = Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeToFuture()
 
-    val defaultDays = default.map(_.day.number).toSet
-    val customDates = custom.map(_.date).toSet
-    val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
+    for {
+      hmOpt <- intervalF
+      (default, custom) <- scheduleF
+    } yield {
 
-    Ok(ScheduleDates(defaultDates, customDates.toList).toJson)
+        hmOpt.map { hm =>
+
+          val defaultDays = default.map(_.day.number).toSet
+          val customDates = custom.map(_.date).toSet
+          val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
+
+          Ok(ScheduleDates(hm.appointmentInterval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
+        }
+          .getOrElse(ErrorResponses.invalidHostUser(hostId))
+    }
   }
 
   private def getDefaultDates(customDates: Set[LocalDate],

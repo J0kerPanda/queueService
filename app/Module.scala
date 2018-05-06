@@ -17,7 +17,6 @@ class Module extends AbstractModule {
 
   override def configure(): Unit = {
     // Use the system clock as the default implementation of Clock
-    println(new LocalDate())
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
   }
 }
