@@ -3,7 +3,7 @@ package controllers
 import akka.actor.ActorSystem
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.ScheduleDates
+import controllers.formats.ScheduleDatesData
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
@@ -77,7 +77,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
       val customDates = custom.map(_.date).toSet
       val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
 
-      Ok(ScheduleDates(interval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
+      Ok(ScheduleDatesData(interval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
     }
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }

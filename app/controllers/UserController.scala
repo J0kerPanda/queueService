@@ -2,7 +2,7 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.{LoginData, UserInputData}
+import controllers.formats.{HostData, LoginData, UserInputData}
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
 import db.data.User.UserId
@@ -37,7 +37,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
       val user = UserData(
         firstName = inputData.firstName,
         surname = inputData.surname,
-        lastName = inputData.lastName,
+        patronymic = inputData.lastName,
         password = inputData.password,
         email = inputData.email,
         googleId = inputData.googleId,
@@ -64,6 +64,15 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
 
   def get(id: Int) = Action {
     Ok(User.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
+  }
+
+  def getHosts = Action {
+    Ok(User.selectHosts()
+      .transact(cu.transactor)
+      .unsafeRunSync()
+      .map(user => HostData(user.id, user.data.firstName, user.data.surname, user.data.patronymic))
+      .toJson
+    )
   }
 
   def test = Action {

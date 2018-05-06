@@ -12,8 +12,10 @@ object User {
 
   type UserId = Int
 
+  private val selectUserSql = sql"""SELECT id, firstName, surname, patronymic, email, password, googleId, categoryId, isHost, isBlocked FROM "User""""
+
   def login(email: String, password: String): ConnectionIO[Option[User]] = {
-    sql"""SELECT id, firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked FROM "User" WHERE email = $email AND password = crypt($password, password)"""
+    (selectUserSql ++ Fragments.whereAnd(fr"email = $email", fr"password = crypt($password, password)"))
       .query[User]
       .option
   }
@@ -25,19 +27,25 @@ object User {
   }
 
   def insert(u: UserData): ConnectionIO[UserId] = {
-    sql"""INSERT INTO "User" (firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.lastName}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
+    sql"""INSERT INTO "User" (firstName, surname, patronymic, email, password, googleId, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.patronymic}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.googleId}, ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
       .update()
       .withUniqueGeneratedKeys("id")
   }
 
+  def selectHosts(): ConnectionIO[List[User]] = {
+    (selectUserSql ++ fr"WHERE ishost = true")
+      .query[User]
+      .to[List]
+  }
+
   def selectById(id: UserId): ConnectionIO[Option[User]] = {
-    sql"""SELECT id, firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked FROM "User" WHERE id = $id"""
+    (selectUserSql ++ fr"WHERE id = $id")
       .query[User]
       .option
   }
 
   def selectByIds(ids: NonEmptyList[UserId], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
-    (fr"""SELECT id, firstName, surname, lastName, email, password, googleId, categoryId, isHost, isBlocked FROM "User" WHERE isblocked = $isBlocked AND""" ++ Fragments.in(fr"id", ids))
+    (selectUserSql ++ Fragments.whereAnd(fr"isblocked = $isBlocked", Fragments.in(fr"id", ids)))
       .query[User]
       .to[List]
   }
@@ -45,7 +53,7 @@ object User {
 
 case class UserData(firstName: String,
                     surname: String,
-                    lastName: String,
+                    patronymic: String,
                     email: String,
                     password: String,
                     googleId: String,

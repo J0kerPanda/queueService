@@ -3,7 +3,7 @@ package controllers
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import db.ConnectionUtils
-import db.data.HostMeta.UserId
+import db.data.User.UserId
 import db.data.{Appointment, AppointmentData}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}

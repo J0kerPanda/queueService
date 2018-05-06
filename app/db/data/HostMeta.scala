@@ -9,8 +9,6 @@ import org.joda.time.Period
 
 object HostMeta {
 
-  type UserId = Int
-
   def insert(m: HostMeta): ConnectionIO[UserId] = {
     sql"""INSERT INTO "HostMeta" (id, appointmentinterval) VALUES (${m.id}, ${m.appointmentInterval})"""
       .update()

@@ -1,8 +1,8 @@
 package db.data
 
 import db.DatabaseFormats._
-import db.data.HostMeta.UserId
 import db.data.Schedule.ScheduleId
+import db.data.User.UserId
 import doobie.free.connection.ConnectionIO
 import doobie._
 import doobie.implicits._
