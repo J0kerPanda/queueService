@@ -62,26 +62,24 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     }
   }
 
-  def getDates(hostId: UserId, from: LocalDate, to: LocalDate): Action[AnyContent] = Action.async {
+  def getDates(hostId: UserId): Action[AnyContent] = Action {
 
-    val intervalF = HostMeta.selectById(hostId).transact(cu.transactor).unsafeToFuture()
-    val scheduleF = Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeToFuture()
+    val intervalOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentInterval)
 
-    for {
-      hmOpt <- intervalF
-      (default, custom) <- scheduleF
-    } yield {
+    intervalOpt.map { interval =>
+      val from = new LocalDate()
+      val to = from.plus(interval.toStandardDays)
+      val (default, custom) = Schedule.selectSchedules(hostId, from, to)
+        .transact(cu.transactor)
+        .unsafeRunSync()
 
-        hmOpt.map { hm =>
+      val defaultDays = default.map(_.day.number).toSet
+      val customDates = custom.map(_.date).toSet
+      val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
 
-          val defaultDays = default.map(_.day.number).toSet
-          val customDates = custom.map(_.date).toSet
-          val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
-
-          Ok(ScheduleDates(hm.appointmentInterval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
-        }
-          .getOrElse(ErrorResponses.invalidHostUser(hostId))
+      Ok(ScheduleDates(interval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
     }
+      .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }
 
   private def getDefaultDates(customDates: Set[LocalDate],
