@@ -64,7 +64,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
 
   def getDates(hostId: UserId): Action[AnyContent] = Action {
 
-    val intervalOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentInterval)
+    val intervalOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
 
     intervalOpt.map { interval =>
       val from = new LocalDate()

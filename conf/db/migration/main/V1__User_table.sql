@@ -52,7 +52,7 @@ CREATE TABLE "HostMeta" (
     ON UPDATE RESTRICT
     ON DELETE CASCADE
     CHECK (is_host_user(id)),
-  appointmentInterval BIGINT NOT NULL DEFAULT 2678400000 -- 31 days
+  appointmentPeriod BIGINT NOT NULL DEFAULT 2678400000 -- 31 days
 );
 
 ---- Default schedule
