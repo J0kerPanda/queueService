@@ -25,6 +25,7 @@ class DefaultErrorHandler extends HttpErrorHandler {
       ))
 
     case _ =>
+      exception.printStackTrace()
       Future.successful(InternalServerError("A server error occurred: " + exception.getMessage))
   }
 }

@@ -55,7 +55,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     }
   }
 
-  def getDefault(hostId: UserId, from: LocalDate, to: LocalDate) = Action { request =>
+  def getDates(hostId: UserId, from: LocalDate, to: LocalDate) = Action { request =>
 
     val (default, custom) = Schedule
       .selectSchedules(hostId, from, to)

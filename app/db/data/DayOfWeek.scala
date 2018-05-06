@@ -22,6 +22,8 @@ object DayOfWeek extends Enum[DayOfWeek] {
 
   private def fromDayNumber(i: Int): DayOfWeek = values.map(v => v.number -> v).toMap.apply(i)
 
+  val dbLowerCaseMap: Map[String, DayOfWeek] = values.map(v => v.dbName.toLowerCase -> v).toMap
+
   def fromDate(date: LocalDate): DayOfWeek = fromDayNumber(date.dayOfWeek().get())
 }
 

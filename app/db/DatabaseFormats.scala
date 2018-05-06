@@ -29,7 +29,7 @@ object DatabaseFormats {
 
   implicit val DayOfWeekMeta: Meta[DayOfWeek] = pgEnumStringOpt(
     "day_of_week",
-    name => DayOfWeek.lowerCaseNamesToValuesMap.get(name.toLowerCase),
+    name => DayOfWeek.dbLowerCaseMap.get(name.toLowerCase),
     enum => enum.dbName
   )
 

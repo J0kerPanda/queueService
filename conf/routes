@@ -31,3 +31,4 @@ GET     /api/appointment            controllers.AppointmentController.byHostDate
 # Schedule
 POST    /api/schedule/createDefault controllers.ScheduleController.createDefault
 POST    /api/schedule/createCustom  controllers.ScheduleController.createCustom
+GET     /api/schedule/interval      controllers.ScheduleController.getDates(hostId: Int, from: org.joda.time.LocalDate, to: org.joda.time.LocalDate)
