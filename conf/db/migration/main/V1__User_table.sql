@@ -75,8 +75,7 @@ CREATE TABLE "DefaultSchedule" (
   day day_of_week NOT NULL,
   start TIME NOT NULL,
   "end" TIME NOT NULL CHECK ("end" > start),
-  place VARCHAR(255) NOT NULL,
-  interval BIGINT NOT NULL
+  place VARCHAR(255) NOT NULL
   -- todo intersection constraint?
 );
 
@@ -89,8 +88,7 @@ CREATE TABLE "CustomSchedule" (
   date DATE NOT NULL,
   start time NOT NULL,
   "end" time NOT NULL CHECK ("end" > start),
-  place VARCHAR(255) NOT NULL,
-  interval BIGINT NOT NULL
+  place VARCHAR(255) NOT NULL
   -- todo intersection constraint?
 );
 

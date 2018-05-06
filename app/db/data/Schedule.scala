@@ -12,12 +12,12 @@ object Schedule {
 
   type ScheduleId = Long
 
-  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", "interval", place FROM "DefaultSchedule""""
+  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", place FROM "DefaultSchedule""""
 
-  private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", "interval", place FROM "CustomSchedule""""
+  private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", place FROM "CustomSchedule""""
 
   def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end", "interval", place) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end}, ${s.interval}, ${s.place})"""
+    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end", place) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end}, ${s.place})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -35,7 +35,7 @@ object Schedule {
   }
 
   def insertCustom(s: CustomScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end", "interval", place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.interval}, ${s.place})"""
+    sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end", place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.place})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -65,11 +65,11 @@ object Schedule {
     } yield (d, c)
   }
 
-  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(List[DefaultSchedule], List[CustomSchedule])] = {
+  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
     for {
       d <- selectDefaultByDay(DayOfWeek.fromDate(date))
       c <- selectCustomByDate(date)
-    } yield (d, c)
+    } yield (d.map(_.data), c.map(_.data))
   }
 }
 
@@ -77,16 +77,27 @@ case class DefaultScheduleData(hostId: UserId,
                                day: DayOfWeek,
                                start: LocalTime,
                                end: LocalTime,
-                               interval: Long,
                                place: String)
 
 case class DefaultSchedule(id: ScheduleId, data: DefaultScheduleData) extends IdEntity[ScheduleId, DefaultScheduleData]
+
+object CustomScheduleData {
+
+  def fromDefault(data: DefaultScheduleData, date: LocalDate): CustomScheduleData = {
+    CustomScheduleData(
+      hostId = data.hostId,
+      date = date,
+      start = data.start,
+      end = data.end,
+      place = data.place
+    )
+  }
+}
 
 case class CustomScheduleData(hostId: UserId,
                               date: LocalDate,
                               start: LocalTime,
                               end: LocalTime,
-                              interval: Long,
                               place: String)
 
 case class CustomSchedule(id: ScheduleId, data: CustomScheduleData) extends IdEntity[ScheduleId, CustomScheduleData]
