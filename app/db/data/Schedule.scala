@@ -4,6 +4,7 @@ import db.DatabaseFormats._
 import db.data.HostMeta.UserId
 import db.data.Schedule.ScheduleId
 import doobie.free.connection.ConnectionIO
+import doobie._
 import doobie.implicits._
 import org.joda.time.{LocalDate, LocalTime}
 
@@ -11,22 +12,26 @@ object Schedule {
 
   type ScheduleId = Long
 
+  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", "interval", place FROM "DefaultSchedule""""
+
+  private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", "interval", place FROM "CustomSchedule""""
+
   def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end", "interval", place) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end}, ${s.interval}, ${s.place})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
 
-  def selectDefaultById(id: ScheduleId): ConnectionIO[Option[DefaultSchedule]] = {
-    sql"""SELECT id, hostid, day, start, "end", "interval", place FROM "DefaultSchedule" WHERE id = $id"""
+  def selectAllDefault(hostId: UserId): ConnectionIO[List[DefaultSchedule]] = {
+    (selectDefaultSql ++ fr"WHERE hostid = $hostId")
       .query[DefaultSchedule]
-      .option
+      .to[List]
   }
 
-  def selectDefaultByDay(day: DayOfWeek): ConnectionIO[Option[DefaultSchedule]] = {
-    sql"""SELECT id, hostid, day, start, "end", "interval", place FROM "DefaultSchedule" WHERE day = $day"""
+  def selectDefaultByDay(day: DayOfWeek): ConnectionIO[List[DefaultSchedule]] = {
+    (selectDefaultSql ++ fr"WHERE day = $day")
       .query[DefaultSchedule]
-      .option
+      .to[List]
   }
 
   def insertCustom(s: CustomScheduleData): ConnectionIO[Option[ScheduleId]] = {
@@ -36,18 +41,31 @@ object Schedule {
   }
 
   def selectCustomById(id: ScheduleId): ConnectionIO[Option[CustomSchedule]] = {
-    sql"""SELECT id, hostid, date, start, "end", "interval", place FROM "CustomSchedule" WHERE id = $id"""
+    (selectCustomSql ++ fr"WHERE id = $id")
       .query[CustomSchedule]
       .option
   }
 
-  def selectCustomByDate(date: LocalDate): ConnectionIO[Option[CustomSchedule]] = {
-    sql"""SELECT id, hostid, date, start, "end", "interval", place FROM "CustomSchedule" WHERE date = $date"""
+  def selectCustomInPeriod(from: LocalDate, to: LocalDate): ConnectionIO[List[CustomSchedule]] = {
+    (selectCustomSql ++ Fragments.whereAnd(fr"date >= $from", fr"date < $to"))
       .query[CustomSchedule]
-      .option
+      .to[List]
   }
 
-  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(Option[DefaultSchedule], Option[CustomSchedule])] = {
+  def selectCustomByDate(date: LocalDate): ConnectionIO[List[CustomSchedule]] = {
+    (selectCustomSql ++ fr"date = $date")
+      .query[CustomSchedule]
+      .to[List]
+  }
+
+  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[(List[DefaultSchedule], List[CustomSchedule])] = {
+    for {
+      d <- selectAllDefault(hostId)
+      c <- selectCustomInPeriod(from, to)
+    } yield (d, c)
+  }
+
+  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(List[DefaultSchedule], List[CustomSchedule])] = {
     for {
       d <- selectDefaultByDay(DayOfWeek.fromDate(date))
       c <- selectCustomByDate(date)
