@@ -6,15 +6,15 @@ import db.data.User.UserId
 import doobie.free.connection.ConnectionIO
 import doobie._
 import doobie.implicits._
-import org.joda.time.{LocalDate, LocalTime}
+import org.joda.time.{LocalDate, LocalTime, Period}
 
 object Schedule {
 
   type ScheduleId = Long
 
-  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", place FROM "DefaultSchedule""""
+  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", appointmentduration, place FROM "DefaultSchedule""""
 
-  private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", place FROM "CustomSchedule""""
+  private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule""""
 
   def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end", place) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end}, ${s.place})"""
@@ -80,6 +80,7 @@ case class DefaultScheduleData(hostId: UserId,
                                day: DayOfWeek,
                                start: LocalTime,
                                end: LocalTime,
+                               appointmentDuration: Period,
                                place: String)
 
 case class DefaultSchedule(id: ScheduleId, data: DefaultScheduleData) extends IdEntity[ScheduleId, DefaultScheduleData]
@@ -92,6 +93,7 @@ object CustomScheduleData {
       date = date,
       start = data.start,
       end = data.end,
+      appointmentDuration = data.appointmentDuration,
       place = data.place
     )
   }
@@ -101,6 +103,7 @@ case class CustomScheduleData(hostId: UserId,
                               date: LocalDate,
                               start: LocalTime,
                               end: LocalTime,
+                              appointmentDuration: Period,
                               place: String)
 
 case class CustomSchedule(id: ScheduleId, data: CustomScheduleData) extends IdEntity[ScheduleId, CustomScheduleData]

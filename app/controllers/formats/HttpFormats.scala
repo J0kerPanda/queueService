@@ -2,7 +2,7 @@ package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
 import db.data._
-import org.joda.time.{DateTime, LocalDate, LocalTime}
+import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
 import play.api.libs.json._
 
 import scala.util.Try
@@ -21,6 +21,10 @@ object HttpFormats {
 
   implicit object dateTimeWrite extends Writes[DateTime] {
     override def writes(dt: DateTime): JsValue = JsString(dt.toString())
+  }
+
+  implicit object periodWrite extends Writes[Period] {
+    override def writes(p: Period): JsValue = JsNumber(p.toStandardDuration.getMillis)
   }
 
   implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
@@ -93,6 +97,14 @@ object HttpFormats {
   implicit object dateTimeRead extends Reads[DateTime] {
     override def reads(json: JsValue): JsResult[DateTime] = json match {
       case JsString(value) => Try(JsSuccess(DateTime.parse(value))).toOption.getOrElse(JsError())
+
+      case _ => JsError()
+    }
+  }
+
+  implicit object periodRead extends Reads[Period] {
+    override def reads(json: JsValue): JsResult[Period] = json match {
+      case JsNumber(value) => Try(JsSuccess(new Period(value.toLong))).toOption.getOrElse(JsError())
 
       case _ => JsError()
     }
