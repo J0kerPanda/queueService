@@ -37,7 +37,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
       val user = UserData(
         firstName = inputData.firstName,
         surname = inputData.surname,
-        patronymic = inputData.lastName,
+        patronymic = inputData.patronymic,
         password = inputData.password,
         email = inputData.email,
         googleId = inputData.googleId,

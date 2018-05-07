@@ -4,7 +4,7 @@ import db.data.Category.CategoryId
 
 case class UserInputData(firstName: String,
                          surname: String,
-                         lastName: String,
+                         patronymic: String,
                          email: String,
                          password: String,
                          googleId: String,

@@ -46,8 +46,8 @@ object Schedule {
       .option
   }
 
-  def selectCustomInPeriod(from: LocalDate, to: LocalDate): ConnectionIO[List[CustomSchedule]] = {
-    (selectCustomSql ++ Fragments.whereAnd(fr"date >= $from", fr"date < $to"))
+  def selectCustomInPeriod(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[CustomSchedule]] = {
+    (selectCustomSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to"))
       .query[CustomSchedule]
       .to[List]
   }
@@ -61,7 +61,7 @@ object Schedule {
   def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
     for {
       d <- selectAllDefault(hostId)
-      c <- selectCustomInPeriod(from, to)
+      c <- selectCustomInPeriod(hostId, from, to)
     } yield (d.map(_.data), c.map(_.data))
   }
 
@@ -72,6 +72,9 @@ object Schedule {
     } yield (d.map(_.data), c.map(_.data))
   }
 }
+
+
+//todo appointment duration
 
 case class DefaultScheduleData(hostId: UserId,
                                day: DayOfWeek,
