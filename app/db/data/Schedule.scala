@@ -3,8 +3,8 @@ package db.data
 import db.DatabaseFormats._
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
-import doobie.free.connection.ConnectionIO
 import doobie._
+import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import org.joda.time.{LocalDate, LocalTime, Period}
 
@@ -12,12 +12,12 @@ object Schedule {
 
   type ScheduleId = Long
 
-  private val selectDefaultSql = sql"""SELECT id, hostid, day, start, "end", appointmentduration, place FROM "DefaultSchedule""""
+  private val selectDefaultSql = sql"""SELECT id, hostid, firstdate, repeatperiod, start, "end", appointmentduration, place FROM "DefaultSchedule""""
 
   private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule""""
 
   def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "DefaultSchedule" (hostid, day, start, "end", place) VALUES (${s.hostId}, ${s.day}, ${s.start}, ${s.end}, ${s.place})"""
+    sql"""INSERT INTO "DefaultSchedule" (hostid, firstDate, repeatperiod, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.firstDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -35,7 +35,7 @@ object Schedule {
   }
 
   def insertCustom(s: CustomScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end", place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.place})"""
+    sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -74,10 +74,12 @@ object Schedule {
 }
 
 
-//todo appointment duration
+//todo single query schedule
+//todo default schedule interval
 
 case class DefaultScheduleData(hostId: UserId,
-                               day: DayOfWeek,
+                               firstDate: LocalDate,
+                               repeatPeriod: Period,
                                start: LocalTime,
                                end: LocalTime,
                                appointmentDuration: Period,

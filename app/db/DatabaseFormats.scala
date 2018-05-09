@@ -33,9 +33,12 @@ object DatabaseFormats {
     enum => enum.dbName
   )
 
-  implicit val PeriodDaysMeta: Meta[Period] = Meta[Long].xmap(
-    pgInterval => new Period(pgInterval),
-    period => period.toStandardDuration.getMillis
+  implicit val PeriodMeta: Meta[Period] = Meta.other[PGInterval]("interval").xmap(
+    pgInterval => Period.parse(pgInterval.toString).normalizedStandard(),
+    period => {
+      val p = period.normalizedStandard()
+      new PGInterval(p.getYears, p.getMonths, p.getDays + p.getWeeks * 7, p.getHours, p.getMinutes, p.getSeconds)
+    }
   )
 
   implicit val LocalTimeMeta: Meta[LocalTime] = Meta.TimeMeta.xmap(

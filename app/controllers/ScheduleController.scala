@@ -71,11 +71,11 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
         .transact(cu.transactor)
         .unsafeRunSync()
 
-      val defaultDays = default.map(_.day.number).toSet
-      val customDates = custom.map(_.date).toSet
-      val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
+//      val defaultDays = default.map(_.day.number).toSet
+//      val customDates = custom.map(_.date).toSet
+//      val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
 
-      Ok(ScheduleDatesData(interval.toStandardDuration.getMillis, defaultDates, customDates.toList).toJson)
+      Ok("")
     }
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }

@@ -52,7 +52,7 @@ CREATE TABLE "HostMeta" (
     ON UPDATE RESTRICT
     ON DELETE CASCADE
     CHECK (is_host_user(id)),
-  appointmentPeriod BIGINT NOT NULL DEFAULT 2678400000 -- 31 days
+  appointmentPeriod INTERVAL NOT NULL DEFAULT '31 day'
 );
 
 ---- Default schedule
@@ -72,10 +72,11 @@ CREATE TABLE "DefaultSchedule" (
   hostId INTEGER REFERENCES "HostMeta"
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
-  day day_of_week NOT NULL,
+  firstDate DATE NOT NULL,
+  repeatPeriod INTERVAL NOT NULL DEFAULT interval '7 day',
   start TIME NOT NULL,
   "end" TIME NOT NULL CHECK ("end" > start),
-  appointmentDuration BIGINT NOT NULL DEFAULT 1800000, -- 30 minutes
+  appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL
   -- todo intersection constraint?
 );
@@ -89,7 +90,7 @@ CREATE TABLE "CustomSchedule" (
   date DATE NOT NULL,
   start time NOT NULL,
   "end" time NOT NULL CHECK ("end" > start),
-  appointmentDuration BIGINT NOT NULL DEFAULT 1800000, -- 30 minutes
+  appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL
   -- todo intersection constraint?
 );
