@@ -60,7 +60,6 @@ object Schedule {
   }
 }
 
-
 //todo single query schedule
 //todo default schedule interval
 

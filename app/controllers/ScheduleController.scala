@@ -3,6 +3,7 @@ package controllers
 import akka.actor.ActorSystem
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
+import controllers.formats.ScheduleData
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
@@ -61,12 +62,15 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
 
   def getSchedules(hostId: UserId): Action[AnyContent] = Action {
 
-    val intervalOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
+    val periodOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
 
-    intervalOpt.map { interval =>
+    periodOpt.map { period =>
       val from = new LocalDate()
-      val to = from.plus(interval.toStandardDays)
-      Ok(Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync().toJson)
+      val to = from.plus(period.toStandardDays)
+      Ok(ScheduleData(
+        period,
+        Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync()
+      ).toJson)
     }
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }

@@ -55,7 +55,7 @@ object HttpFormats {
 
   implicit val customScheduleWrite: Writes[CustomSchedule] = Json.writes[CustomSchedule]
 
-  implicit val scheduleDatesWrite: Writes[ScheduleDatesData] = Json.writes[ScheduleDatesData]
+  implicit val scheduleDatesWrite: Writes[ScheduleData] = Json.writes[ScheduleData]
 
   implicit val hostDataWrite: Writes[HostData] = Json.writes[HostData]
 
