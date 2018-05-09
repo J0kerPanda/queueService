@@ -28,12 +28,6 @@ object Schedule {
       .to[List]
   }
 
-  def selectDefaultByDay(day: DayOfWeek): ConnectionIO[List[DefaultSchedule]] = {
-    (selectDefaultSql ++ fr"WHERE day = $day")
-      .query[DefaultSchedule]
-      .to[List]
-  }
-
   def insertCustom(s: CustomScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "CustomSchedule" (hostid, date, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
       .update
@@ -62,13 +56,6 @@ object Schedule {
     for {
       d <- selectAllDefault(hostId)
       c <- selectCustomInPeriod(hostId, from, to)
-    } yield (d.map(_.data), c.map(_.data))
-  }
-
-  def selectSchedulesOnDate(date: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
-    for {
-      d <- selectDefaultByDay(DayOfWeek.fromDate(date))
-      c <- selectCustomByDate(date)
     } yield (d.map(_.data), c.map(_.data))
   }
 }

@@ -47,10 +47,6 @@ object HttpFormats {
 
   implicit val errorListResponseWrite: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
 
-  implicit object dayOfWeekStatusWrite extends Writes[DayOfWeek] {
-    override def writes(day: DayOfWeek): JsValue = JsString(day.dbName)
-  }
-
   implicit val defaultScheduleDataWrite: Writes[DefaultScheduleData] = Json.writes[DefaultScheduleData]
 
   implicit val defaultScheduleWrite: Writes[DefaultSchedule] = Json.writes[DefaultSchedule]
@@ -114,15 +110,6 @@ object HttpFormats {
     override def reads(json: JsValue): JsResult[AppointmentStatus] = json match {
       case JsString(value) if AppointmentStatus.lowerCaseNamesToValuesMap.contains(value.toLowerCase) =>
         JsSuccess(AppointmentStatus.lowerCaseNamesToValuesMap(value.toLowerCase))
-
-      case _ => JsError()
-    }
-  }
-
-  implicit object dayOfWeekRead extends Reads[DayOfWeek] {
-    override def reads(json: JsValue): JsResult[DayOfWeek] = json match {
-      case JsString(value) if DayOfWeek.lowerCaseNamesToValuesMap.contains(value.toLowerCase) =>
-        JsSuccess(DayOfWeek.lowerCaseNamesToValuesMap(value.toLowerCase))
 
       case _ => JsError()
     }
