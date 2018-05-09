@@ -32,4 +32,4 @@ GET     /api/appointment            controllers.AppointmentController.byHostDate
 # Schedule
 POST    /api/schedule/createDefault controllers.ScheduleController.createDefault
 POST    /api/schedule/createCustom  controllers.ScheduleController.createCustom
-GET     /api/schedule/dates/period  controllers.ScheduleController.getDates(hostId: Int)
+GET     /api/schedule/host/:hostId  controllers.ScheduleController.getSchedules(hostId: Int)

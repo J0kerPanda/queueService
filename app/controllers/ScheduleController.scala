@@ -3,7 +3,6 @@ package controllers
 import akka.actor.ActorSystem
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.ScheduleDatesData
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
@@ -60,39 +59,16 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     }
   }
 
-  def getDates(hostId: UserId): Action[AnyContent] = Action {
+  def getSchedules(hostId: UserId): Action[AnyContent] = Action {
 
     val intervalOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
 
     intervalOpt.map { interval =>
       val from = new LocalDate()
       val to = from.plus(interval.toStandardDays)
-      val (default, custom) = Schedule.selectSchedules(hostId, from, to)
-        .transact(cu.transactor)
-        .unsafeRunSync()
-
-//      val defaultDays = default.map(_.day.number).toSet
-//      val customDates = custom.map(_.date).toSet
-//      val defaultDates = getDefaultDates(customDates, defaultDays, from, to)
-
-      Ok("")
+      Ok(Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync().toJson)
     }
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
-  }
-
-  private def getDefaultDates(customDates: Set[LocalDate],
-                              defaultDayNumbers: Set[Int],
-                              current: LocalDate,
-                              end: LocalDate,
-                              acc: List[LocalDate] = Nil): List[LocalDate] = {
-
-    if (current.isBefore(end)) {
-      val defaultDatePossible = !customDates.contains(current) && defaultDayNumbers.contains(current.getDayOfWeek)
-      val newAcc = if (defaultDatePossible) current :: acc else acc
-      getDefaultDates(customDates, defaultDayNumbers, current.plusDays(1), end, newAcc)
-    } else {
-      acc
-    }
   }
 
   //todo add default, remove default -> composition

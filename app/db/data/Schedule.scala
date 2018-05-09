@@ -14,6 +14,7 @@ object Schedule {
 
   private val selectDefaultSql = sql"""SELECT id, hostid, firstdate, repeatperiod, start, "end", appointmentduration, place FROM "DefaultSchedule""""
 
+  //change select schedules
   private val selectCustomSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule""""
 
   def insertDefault(s: DefaultScheduleData): ConnectionIO[Option[ScheduleId]] = {
@@ -52,11 +53,10 @@ object Schedule {
       .to[List]
   }
 
-  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[(List[DefaultScheduleData], List[CustomScheduleData])] = {
-    for {
-      d <- selectAllDefault(hostId)
-      c <- selectCustomInPeriod(hostId, from, to)
-    } yield (d.map(_.data), c.map(_.data))
+  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[CustomScheduleData]] = {
+    sql"""SELECT GEN.c_hostid, GEN.c_date, GEN.c_start, GEN.c_end, GEN.c_appointmentduration, GEN.c_place FROM get_schedule($hostId, $from, $to) AS GEN"""
+      .query[CustomScheduleData]
+      .to[List]
   }
 }
 

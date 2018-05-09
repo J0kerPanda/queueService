@@ -28,7 +28,7 @@ object DatabaseFormats {
   )
 
   implicit val PeriodMeta: Meta[Period] = Meta.other[PGInterval]("interval").xmap(
-    pgInterval => Period.parse(pgInterval.toString).normalizedStandard(),
+    pgI => new Period(pgI.getYears, pgI.getMonths, 0, pgI.getDays, pgI.getHours, pgI.getMinutes, pgI.getSeconds.toInt, 0),
     period => {
       val p = period.normalizedStandard()
       new PGInterval(p.getYears, p.getMonths, p.getDays + p.getWeeks * 7, p.getHours, p.getMinutes, p.getSeconds)

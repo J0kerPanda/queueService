@@ -167,11 +167,11 @@ CREATE OR REPLACE FUNCTION get_schedule(p_hostid INTEGER, p_from DATE, p_to Date
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule"
-  WHERE date >= p_from AND date < p_to AND hostid = p_hostid
-  UNION
-  SELECT g_hostId, g_date, g_start, g_end, g_appointmentDuration, g_place FROM generate_schedule(p_hostid, p_from, p_to) as GEN
-  WHERE GEN.g_date NOT IN (SELECT date FROM "CustomSchedule" WHERE date >= p_from and Date < p_to);
+    SELECT hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule"
+    WHERE date >= p_from AND date < p_to AND hostid = p_hostid
+    UNION
+    SELECT g_hostId, g_date, g_start, g_end, g_appointmentDuration, g_place FROM generate_schedule(p_hostid, p_from, p_to) as GEN
+    WHERE GEN.g_date NOT IN (SELECT date FROM "CustomSchedule" WHERE date >= p_from and Date < p_to);
 END;
 $$ LANGUAGE 'plpgsql';
 
