@@ -24,7 +24,7 @@ object HttpFormats {
   }
 
   implicit object periodWrite extends Writes[Period] {
-    override def writes(p: Period): JsValue = JsNumber(p.toStandardDuration.getMillis)
+    override def writes(p: Period): JsValue = JsString(p.toString())
   }
 
   implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
