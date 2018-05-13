@@ -122,59 +122,6 @@ CREATE TRIGGER appointment_user_check BEFORE INSERT OR UPDATE ON "Appointment"
 
 -- functions
 
-CREATE OR REPLACE FUNCTION generate_schedule(p_hostId INTEGER, p_from DATE, p_to Date)
-  RETURNS TABLE (
-    g_hostId INTEGER,
-    g_date DATE,
-    g_start time,
-    g_end time,
-    g_appointmentDuration INTERVAL,
-    g_place VARCHAR(255)
-  )
-AS $$
-DECLARE
-  ds "DefaultSchedule";
-  currentDate DATE;
-BEGIN
-  FOR ds IN SELECT * FROM "DefaultSchedule" WHERE firstdate <= p_from AND hostId = p_hostId LOOP
-    currentDate := ds.firstdate;
-
-    WHILE currentDate < p_to LOOP
-      IF currentDate >= p_from THEN
-        g_hostId := ds.hostid;
-        g_date := currentDate;
-        g_start = ds.start;
-        g_end = ds.end;
-        g_appointmentDuration = ds.appointmentduration;
-        g_place = ds.place;
-        RETURN NEXT;
-      END IF;
-      currentDate := currentDate + ds.repeatperiod;
-    END LOOP;
-  END LOOP;
-END
-$$ LANGUAGE 'plpgsql';
-
-CREATE OR REPLACE FUNCTION get_schedule(p_hostid INTEGER, p_from DATE, p_to Date)
-  RETURNS TABLE (
-    c_hostId INTEGER,
-    c_date DATE,
-    c_start time,
-    c_end time,
-    c_appointmentDuration INTERVAL,
-    c_place VARCHAR(255)
-  )
-AS $$
-BEGIN
-  RETURN QUERY
-    SELECT hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule"
-      WHERE date >= p_from AND date < p_to AND hostid = p_hostid
-    UNION
-    SELECT g_hostId, g_date, g_start, g_end, g_appointmentDuration, g_place FROM generate_schedule(p_hostid, p_from, p_to) as GEN
-      WHERE GEN.g_date NOT IN (SELECT date FROM "CustomSchedule" WHERE date >= p_from AND date < p_to AND hostId = p_hostid);
-END;
-$$ LANGUAGE 'plpgsql';
-
 CREATE OR REPLACE FUNCTION generate_appointments(p_from time, p_to time, p_interval interval)
   RETURNS TABLE (
     g_hostFullName VARCHAR(255),
@@ -229,6 +176,29 @@ BEGIN
       END LOOP;
     END LOOP;
   END IF;
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION get_appointments(p_hostId INT, p_date DATE, p_scheduleIds INT[], p_isCustom BOOLEAN)
+  RETURNS TABLE (
+    g_hostFullName VARCHAR(255),
+    g_visitorFullName VARCHAR(255),
+    g_date DATE,
+    g_start time,
+    g_end time,
+    g_status appointment_status
+  )
+AS $$
+BEGIN
+  RETURN QUERY
+  SELECT H.surname, V.surname, A.date, a.start, a.end, A.status FROM "Appointment" AS A
+    JOIN "User" AS V ON V.id = A.visitorid
+    JOIN "User" AS H ON H.id = A.hostid
+  WHERE hostid = p_hostId AND date = p_date
+  UNION
+  SELECT G.g_hostFullName, G.g_visitorFullName, G.g_date, G.g_start, G.g_end, G.g_status FROM generate_appointments(p_scheduleIds, p_isCustom) AS G
+  WHERE G.g_start NOT IN (SELECT start FROM "Appointment" WHERE date = p_date);
+
 END
 $$ LANGUAGE 'plpgsql';
 
