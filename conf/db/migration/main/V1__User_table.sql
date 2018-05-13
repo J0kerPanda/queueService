@@ -178,12 +178,8 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION generate_appointments(p_from time, p_to time, p_interval interval)
   RETURNS TABLE (
-    g_hostFullName VARCHAR(255),
-    g_visitorFullName VARCHAR(255),
-    g_date DATE,
     g_start time,
-    g_end time,
-    g_status appointment_status
+    g_end time
   )
 AS $$
 DECLARE
@@ -192,11 +188,8 @@ BEGIN
   curr_time := p_from;
 
   WHILE curr_time < p_to LOOP
-    g_hostFullName := NULL;
-    g_visitorFullName := NULL;
     g_start = curr_time;
     g_end = curr_time + p_interval;
-    g_status = NULL;
     RETURN NEXT;
     curr_time := curr_time + p_interval;
   END LOOP;
@@ -205,12 +198,8 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION generate_appointments(p_scheduleIds INT[], p_isCustom BOOLEAN)
   RETURNS TABLE (
-    g_hostFullName VARCHAR(255),
-    g_visitorFullName VARCHAR(255),
-    g_date DATE,
     g_start time,
-    g_end time,
-    g_status appointment_status
+    g_end time
   )
 AS $$
 DECLARE
@@ -219,13 +208,13 @@ DECLARE
 BEGIN
   IF p_isCustom THEN
     FOR cs IN SELECT * FROM "CustomSchedule" AS C WHERE C.id = ANY(p_scheduleIds) LOOP
-      FOR g_hostFullName, g_visitorFullName, g_date, g_start, g_end, g_status IN SELECT * FROM generate_appointments(cs.start, cs.end, cs.appointmentduration) LOOP
+      FOR g_start, g_end IN SELECT * FROM generate_appointments(cs.start, cs.end, cs.appointmentduration) LOOP
         RETURN NEXT;
       END LOOP;
     END LOOP;
   ELSE
     FOR ds IN SELECT * FROM "DefaultSchedule" AS D WHERE D.id = ANY(p_scheduleIds) LOOP
-      FOR g_hostFullName, g_visitorFullName, g_date, g_start, g_end, g_status IN SELECT * FROM generate_appointments(ds.start, ds.end, ds.appointmentduration) LOOP
+      FOR g_start, g_end IN SELECT * FROM generate_appointments(ds.start, ds.end, ds.appointmentduration) LOOP
         RETURN NEXT;
       END LOOP;
     END LOOP;
@@ -235,9 +224,8 @@ $$ LANGUAGE 'plpgsql';
 
 CREATE OR REPLACE FUNCTION get_appointments(p_hostId INT, p_date DATE, p_scheduleIds INT[], p_isCustom BOOLEAN)
   RETURNS TABLE (
-    g_hostFullName VARCHAR(255),
+    g_visitorId INTEGER,
     g_visitorFullName VARCHAR(255),
-    g_date DATE,
     g_start time,
     g_end time,
     g_status appointment_status
@@ -245,12 +233,11 @@ CREATE OR REPLACE FUNCTION get_appointments(p_hostId INT, p_date DATE, p_schedul
 AS $$
 BEGIN
   RETURN QUERY
-  SELECT H.surname, V.surname, A.date, a.start, a.end, A.status FROM "Appointment" AS A
+  SELECT V.id, format('%s %s %s', V.surname, V.firstname, V.patronymic)::VARCHAR(255), a.start, a.end, A.status FROM "Appointment" AS A
     JOIN "User" AS V ON V.id = A.visitorid
-    JOIN "User" AS H ON H.id = A.hostid
   WHERE hostid = p_hostId AND date = p_date
   UNION
-  SELECT G.g_hostFullName, G.g_visitorFullName, G.g_date, G.g_start, G.g_end, G.g_status FROM generate_appointments(p_scheduleIds, p_isCustom) AS G
+  SELECT NULL, NULL, G.g_start, G.g_end, NULL FROM generate_appointments(p_scheduleIds, p_isCustom) AS G
   WHERE G.g_start NOT IN (SELECT start FROM "Appointment" WHERE date = p_date);
 
 END

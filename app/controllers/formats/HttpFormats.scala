@@ -47,14 +47,6 @@ object HttpFormats {
 
   implicit val errorListResponseWrite: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
 
-  implicit val defaultScheduleDataWrite: Writes[DefaultScheduleData] = Json.writes[DefaultScheduleData]
-
-  implicit val defaultScheduleWrite: Writes[DefaultSchedule] = Json.writes[DefaultSchedule]
-
-  implicit val customScheduleDataWrite: Writes[CustomScheduleData] = Json.writes[CustomScheduleData]
-
-  implicit val customScheduleWrite: Writes[CustomSchedule] = Json.writes[CustomSchedule]
-
   implicit val genericScheduleWrite: Writes[GenericSchedule] = Json.writes[GenericSchedule]
 
   implicit val scheduleDatesWrite: Writes[ScheduleData] = Json.writes[ScheduleData]
