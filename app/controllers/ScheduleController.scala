@@ -24,7 +24,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
   private implicit val ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
   //todo unique constraint errors
-  def createDefault = Action { implicit request =>
+  def createDefault = Action { implicit r =>
     extractJsObject[DefaultScheduleData] { sd =>
 
       Schedule
@@ -42,7 +42,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
     }
   }
 
-  def createCustom = Action { implicit request =>
+  def createCustom = Action { implicit r =>
     extractJsObject[CustomScheduleData] { sd =>
 
       Schedule
@@ -62,17 +62,16 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
 
   def getSchedules(hostId: UserId): Action[AnyContent] = Action {
 
-    val periodOpt = HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
-
-    periodOpt.map { period =>
-      val from = new LocalDate()
-      val to = from.plus(period.toStandardDays)
-      Ok(ScheduleData(
-        hostId,
-        period,
-        Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync()
-      ).toJson)
-    }
+    HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
+      .map { period =>
+        val from = new LocalDate()
+        val to = from.plus(period.toStandardDays)
+        Ok(ScheduleData(
+          hostId,
+          period,
+          Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync()
+        ).toJson)
+      }
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }
 
