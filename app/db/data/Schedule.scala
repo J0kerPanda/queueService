@@ -53,9 +53,9 @@ object Schedule {
       .to[List]
   }
 
-  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[CustomScheduleData]] = {
-    sql"""SELECT GEN.c_hostid, GEN.c_date, GEN.c_start, GEN.c_end, GEN.c_appointmentduration, GEN.c_place FROM get_schedule($hostId, $from, $to) AS GEN"""
-      .query[CustomScheduleData]
+  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[GenericSchedule]] = {
+    sql"""SELECT GEN.c_id, GEN.c_hostid, GEN.c_date, GEN.c_start, GEN.c_end, GEN.c_appointmentduration, GEN.c_place, GEN.c_iscustom FROM get_schedule($hostId, $from, $to) AS GEN"""
+      .query[GenericSchedule]
       .to[List]
   }
 }
@@ -95,3 +95,11 @@ case class CustomScheduleData(hostId: UserId,
                               place: String)
 
 case class CustomSchedule(id: ScheduleId, data: CustomScheduleData) extends IdEntity[ScheduleId, CustomScheduleData]
+
+case class GenericSchedule(rootId: ScheduleId,
+                           date: LocalDate,
+                           start: LocalTime,
+                           end: LocalTime,
+                           appointmentDuration: Period,
+                           place: String,
+                           isCustom: Boolean)

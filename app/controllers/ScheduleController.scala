@@ -68,6 +68,7 @@ class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents
       val from = new LocalDate()
       val to = from.plus(period.toStandardDays)
       Ok(ScheduleData(
+        hostId,
         period,
         Schedule.selectSchedules(hostId, from, to).transact(cu.transactor).unsafeRunSync()
       ).toJson)
