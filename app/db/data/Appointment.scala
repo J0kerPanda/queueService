@@ -32,6 +32,8 @@ object Appointment {
       .to[List]
   }
 
+  //todo generate list of appointments? -> hostid/ visitorid?
+
   def selectByDate(hostId: UserId, date: LocalDate): ConnectionIO[List[Appointment]] = {
     sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment" WHERE hostid = $hostId AND date = $date"""
       .query[Appointment]

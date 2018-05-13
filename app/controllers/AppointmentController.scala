@@ -4,7 +4,7 @@ import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import db.ConnectionUtils
 import db.data.User.UserId
-import db.data.{Appointment, AppointmentData}
+import db.data.{Appointment, AppointmentData, User}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.{DateTime, LocalDate}
@@ -38,8 +38,7 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
     Ok(Appointment.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
   }
 
-  def byHostDate(hostId: UserId, date: LocalDate) = Action {
+  def byDate(hostId: UserId, date: LocalDate) = Action {
     Ok(Appointment.selectByDate(hostId, date).transact(cu.transactor).unsafeRunSync().toJson)
   }
-
 }

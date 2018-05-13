@@ -168,10 +168,67 @@ AS $$
 BEGIN
   RETURN QUERY
     SELECT hostid, date, start, "end", appointmentduration, place FROM "CustomSchedule"
-    WHERE date >= p_from AND date < p_to AND hostid = p_hostid
+      WHERE date >= p_from AND date < p_to AND hostid = p_hostid
     UNION
     SELECT g_hostId, g_date, g_start, g_end, g_appointmentDuration, g_place FROM generate_schedule(p_hostid, p_from, p_to) as GEN
-    WHERE GEN.g_date NOT IN (SELECT date FROM "CustomSchedule" WHERE date >= p_from AND date < p_to AND hostId = p_hostid);
+      WHERE GEN.g_date NOT IN (SELECT date FROM "CustomSchedule" WHERE date >= p_from AND date < p_to AND hostId = p_hostid);
 END;
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION generate_appointments(p_from time, p_to time, p_interval interval)
+  RETURNS TABLE (
+    g_hostFullName VARCHAR(255),
+    g_visitorFullName VARCHAR(255),
+    g_date DATE,
+    g_start time,
+    g_end time,
+    g_status appointment_status
+  )
+AS $$
+DECLARE
+  curr_time time;
+BEGIN
+  curr_time := p_from;
+
+  WHILE curr_time < p_to LOOP
+    g_hostFullName := NULL;
+    g_visitorFullName := NULL;
+    g_start = curr_time;
+    g_end = curr_time + p_interval;
+    g_status = NULL;
+    RETURN NEXT;
+    curr_time := curr_time + p_interval;
+  END LOOP;
+END
+$$ LANGUAGE 'plpgsql';
+
+CREATE OR REPLACE FUNCTION generate_appointments(p_scheduleIds INT[], p_isCustom BOOLEAN)
+  RETURNS TABLE (
+    g_hostFullName VARCHAR(255),
+    g_visitorFullName VARCHAR(255),
+    g_date DATE,
+    g_start time,
+    g_end time,
+    g_status appointment_status
+  )
+AS $$
+DECLARE
+  cs "CustomSchedule";
+  ds "DefaultSchedule";
+BEGIN
+  IF p_isCustom THEN
+    FOR cs IN SELECT * FROM "CustomSchedule" AS C WHERE C.id = ANY(p_scheduleIds) LOOP
+      FOR g_hostFullName, g_visitorFullName, g_date, g_start, g_end, g_status IN SELECT * FROM generate_appointments(cs.start, cs.end, cs.appointmentduration) LOOP
+        RETURN NEXT;
+      END LOOP;
+    END LOOP;
+  ELSE
+    FOR ds IN SELECT * FROM "DefaultSchedule" AS D WHERE D.id = ANY(p_scheduleIds) LOOP
+      FOR g_hostFullName, g_visitorFullName, g_date, g_start, g_end, g_status IN SELECT * FROM generate_appointments(ds.start, ds.end, ds.appointmentduration) LOOP
+        RETURN NEXT;
+      END LOOP;
+    END LOOP;
+  END IF;
+END
 $$ LANGUAGE 'plpgsql';
 
