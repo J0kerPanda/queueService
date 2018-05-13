@@ -1,5 +1,4 @@
-package controllers.formats
-
+package controllers.formats.response
 
 import db.data.GenericSchedule
 import db.data.User.UserId

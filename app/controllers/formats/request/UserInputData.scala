@@ -1,4 +1,4 @@
-package controllers.formats
+package controllers.formats.request
 
 import db.data.Category.CategoryId
 

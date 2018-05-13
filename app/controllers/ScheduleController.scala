@@ -3,7 +3,7 @@ package controllers
 import akka.actor.ActorSystem
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.ScheduleData
+import controllers.formats.response.ScheduleData
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils

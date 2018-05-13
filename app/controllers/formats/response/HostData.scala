@@ -1,4 +1,4 @@
-package controllers.formats
+package controllers.formats.response
 
 import db.data.User.UserId
 

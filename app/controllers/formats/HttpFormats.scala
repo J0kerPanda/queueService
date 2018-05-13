@@ -1,6 +1,8 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
+import controllers.formats.request.{LoginData, UserInputData}
+import controllers.formats.response.{HostData, ScheduleData}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
 import play.api.libs.json._

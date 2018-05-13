@@ -2,7 +2,8 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.{HostData, LoginData, UserInputData}
+import controllers.formats.response.HostData
+import controllers.formats.request.{LoginData, UserInputData}
 import controllers.util.ControllerUtils._
 import db.ConnectionUtils
 import db.data.User.UserId
