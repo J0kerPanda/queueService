@@ -1,7 +1,7 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
-import controllers.formats.request.{LoginData, UserInputData}
+import controllers.formats.request.{AppointmentsRequest, LoginData, UserInputData}
 import controllers.formats.response.{HostData, ScheduleData}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -54,6 +54,8 @@ object HttpFormats {
   implicit val scheduleDatesWrite: Writes[ScheduleData] = Json.writes[ScheduleData]
 
   implicit val hostDataWrite: Writes[HostData] = Json.writes[HostData]
+
+  implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
 
   implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
@@ -115,7 +117,9 @@ object HttpFormats {
 
   implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]
 
-  implicit val defaultScheduleData: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
+  implicit val defaultScheduleDataRead: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
 
-  implicit val customScheduleData: Reads[CustomScheduleData] = Json.reads[CustomScheduleData]
+  implicit val customScheduleDataRead: Reads[CustomScheduleData] = Json.reads[CustomScheduleData]
+
+  implicit val appointmentsRequest: Reads[AppointmentsRequest] = Json.reads[AppointmentsRequest]
 }

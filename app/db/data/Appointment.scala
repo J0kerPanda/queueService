@@ -37,8 +37,8 @@ object Appointment {
   def selectByDate(hostId: UserId,
                    date: LocalDate,
                    scheduleIds: List[ScheduleId],
-                   customSchedule: Boolean): ConnectionIO[List[GenericAppointment]] = {
-    sql"""SELECT G.g_visitorid, G.g_visitorfullname, G.g_start, G.g_end, G.g_status FROM get_appointments($hostId, $date, $scheduleIds, $customSchedule) AS G"""
+                   isCustom: Boolean): ConnectionIO[List[GenericAppointment]] = {
+    sql"""SELECT G.g_visitorid, G.g_visitorfullname, G.g_start, G.g_end, G.g_status FROM get_appointments($hostId, $date, $scheduleIds, $isCustom) AS G"""
       .query[GenericAppointment]
       .to[List]
   }

@@ -11,8 +11,8 @@ object ControllerUtils {
 
   def getExecutionContext(system: ActorSystem): ExecutionContext = system.dispatchers.lookup("api-dispatcher")
 
-  def extractJsObject[T](request: Request[AnyContent])(extractor: T => Result)(implicit r: Reads[T]): Result =
-    request.body.asJson match {
+  def extractJsObject[T](extractor: T => Result)(implicit req: Request[AnyContent], r: Reads[T]): Result =
+    req.body.asJson match {
 
       case Some(obj: JsObject) => extractor(obj.as[T])
 

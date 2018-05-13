@@ -27,9 +27,9 @@ GET     /api/category/:id           controllers.CategoryController.get(id: Int)
 # Appointment
 POST    /api/appointment/create     controllers.AppointmentController.create(hostId: Int, visitorId: Int)
 GET     /api/appointment/:id        controllers.AppointmentController.get(id: Long)
-#POST    /api/appointment/byDate     controllers.AppointmentController.byDate(hostId: Int, date: org.joda.time.LocalDate)
+POST    /api/appointment/list       controllers.AppointmentController.byDate
 
 # Schedule
-POST    /api/schedule/createDefault controllers.ScheduleController.createDefault
-POST    /api/schedule/createCustom  controllers.ScheduleController.createCustom
-GET     /api/schedule/host/:hostId  controllers.ScheduleController.getSchedules(hostId: Int)
+POST    /api/schedule/default/create    controllers.ScheduleController.createDefault
+POST    /api/schedule/custom/create     controllers.ScheduleController.createCustom
+GET     /api/schedule/host/:hostId      controllers.ScheduleController.getSchedules(hostId: Int)

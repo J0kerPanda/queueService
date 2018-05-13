@@ -18,8 +18,8 @@ import play.api.mvc.{AbstractController, ControllerComponents}
 class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   //todo unique constraint errors
-  def login = Action { request =>
-    extractJsObject[LoginData](request) { ld =>
+  def login = Action { implicit request =>
+    extractJsObject[LoginData] { ld =>
 
       User.login(ld.email, ld.password)
         .transact(cu.transactor)
@@ -32,8 +32,8 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
     }
   }
 
-  def register = Action { request =>
-    extractJsObject[UserInputData](request) { inputData =>
+  def register = Action { implicit request =>
+    extractJsObject[UserInputData] { inputData =>
 
       val user = UserData(
         firstName = inputData.firstName,

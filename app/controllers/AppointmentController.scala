@@ -2,6 +2,7 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
+import controllers.formats.request.AppointmentsRequest
 import db.ConnectionUtils
 import db.data.User.UserId
 import db.data.{Appointment, AppointmentData}
@@ -9,6 +10,7 @@ import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.DateTime
 import play.api.mvc.{AbstractController, ControllerComponents}
+import controllers.util.ControllerUtils.extractJsObject
 
 @Singleton
 class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUtils) extends AbstractController(cc) {
@@ -38,7 +40,15 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
     Ok(Appointment.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
   }
 
-//  def byDate(hostId: UserId, date: LocalDate) = Action {
-//    Ok(Appointment.selectByDate(hostId, date).transact(cu.transactor).unsafeRunSync().toJson)
-//  }
+  def byDate = Action { implicit request =>
+    extractJsObject[AppointmentsRequest] { req =>
+
+      Ok(
+        Appointment.selectByDate(req.hostId, req.date, req.scheduleIds, req.isCustom)
+          .transact(cu.transactor)
+          .unsafeRunSync()
+          .toJson
+      )
+    }
+  }
 }
