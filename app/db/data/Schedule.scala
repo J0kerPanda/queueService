@@ -54,7 +54,7 @@ object Schedule {
   }
 
   def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[GenericSchedule]] = {
-    sql"""SELECT GEN.c_id, GEN.c_hostid, GEN.c_date, GEN.c_start, GEN.c_end, GEN.c_appointmentduration, GEN.c_place, GEN.c_iscustom FROM get_schedule($hostId, $from, $to) AS GEN"""
+    sql"""SELECT GEN.c_id, GEN.c_date, GEN.c_start, GEN.c_end, GEN.c_appointmentduration, GEN.c_place, GEN.c_iscustom FROM get_schedule($hostId, $from, $to) AS GEN"""
       .query[GenericSchedule]
       .to[List]
   }
