@@ -43,8 +43,10 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
   def byDate = Action { implicit request =>
     extractJsObject[AppointmentsRequest] { req =>
 
+      println(req)
+
       Ok(
-        Appointment.selectByDate(req.hostId, req.date, req.scheduleIds, req.isCustom)
+        Appointment.selectGeneric(req.hostId, req.date, req.scheduleIds, req.isCustom)
           .transact(cu.transactor)
           .unsafeRunSync()
           .toJson

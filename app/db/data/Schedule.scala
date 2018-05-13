@@ -10,7 +10,7 @@ import org.joda.time.{LocalDate, LocalTime, Period}
 
 object Schedule {
 
-  type ScheduleId = Long
+  type ScheduleId = Int
 
   private val selectDefaultSql = sql"""SELECT id, hostid, firstdate, repeatperiod, start, "end", appointmentduration, place FROM "DefaultSchedule""""
 
