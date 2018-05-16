@@ -115,6 +115,8 @@ object HttpFormats {
 
   implicit val createAppointmentRequestRead: Reads[CreateAppointmentRequest] = Json.reads[CreateAppointmentRequest]
 
+  implicit val appointmentDataRead: Reads[AppointmentData] = Json.reads[AppointmentData]
+
   implicit val loginDataRead: Reads[LoginData] = Json.reads[LoginData]
 
   implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]

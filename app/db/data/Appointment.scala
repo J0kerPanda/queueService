@@ -19,6 +19,7 @@ object Appointment {
 
   private val selectAppointmentSql = sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment""""
 
+  //todo check date/start/end
   def createBySchedule(hostId: UserId,
                        visitorId: UserId,
                        scheduleId: ScheduleId,
