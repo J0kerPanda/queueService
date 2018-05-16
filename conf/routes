@@ -25,7 +25,7 @@ POST    /api/category/create        controllers.CategoryController.create(name: 
 GET     /api/category/:id           controllers.CategoryController.get(id: Int)
 
 # Appointment
-POST    /api/appointment/create     controllers.AppointmentController.create(hostId: Int, visitorId: Int)
+POST    /api/appointment/create     controllers.AppointmentController.create
 GET     /api/appointment/:id        controllers.AppointmentController.get(id: Long)
 POST    /api/appointment/list       controllers.AppointmentController.byDate
 
