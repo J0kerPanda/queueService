@@ -55,7 +55,7 @@ CREATE TABLE "HostMeta" (
   appointmentPeriod INTERVAL NOT NULL DEFAULT '31 day'
 );
 
----- Default schedule
+  ---- Default schedule
 
 CREATE TABLE "DefaultSchedule" (
   id SERIAL PRIMARY KEY,
@@ -98,7 +98,7 @@ CREATE TABLE "Appointment" (
     ON DELETE RESTRICT,
   date DATE NOT NULL,
   start TIME NOT NULL,
-  "end" TIME NOT NULL,
+  "end" TIME NOT NULL CHECK ("end" > start),
   status appointment_status NOT NULL DEFAULT 'pending'
   -- todo intersection constraint?
 );

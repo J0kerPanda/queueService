@@ -1,7 +1,7 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
-import controllers.formats.request.{AppointmentsRequest, LoginData, UserInputData}
+import controllers.formats.request.{AppointmentsRequest, CreateAppointmentRequest, LoginData, UserInputData}
 import controllers.formats.response.{HostData, ScheduleData}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -56,6 +56,8 @@ object HttpFormats {
   implicit val hostDataWrite: Writes[HostData] = Json.writes[HostData]
 
   implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
+
+  implicit val createAppointmentRequestWrite: Writes[CreateAppointmentRequest] = Json.writes[CreateAppointmentRequest]
 
   implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
