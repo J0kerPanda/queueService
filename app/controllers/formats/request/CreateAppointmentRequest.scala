@@ -7,5 +7,6 @@ import org.joda.time.{LocalDate, LocalTime}
 case class CreateAppointmentRequest(hostId: UserId,
                                     visitorId: UserId,
                                     scheduleId: ScheduleId,
+                                    isCustom: Boolean,
                                     date: LocalDate,
-                                    time: LocalTime)
+                                    start: LocalTime)

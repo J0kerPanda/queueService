@@ -41,7 +41,6 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         patronymic = inputData.patronymic,
         password = inputData.password,
         email = inputData.email,
-        googleId = inputData.googleId,
         categoryId = inputData.categoryId
       )
 

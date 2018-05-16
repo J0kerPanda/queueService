@@ -23,6 +23,12 @@ object Schedule {
       .withUniqueGeneratedKeys("id")
   }
 
+  def selectDefaultById(id: ScheduleId): ConnectionIO[Option[DefaultSchedule]] = {
+    (selectDefaultSql ++ fr"WHERE id = $id")
+      .query[DefaultSchedule]
+      .option
+  }
+
   def selectAllDefault(hostId: UserId): ConnectionIO[List[DefaultSchedule]] = {
     (selectDefaultSql ++ fr"WHERE hostid = $hostId")
       .query[DefaultSchedule]
@@ -63,13 +69,20 @@ object Schedule {
 //todo single query schedule
 //todo default schedule interval
 
+trait GeneralScheduleData {
+  def start: LocalTime
+  def end: LocalTime
+  def appointmentDuration: Period
+  def place: String
+}
+
 case class DefaultScheduleData(hostId: UserId,
                                firstDate: LocalDate,
                                repeatPeriod: Period,
                                start: LocalTime,
                                end: LocalTime,
                                appointmentDuration: Period,
-                               place: String)
+                               place: String) extends GeneralScheduleData
 
 case class DefaultSchedule(id: ScheduleId, data: DefaultScheduleData) extends IdEntity[ScheduleId, DefaultScheduleData]
 
@@ -92,7 +105,7 @@ case class CustomScheduleData(hostId: UserId,
                               start: LocalTime,
                               end: LocalTime,
                               appointmentDuration: Period,
-                              place: String)
+                              place: String) extends GeneralScheduleData
 
 case class CustomSchedule(id: ScheduleId, data: CustomScheduleData) extends IdEntity[ScheduleId, CustomScheduleData]
 
@@ -102,4 +115,4 @@ case class GenericSchedule(rootId: ScheduleId,
                            end: LocalTime,
                            appointmentDuration: Period,
                            place: String,
-                           isCustom: Boolean)
+                           isCustom: Boolean) extends GeneralScheduleData

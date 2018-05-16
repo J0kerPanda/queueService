@@ -7,5 +7,4 @@ case class UserInputData(firstName: String,
                          patronymic: String,
                          email: String,
                          password: String,
-                         googleId: String,
                          categoryId: CategoryId)

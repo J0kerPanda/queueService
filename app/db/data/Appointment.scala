@@ -1,8 +1,8 @@
 package db.data
 
 import cats.data.NonEmptyList
+import cats.free.Free
 import db.DatabaseFormats._
-import doobie.postgres.implicits._
 import db.data.Appointment.AppointmentId
 import db.data.AppointmentStatus.Pending
 import db.data.Schedule.ScheduleId
@@ -10,11 +10,40 @@ import db.data.User.UserId
 import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
+import doobie.postgres.implicits._
 import org.joda.time.{LocalDate, LocalTime}
 
 object Appointment {
 
   type AppointmentId = Long
+
+  private val selectAppointmentSql = sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment""""
+
+  def createBySchedule(hostId: UserId,
+                       visitorId: UserId,
+                       scheduleId: ScheduleId,
+                       isCustom: Boolean,
+                       date: LocalDate,
+                       start: LocalTime): ConnectionIO[Option[AppointmentId]] = {
+
+    val selectSchedule: ConnectionIO[Option[GeneralScheduleData]] = if (isCustom) {
+      Schedule.selectCustomById(scheduleId).map(_.map(_.data))
+    } else {
+      Schedule.selectDefaultById(scheduleId).map(_.map(_.data))
+    }
+
+    selectSchedule.flatMap {
+      case Some(d) => Appointment.insert(AppointmentData(
+        hostId,
+        visitorId,
+        date,
+        start,
+        start.plus(d.appointmentDuration)
+      )).map(Some(_))
+
+      case None => Free.pure(None)
+    }
+  }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
     sql"""INSERT INTO "Appointment" (hostid, visitorId, date, start, "end", status) VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end}, ${a.status})"""
@@ -23,13 +52,13 @@ object Appointment {
   }
 
   def selectById(id: AppointmentId): ConnectionIO[Option[Appointment]] = {
-    sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment" WHERE id = $id"""
+    (selectAppointmentSql ++ fr"WHERE id = $id")
       .query[Appointment]
       .option
   }
 
   def selectByIds(ids: NonEmptyList[AppointmentId]): ConnectionIO[List[Appointment]] = {
-    (fr"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment" WHERE""" ++ Fragments.in(fr"id", ids))
+    (selectAppointmentSql ++ Fragments.whereAnd(Fragments.in(fr"id", ids)))
       .query[Appointment]
       .to[List]
   }

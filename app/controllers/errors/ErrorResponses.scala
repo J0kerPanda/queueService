@@ -22,9 +22,6 @@ object ErrorResponses {
   def emailExists(email: String) =
     Conflict(ErrorResponse(msg = s"with email $email already exists", source = Some("email")).toJson)
 
-  def googleIdExists(googleId: String) =
-    Conflict(ErrorResponse(s"google id $googleId already exists", source = Some("googleId")).toJson)
-
   def invalidCategory(categoryId: CategoryId) =
     BadRequest(ErrorResponse(s"invalid category id $categoryId", source = Some("categoryId")).toJson)
 

@@ -57,8 +57,6 @@ object HttpFormats {
 
   implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
 
-  implicit val createAppointmentRequestWrite: Writes[CreateAppointmentRequest] = Json.writes[CreateAppointmentRequest]
-
   implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
@@ -114,6 +112,8 @@ object HttpFormats {
       case _ => JsError()
     }
   }
+
+  implicit val createAppointmentRequestRead: Reads[CreateAppointmentRequest] = Json.reads[CreateAppointmentRequest]
 
   implicit val loginDataRead: Reads[LoginData] = Json.reads[LoginData]
 

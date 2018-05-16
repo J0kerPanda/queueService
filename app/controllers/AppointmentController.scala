@@ -2,7 +2,7 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.AppointmentsRequest
+import controllers.formats.request.{AppointmentsRequest, CreateAppointmentRequest}
 import db.ConnectionUtils
 import db.data.User.UserId
 import db.data.{Appointment, AppointmentData}
@@ -17,22 +17,25 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
 
   //todo unique constraint errors
 
-  def create(hostId: UserId, visitorId: UserId) = Action {
-    if (hostId == visitorId) {
-      ErrorResponses.invalidHostUser(hostId)
-    } else {
-      val dateTime = DateTime.now()
-      val date = dateTime.toLocalDate
-      val start = dateTime.toLocalTime
-      val end = start.plusHours(3)
-      val appointment = AppointmentData(hostId, visitorId, date, start, end)
+  def create(hostId: UserId, visitorId: UserId) = Action { implicit r =>
+    extractJsObject[CreateAppointmentRequest] { req =>
 
-      val tr = for {
-        id <- Appointment.insert(appointment)
-        a <- Appointment.selectById(id)
-      } yield a
+      if (hostId == visitorId) {
+        ErrorResponses.invalidHostUser(hostId)
+      } else {
+        val dateTime = DateTime.now()
+        val date = dateTime.toLocalDate
+        val start = dateTime.toLocalTime
+        val end = start.plusHours(3)
+        val appointment = AppointmentData(req.hostId, req.visitorId, req.date, req.start, end)
 
-      Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+        val tr = for {
+          id <- Appointment.insert(appointment)
+          a <- Appointment.selectById(id)
+        } yield a
+
+        Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+      }
     }
   }
 
