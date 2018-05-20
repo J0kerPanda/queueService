@@ -1,13 +1,5 @@
 name := "queueService"
 
-herokuAppName in Compile := "queue-service"
-
-herokuConfigVars in Compile := Map(
-  "db.main.url" -> sys.env.getOrElse("DB_URL", ""),
-  "db.main.username" -> sys.env.getOrElse("DB_USERNAME", ""),
-  "db.main.password" -> sys.env.getOrElse("DB_PASSWORD", "")
-)
- 
 version := "1.0"
 
 scalacOptions += "-Ypartial-unification"
