@@ -2,12 +2,11 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.{AppointmentsRequest, CreateAppointmentRequest}
-import controllers.formats.response.ScheduleData
+import controllers.formats.request.CreateAppointmentRequest
 import controllers.util.ControllerUtils.extractJsObject
 import db.ConnectionUtils
+import db.data.Appointment
 import db.data.User.UserId
-import db.data.{Appointment, AppointmentData}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.LocalDate
@@ -29,7 +28,9 @@ class AppointmentController @Inject()(cc: ControllerComponents, cu: ConnectionUt
           .attempt
           .unsafeRunSync() match {
 
-            case Left(e) => BadRequest //todo error
+            case Left(e) =>
+              println(e)
+              BadRequest //todo error
 
             case Right(d) => Ok
         }

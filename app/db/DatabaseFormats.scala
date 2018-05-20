@@ -2,7 +2,6 @@ package db
 
 import java.sql.{Date, Timestamp}
 
-import db.data.AppointmentStatus
 import doobie.postgres.implicits.pgEnumStringOpt
 import doobie.util.meta.Meta
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -19,12 +18,6 @@ object DatabaseFormats {
   implicit val DateTimeMeta: Meta[DateTime] = Meta[Timestamp].xmap(
     ts => new DateTime(ts.getTime),
     dt => new java.sql.Timestamp(dt.getMillis)
-  )
-
-  implicit val AppointmentStatusMeta: Meta[AppointmentStatus] = pgEnumStringOpt(
-    "appointment_status",
-    name => AppointmentStatus.lowerCaseNamesToValuesMap.get(name.toLowerCase),
-    enum => enum.dbName
   )
 
   implicit val PeriodMeta: Meta[Period] = Meta.other[PGInterval]("interval").xmap(

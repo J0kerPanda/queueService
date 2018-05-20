@@ -1,7 +1,7 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
-import controllers.formats.request.{AppointmentsRequest, CreateAppointmentRequest, LoginData, UserInputData}
+import controllers.formats.request.{CreateAppointmentRequest, LoginData, UserInputData}
 import controllers.formats.response.{HostData, ScheduleData}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -32,10 +32,6 @@ object HttpFormats {
   implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
 
   implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o)
-
-  implicit object appointmentStatusWrite extends Writes[AppointmentStatus] {
-    override def writes(status: AppointmentStatus): JsValue = JsString(status.dbName)
-  }
 
   implicit val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
 
@@ -102,15 +98,6 @@ object HttpFormats {
     }
   }
 
-  implicit object appointmentStatusRead extends Reads[AppointmentStatus] {
-    override def reads(json: JsValue): JsResult[AppointmentStatus] = json match {
-      case JsString(value) if AppointmentStatus.lowerCaseNamesToValuesMap.contains(value.toLowerCase) =>
-        JsSuccess(AppointmentStatus.lowerCaseNamesToValuesMap(value.toLowerCase))
-
-      case _ => JsError()
-    }
-  }
-
   implicit val createAppointmentRequestRead: Reads[CreateAppointmentRequest] = Json.reads[CreateAppointmentRequest]
 
   implicit val appointmentDataRead: Reads[AppointmentData] = Json.reads[AppointmentData]
@@ -122,6 +109,4 @@ object HttpFormats {
   implicit val defaultScheduleDataRead: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
 
   implicit val customScheduleDataRead: Reads[CustomScheduleData] = Json.reads[CustomScheduleData]
-
-  implicit val appointmentsRequest: Reads[AppointmentsRequest] = Json.reads[AppointmentsRequest]
 }

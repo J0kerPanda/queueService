@@ -4,7 +4,6 @@ import cats.data.NonEmptyList
 import cats.free.Free
 import db.DatabaseFormats._
 import db.data.Appointment.AppointmentId
-import db.data.AppointmentStatus.Pending
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
 import doobie._
@@ -17,7 +16,7 @@ object Appointment {
 
   type AppointmentId = Long
 
-  private val selectAppointmentSql = sql"""SELECT "id", hostid, visitorId, date, start, "end", status FROM "Appointment""""
+  private val selectAppointmentSql = sql"""SELECT "id", hostid, visitorId, date, start, "end" FROM "Appointment""""
 
   //todo check date/start/end
   def createBySchedule(hostId: UserId,
@@ -47,7 +46,7 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (hostid, visitorId, date, start, "end", status) VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end}, ${a.status})"""
+    sql"""INSERT INTO "Appointment" (hostid, visitorId, date, start, "end") VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
@@ -75,8 +74,7 @@ case class AppointmentData(hostId: UserId,
                            visitorId: UserId,
                            date: LocalDate,
                            start: LocalTime,
-                           end: LocalTime,
-                           status: AppointmentStatus = Pending)
+                           end: LocalTime)
 
 case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntity[AppointmentId, AppointmentData]
 
