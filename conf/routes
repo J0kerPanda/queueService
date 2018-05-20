@@ -20,10 +20,6 @@ POST    /api/user/promote           controllers.UserController.promote(id: Int)
 GET     /api/user/hosts             controllers.UserController.getHosts
 GET     /api/user/:id               controllers.UserController.get(id: Int)
 
-# Category
-POST    /api/category/create        controllers.CategoryController.create(name: String, isFinal: Boolean)
-GET     /api/category/:id           controllers.CategoryController.get(id: Int)
-
 # Appointment
 POST    /api/appointment/create     controllers.AppointmentController.create
 GET     /api/appointment/:id        controllers.AppointmentController.get(id: Long)

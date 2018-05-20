@@ -1,22 +1,6 @@
 -- Connection must be done as superuser
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
----- Category
-CREATE TABLE "Category" (
-  id SERIAL PRIMARY KEY,
-  parentId INTEGER NULL REFERENCES "Category" (id)
-    ON UPDATE RESTRICT
-    ON DELETE CASCADE,
-  name VARCHAR(255) NOT NULL UNIQUE,
-  isFinal BOOLEAN NOT NULL DEFAULT FALSE
-);
-
-CREATE OR REPLACE FUNCTION is_final_category(int) RETURNS BOOLEAN AS $$
-SELECT EXISTS(
-    SELECT id FROM "Category" WHERE id = $1 AND isFinal = TRUE
-);
-$$ LANGUAGE sql;
-
 ---- User
 CREATE TABLE "User" (
   id SERIAL PRIMARY KEY,
@@ -30,7 +14,6 @@ CREATE TABLE "User" (
   categoryId INTEGER NOT NULL REFERENCES "Category" (id)
     ON UPDATE RESTRICT
     ON DELETE RESTRICT
-    CHECK (is_final_category(categoryId))
 );
 
 CREATE OR REPLACE FUNCTION is_host_user(int) RETURNS BOOLEAN AS $$

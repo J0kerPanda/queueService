@@ -33,10 +33,6 @@ object HttpFormats {
 
   implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o)
 
-  implicit val categoryDaaWrite: Writes[CategoryData] = Json.writes[CategoryData]
-
-  implicit val categoryWrite: Writes[Category] = Json.writes[Category]
-
   implicit object appointmentStatusWrite extends Writes[AppointmentStatus] {
     override def writes(status: AppointmentStatus): JsValue = JsString(status.dbName)
   }

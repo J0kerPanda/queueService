@@ -40,8 +40,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         surname = inputData.surname,
         patronymic = inputData.patronymic,
         password = inputData.password,
-        email = inputData.email,
-        categoryId = inputData.categoryId
+        email = inputData.email
       )
 
       val tr: ConnectionIO[Option[User]] = for {

@@ -1,7 +1,6 @@
 package controllers.errors
 
 import controllers.formats.HttpFormats._
-import db.data.Category.CategoryId
 import db.data.User.UserId
 import play.api.mvc.Results._
 
@@ -21,9 +20,6 @@ object ErrorResponses {
 
   def emailExists(email: String) =
     Conflict(ErrorResponse(msg = s"with email $email already exists", source = Some("email")).toJson)
-
-  def invalidCategory(categoryId: CategoryId) =
-    BadRequest(ErrorResponse(s"invalid category id $categoryId", source = Some("categoryId")).toJson)
 
   val invalidScheduleData = BadRequest(ErrorResponse("invalid schedule data", source = None).toJson)
 

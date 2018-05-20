@@ -2,7 +2,6 @@ package db.data
 
 import cats.data.NonEmptyList
 import db.DatabaseFormats.IdEntity
-import db.data.Category.CategoryId
 import db.data.User.UserId
 import doobie._
 import doobie.free.connection.ConnectionIO
@@ -12,7 +11,7 @@ object User {
 
   type UserId = Int
 
-  private val selectUserSql = sql"""SELECT id, firstName, surname, patronymic, email, password, categoryId, isHost, isBlocked FROM "User""""
+  private val selectUserSql = sql"""SELECT id, firstName, surname, patronymic, email, password, isHost, isBlocked FROM "User""""
 
   def login(email: String, password: String): ConnectionIO[Option[User]] = {
     (selectUserSql ++ Fragments.whereAnd(fr"email = $email", fr"password = crypt($password, password)"))
@@ -27,7 +26,7 @@ object User {
   }
 
   def insert(u: UserData): ConnectionIO[UserId] = {
-    sql"""INSERT INTO "User" (firstName, surname, patronymic, email, password, categoryId, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.patronymic}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.categoryId}, ${u.isHost}, ${u.isBlocked})"""
+    sql"""INSERT INTO "User" (firstName, surname, patronymic, email, password, isHost, isBlocked) VALUES (${u.firstName}, ${u.surname}, ${u.patronymic}, ${u.email}, crypt(${u.password}, gen_salt('bf', 8)), ${u.isHost}, ${u.isBlocked})"""
       .update()
       .withUniqueGeneratedKeys("id")
   }
@@ -56,7 +55,6 @@ case class UserData(firstName: String,
                     patronymic: String,
                     email: String,
                     password: String,
-                    categoryId: CategoryId,
                     isHost: Boolean = false,
                     isBlocked: Boolean = false)
 
