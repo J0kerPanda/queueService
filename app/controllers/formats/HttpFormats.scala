@@ -98,6 +98,8 @@ object HttpFormats {
 
   implicit object periodRead extends Reads[Period] {
     override def reads(json: JsValue): JsResult[Period] = json match {
+      case JsString(value) => Try(JsSuccess(Period.parse(value))).toOption.getOrElse(JsError())
+
       case JsNumber(value) => Try(JsSuccess(new Period(value.toLong))).toOption.getOrElse(JsError())
 
       case _ => JsError()
