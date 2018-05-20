@@ -10,10 +10,7 @@ CREATE TABLE "User" (
   email VARCHAR(255) NOT NULL UNIQUE,
   password VARCHAR(255) NOT NULL,
   isHost BOOLEAN NOT NULL DEFAULT FALSE,
-  isBlocked BOOLEAN NOT NULL DEFAULT FALSE,
-  categoryId INTEGER NOT NULL REFERENCES "Category" (id)
-    ON UPDATE RESTRICT
-    ON DELETE RESTRICT
+  isBlocked BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 CREATE OR REPLACE FUNCTION is_host_user(int) RETURNS BOOLEAN AS $$
@@ -68,8 +65,6 @@ CREATE TABLE "CustomSchedule" (
 );
 
 ---- Appointment
-CREATE TYPE appointment_status AS ENUM ('pending', 'finished', 'cancelledByUser', 'cancelledByHost');
-
 CREATE TABLE "Appointment" (
   id BIGSERIAL PRIMARY KEY,
   hostId INT NOT NULL REFERENCES "HostMeta" (id)
@@ -80,8 +75,7 @@ CREATE TABLE "Appointment" (
     ON DELETE RESTRICT,
   date DATE NOT NULL,
   start TIME NOT NULL,
-  "end" TIME NOT NULL CHECK ("end" > start),
-  status appointment_status NOT NULL DEFAULT 'pending'
+  "end" TIME NOT NULL CHECK ("end" > start)
   -- todo intersection constraint?
 );
 
