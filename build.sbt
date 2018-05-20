@@ -1,4 +1,12 @@
 name := "queueService"
+
+herokuAppName in Compile := "queue-service"
+
+herokuConfigVars in Compile := Map(
+  "db.main.url" -> sys.env.getOrElse("DB_URL", ""),
+  "db.main.username" -> sys.env.getOrElse("DB_USERNAME", ""),
+  "db.main.password" -> sys.env.getOrElse("DB_PASSWORD", "")
+)
  
 version := "1.0"
 
@@ -16,7 +24,7 @@ scalaVersion := "2.12.2"
 
 libraryDependencies ++= Seq(jdbc, ehcache, ws, specs2 % Test, guice)
 
-unmanagedResourceDirectories in Test <+= baseDirectory (_/"target/web/public/test")
+unmanagedResourceDirectories in Test <+= baseDirectory(_/"target/web/public/test")
 
 //Joda
 libraryDependencies += "joda-time" % "joda-time" % "2.9.9"
