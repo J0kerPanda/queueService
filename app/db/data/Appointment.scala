@@ -64,11 +64,8 @@ object Appointment {
       .to[List]
   }
 
-  def selectGeneric(hostId: UserId,
-                    date: LocalDate,
-                    scheduleIds: List[Int], //todo -> schedule id
-                    isCustom: Boolean): ConnectionIO[List[GenericAppointment]] = {
-    sql"""SELECT G.g_visitorid, G.g_visitorfullname, G.g_start, G.g_end, G.g_status FROM get_appointments($hostId, $date, $scheduleIds, $isCustom) AS G"""
+  def selectByDate(hostId: UserId, date: LocalDate): ConnectionIO[List[GenericAppointment]] = {
+    sql"""SELECT visitorid, format('%s %s %s', V.surname, V.firstname, V.patronymic)::VARCHAR(255), start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid"""
       .query[GenericAppointment]
       .to[List]
   }
@@ -86,6 +83,5 @@ case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntit
 case class GenericAppointment(visitorId: Option[UserId],
                               visitorFullName: Option[String],
                               start: LocalTime,
-                              end: LocalTime,
-                              status: Option[AppointmentStatus])
+                              end: LocalTime)
 
