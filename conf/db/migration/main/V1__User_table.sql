@@ -54,7 +54,7 @@ CREATE TABLE "HostMeta" (
   appointmentPeriod INTERVAL NOT NULL DEFAULT '31 day'
 );
 
-  ---- Default schedule
+---- Default schedule
 
 CREATE TABLE "DefaultSchedule" (
   id SERIAL PRIMARY KEY,
