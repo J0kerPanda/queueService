@@ -25,7 +25,8 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         .transact(cu.transactor)
         .unsafeRunSync() match {
 
-          case Some(user) => Ok(user.toJson)
+          case Some(user) =>
+            Ok
 
           case None => ErrorResponses.loginFailed
       }

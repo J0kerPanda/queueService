@@ -23,6 +23,7 @@ lazy val Version = new {
   val flyway = "5.0.0"
   val enumeratum = "1.5.13"
   val joda = "2.9.9"
+  val deadbolt = "2.6.0"
 }
 
 //Doobie
@@ -41,5 +42,12 @@ libraryDependencies += "com.beachape" %% "enumeratum" % Version.enumeratum
 
 //Joda
 libraryDependencies += "joda-time" % "joda-time" % Version.joda
+
+//Deadbolt
+libraryDependencies += "be.objectify" %% "deadbolt-scala" % Version.deadbolt
+
+resolvers += Resolver.sonatypeRepo("snapshots")
+
+
 
       
