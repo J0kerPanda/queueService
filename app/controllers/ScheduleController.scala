@@ -6,7 +6,7 @@ import controllers.formats.HttpFormats._
 import controllers.formats.response.ScheduleData
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
-import db.ConnectionUtils
+import db.DbConnectionUtils
 import db.data.User.UserId
 import db.data.{CustomScheduleData, DefaultScheduleData, HostMeta, Schedule}
 import doobie.implicits._
@@ -18,7 +18,7 @@ import play.api.mvc.{AbstractController, Action, AnyContent, ControllerComponent
 import scala.concurrent.ExecutionContext
 
 @Singleton
-class ScheduleController @Inject()(cu: ConnectionUtils, cc: ControllerComponents, system: ActorSystem)
+class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents, system: ActorSystem)
   extends AbstractController(cc) {
 
   private implicit val ec: ExecutionContext = ControllerUtils.getExecutionContext(system)

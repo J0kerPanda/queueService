@@ -1,6 +1,7 @@
 package controllers.util
 
 import akka.actor.ActorSystem
+import be.objectify.deadbolt.scala.AuthenticatedRequest
 import controllers.errors.ErrorResponses
 import play.api.libs.json.{JsObject, Reads}
 import play.api.mvc.{AnyContent, Request, Result}
@@ -18,4 +19,12 @@ object ControllerUtils {
 
       case json => ErrorResponses.badJson(json.toString)
   }
+
+  def extractJsObjectAuth[T](extractor: T => Result)(implicit req: AuthenticatedRequest[AnyContent], r: Reads[T]): Result =
+    req.body.asJson match {
+
+      case Some(obj: JsObject) => extractor(obj.as[T])
+
+      case json => ErrorResponses.badJson(json.toString)
+    }
 }

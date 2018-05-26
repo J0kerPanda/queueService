@@ -1,16 +1,37 @@
 package controllers.auth
 
+import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.models.Subject
 import be.objectify.deadbolt.scala.{AuthenticatedRequest, DeadboltHandler, DynamicResourceHandler}
+import controllers.util.{AuthUtils, ControllerUtils}
+import db.DbConnectionUtils
+import db.data.User
+import doobie.implicits._
+import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Request, Result, _}
 
-import scala.concurrent.Future
+import scala.concurrent.{ExecutionContext, Future}
 
-class AppDeadboltHandler extends DeadboltHandler {
+@Singleton
+class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) extends DeadboltHandler {
+
+  private implicit val ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
   override def beforeAuthCheck[A](request: Request[A]): Future[Option[Result]] = Future.successful(None)
 
-  override def getSubject[A](request: AuthenticatedRequest[A]): Future[Option[Subject]] = Future.successful(request.subject) //todo
+  override def getSubject[A](request: AuthenticatedRequest[A]): Future[Option[Subject]] = Future(
+    request.subject.orElse {
+      request.session.get(AuthUtils.UserIdKey) match {
+        case Some(id) =>
+          User.selectById(id.toInt)
+          .transact(cu.transactor)
+          .unsafeRunSync()
+          .map(u => AuthUser(u.id, Nil, Nil))
+        case _ =>
+          None
+      }
+    }
+  )
 
   override def onAuthFailure[A](request: AuthenticatedRequest[A]): Future[Result] = Future.successful(Results.Forbidden)
 

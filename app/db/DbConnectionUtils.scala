@@ -8,7 +8,7 @@ import javax.sql.DataSource
 import play.api.db.Database
 
 @Singleton
-class ConnectionUtils @Inject()(db: Database) {
+class DbConnectionUtils @Inject()(db: Database) {
 
   def transactor: Aux[IO, DataSource] = Transactor.fromDataSource[IO](db.dataSource)
 }

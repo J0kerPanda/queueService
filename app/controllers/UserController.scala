@@ -2,10 +2,11 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.response.HostData
 import controllers.formats.request.{LoginData, UserInputData}
+import controllers.formats.response.HostData
+import controllers.util.AuthUtils._
 import controllers.util.ControllerUtils._
-import db.ConnectionUtils
+import db.DbConnectionUtils
 import db.data.User.UserId
 import db.data.{HostMeta, User, UserData}
 import doobie.free.connection.ConnectionIO
@@ -15,7 +16,7 @@ import org.joda.time.Period
 import play.api.mvc.{AbstractController, ControllerComponents}
 
 @Singleton
-class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
+class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
   //todo unique constraint errors
   def login = Action { implicit r =>
@@ -25,8 +26,7 @@ class UserController @Inject()(cu: ConnectionUtils, cc: ControllerComponents) ex
         .transact(cu.transactor)
         .unsafeRunSync() match {
 
-          case Some(user) =>
-            Ok
+          case Some(user) => Ok.addSession(user.id)
 
           case None => ErrorResponses.loginFailed
       }
