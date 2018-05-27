@@ -24,6 +24,7 @@ lazy val Version = new {
   val enumeratum = "1.5.13"
   val joda = "2.9.9"
   val deadbolt = "2.6.0"
+  val chimney = "0.2.0"
 }
 
 //Doobie
@@ -45,6 +46,10 @@ libraryDependencies += "joda-time" % "joda-time" % Version.joda
 
 //Deadbolt
 libraryDependencies += "be.objectify" %% "deadbolt-scala" % Version.deadbolt
+
+//Chimney
+libraryDependencies += "io.scalaland" %% "chimney" % Version.chimney
+
 
 resolvers += Resolver.sonatypeRepo("snapshots")
 

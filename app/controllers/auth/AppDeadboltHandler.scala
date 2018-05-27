@@ -23,6 +23,7 @@ class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) 
     request.subject.orElse {
       request.session.get(AuthUtils.UserIdKey) match {
         case Some(id) =>
+          //todo cache?
           User.selectById(id.toInt)
           .transact(cu.transactor)
           .unsafeRunSync()

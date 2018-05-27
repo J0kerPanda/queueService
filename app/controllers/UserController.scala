@@ -14,6 +14,7 @@ import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.Period
 import play.api.mvc.{AbstractController, ControllerComponents}
+import io.scalaland.chimney.dsl._
 
 @Singleton
 class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
@@ -26,7 +27,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
         .transact(cu.transactor)
         .unsafeRunSync() match {
 
-          case Some(user) => Ok.addSession(user.id)
+          case Some(user) => Ok(user.toJson).addSession(user.id)
 
           case None => ErrorResponses.loginFailed
       }
@@ -70,7 +71,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
     Ok(User.selectHosts()
       .transact(cu.transactor)
       .unsafeRunSync()
-      .map(user => HostData(user.id, user.data.firstName, user.data.surname, user.data.patronymic))
+      .map(u => u.data.into[HostData].withFieldConst(_.id, u.id).transform)
       .toJson
     )
   }

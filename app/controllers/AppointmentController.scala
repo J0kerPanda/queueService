@@ -59,12 +59,10 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
-  def byDate(hostId: UserId, date: LocalDate) = Action {
-    Ok(
+  def byDate(hostId: UserId, date: LocalDate) = ab.SubjectPresentAction().defaultHandler() {
       Appointment.selectByDate(hostId, date)
         .transact(cu.transactor)
-        .unsafeRunSync()
-        .toJson
-    )
+        .unsafeToFuture()
+        .map(r => Ok(r.toJson))
   }
 }

@@ -31,7 +31,9 @@ object HttpFormats {
 
   implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
 
-  implicit val userWrite: Writes[User] = (o: User) => Json.writes[User].writes(o)
+  implicit val userWrite: Writes[User] = (o: User) => {
+    JsObject(("id", JsNumber(o.id)) +: userDataWrite.writes(o.data).as[JsObject].fields)
+  }
 
   implicit val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
 
