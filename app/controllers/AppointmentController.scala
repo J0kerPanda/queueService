@@ -59,7 +59,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
-  def byDate(hostId: UserId, date: LocalDate) = ab.SubjectPresentAction().defaultHandler() {
+  def byDate(hostId: UserId, date: LocalDate): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
       Appointment.selectByDate(hostId, date)
         .transact(cu.transactor)
         .unsafeToFuture()

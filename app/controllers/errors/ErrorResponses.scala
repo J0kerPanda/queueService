@@ -10,7 +10,7 @@ case class ErrorListResponse(msg: String, sources: List[String])
 
 object ErrorResponses {
 
-  val loginFailed = BadRequest(ErrorResponse("invalid email or password", source = None).toJson)
+  val loginFailed = Forbidden(ErrorResponse("invalid email or password", source = None).toJson)
 
   def invalidHostUser(hostId: UserId) =
     BadRequest(ErrorResponse(s"invalid hostId $hostId", source = Some("hostId")).toJson)
