@@ -19,79 +19,57 @@ SELECT EXISTS(
 )
 $$ LANGUAGE sql;
 
-CREATE OR REPLACE FUNCTION is_active_user(int) RETURNS BOOLEAN AS $$
-SELECT EXISTS(
-    SELECT id FROM "User" WHERE id = $1 AND isBlocked = FALSE
-)
-$$ LANGUAGE sql;
-
 ---- Host Meta
 CREATE TABLE "HostMeta" (
-  id INTEGER PRIMARY KEY REFERENCES "User"
+  id INT PRIMARY KEY REFERENCES "User"
     ON UPDATE RESTRICT
     ON DELETE CASCADE
     CHECK (is_host_user(id)),
   appointmentPeriod INTERVAL NOT NULL DEFAULT '31 day'
 );
 
----- Default schedule
-
-CREATE TABLE "DefaultSchedule" (
+-- todo intersection constraints?
+---- Repeat schedule
+CREATE TABLE "RepeatSchedule" (
   id SERIAL PRIMARY KEY,
-  hostId INTEGER REFERENCES "HostMeta"
+  hostId INT REFERENCES "HostMeta"
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
-  firstDate DATE NOT NULL,
+  repeatDate DATE NOT NULL,
   repeatPeriod INTERVAL NOT NULL DEFAULT interval '7 day',
   start TIME NOT NULL,
   "end" TIME NOT NULL CHECK ("end" > start),
   appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL
-  -- todo intersection constraint?
 );
 
----- Custom schedule
-CREATE TABLE "CustomSchedule" (
+---- Schedule
+CREATE TABLE "Schedule" (
   id SERIAL PRIMARY KEY,
-  hostId INTEGER REFERENCES "HostMeta"
+  hostId INT REFERENCES "HostMeta"
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
+  repeatId INT REFERENCES "RepeatSchedule"
+    ON UPDATE CASCADE
+    ON DELETE SET NULL
+    NULL,
   date DATE NOT NULL,
   start time NOT NULL,
   "end" time NOT NULL CHECK ("end" > start),
   appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
-  place VARCHAR(255) NOT NULL
-  -- todo intersection constraint?
+  place VARCHAR(255) NOT NULL,
+  isBlocked BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 ---- Appointment
 CREATE TABLE "Appointment" (
   id BIGSERIAL PRIMARY KEY,
-  hostId INT NOT NULL REFERENCES "HostMeta" (id)
+  scheduleId INT NOT NULL REFERENCES "Schedule" (id)
     ON UPDATE RESTRICT
     ON DELETE RESTRICT,
   visitorId INT NOT NULL REFERENCES "User" (id)
     ON UPDATE RESTRICT
     ON DELETE RESTRICT,
-  date DATE NOT NULL,
   start TIME NOT NULL,
   "end" TIME NOT NULL CHECK ("end" > start)
-  -- todo intersection constraint?
 );
-
-CREATE OR REPLACE FUNCTION appointment_user_check() RETURNS TRIGGER AS $appointment_user_check$
-BEGIN
-  IF NOT is_active_user(NEW.hostid) THEN
-    RAISE EXCEPTION 'host with id % is blocked', NEW.hostid;
-  END IF;
-
-  IF NOT is_active_user(NEW.visitorid) THEN
-    RAISE EXCEPTION 'visitor with id % is blocked', NEW.visitorid;
-  END IF;
-
-  RETURN NEW;
-END;
-$appointment_user_check$ LANGUAGE plpgsql;
-
-CREATE TRIGGER appointment_user_check BEFORE INSERT OR UPDATE ON "Appointment"
-  FOR EACH ROW EXECUTE PROCEDURE appointment_user_check();
