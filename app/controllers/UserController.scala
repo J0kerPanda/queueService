@@ -2,8 +2,8 @@ package controllers
 
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.{LoginData, UserInputData}
-import controllers.formats.response.HostData
+import controllers.formats.request.{LoginRequest, RegistrationRequest}
+import controllers.formats.response.HostDataFormat
 import controllers.util.AuthUtils._
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
@@ -21,7 +21,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
 
   //todo unique constraint errors
   def login = Action { implicit r =>
-    extractJsObject[LoginData] { ld =>
+    extractJsObject[LoginRequest] { ld =>
 
       User.login(ld.email, ld.password)
         .transact(cu.transactor)
@@ -35,7 +35,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
   }
 
   def register = Action { implicit request =>
-    extractJsObject[UserInputData] { inputData =>
+    extractJsObject[RegistrationRequest] { inputData =>
 
       val user = UserData(
         firstName = inputData.firstName,
@@ -71,7 +71,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
     Ok(User.selectHosts()
       .transact(cu.transactor)
       .unsafeRunSync()
-      .map(u => u.data.into[HostData].withFieldConst(_.id, u.id).transform)
+      .map(u => u.data.into[HostDataFormat].withFieldConst(_.id, u.id).transform)
       .toJson
     )
   }

@@ -4,11 +4,10 @@ import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.CreateAppointmentRequest
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
-import db.data.Appointment
+import db.data.{Appointment, AppointmentData}
 import db.data.User.UserId
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
@@ -30,22 +29,18 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   //todo unique constraint errors
 
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    Future(extractJsObjectAuth[CreateAppointmentRequest] { req =>
+    Future(extractJsObjectAuth[AppointmentData] { req =>
 
-      if (req.hostId == req.visitorId) {
-        ErrorResponses.invalidHostUser(req.hostId)
-      } else {
-        Appointment.insert(req.toAppointmentData())
-          .transact(cu.transactor)
-          .attempt
-          .unsafeRunSync() match {
+      Appointment.insert(req)
+        .transact(cu.transactor)
+        .attempt
+        .unsafeRunSync() match {
 
-            case Left(e) =>
-              println(e)
-              BadRequest //todo error
+          case Left(e) =>
+            println(e)
+            BadRequest //todo error
 
-            case Right(d) => Ok
-        }
+          case Right(_) => Ok
       }
     })
   }

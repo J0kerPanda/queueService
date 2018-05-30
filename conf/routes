@@ -16,6 +16,5 @@ GET     /api/appointment/list           controllers.AppointmentController.byDate
 GET     /api/appointment/:id            controllers.AppointmentController.get(id: Long)
 
 # Schedule
-POST    /api/schedule/default/create    controllers.ScheduleController.createDefault
-POST    /api/schedule/custom/create     controllers.ScheduleController.createCustom
+POST    /api/schedule/create            controllers.ScheduleController.create
 GET     /api/schedule/host/:hostId      controllers.ScheduleController.getSchedules(hostId: Int)

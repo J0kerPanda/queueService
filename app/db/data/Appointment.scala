@@ -16,29 +16,22 @@ object Appointment {
 
   type AppointmentId = Long
 
-  private val selectAppointmentSql = sql"""SELECT "id", hostid, visitorId, date, start, "end" FROM "Appointment""""
+  private val selectAppointmentSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment""""
 
   //todo check date/start/end
-  def createBySchedule(hostId: UserId,
-                       visitorId: UserId,
+  def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
-                       isCustom: Boolean,
-                       date: LocalDate,
                        start: LocalTime): ConnectionIO[Option[AppointmentId]] = {
 
-    val selectSchedule: ConnectionIO[Option[GeneralScheduleData]] = if (isCustom) {
-      Schedule.selectCustomById(scheduleId).map(_.map(_.data))
-    } else {
-      Schedule.selectDefaultById(scheduleId).map(_.map(_.data))
-    }
-
-    selectSchedule.flatMap {
+   Schedule
+     .select(scheduleId)
+     .flatMap {
       case Some(d) => Appointment.insert(AppointmentData(
-        hostId,
+        scheduleId,
         visitorId,
-        date,
+        d.data.date,
         start,
-        start.plus(d.appointmentDuration)
+        start.plus(d.data.appointmentDuration)
       )).map(Some(_))
 
       case None => Free.pure(None)
@@ -46,7 +39,7 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (hostid, visitorId, date, start, "end") VALUES (${a.hostId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end})"""
+    sql"""INSERT INTO "Appointment" (scheduleid, visitorId, date, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
@@ -70,7 +63,7 @@ object Appointment {
   }
 }
 
-case class AppointmentData(hostId: UserId,
+case class AppointmentData(scheduleId: ScheduleId,
                            visitorId: UserId,
                            date: LocalDate,
                            start: LocalTime,

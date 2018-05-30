@@ -1,8 +1,8 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
-import controllers.formats.request.{CreateAppointmentRequest, LoginData, UserInputData}
-import controllers.formats.response.{HostData, ScheduleData}
+import controllers.formats.request.{LoginRequest, RegistrationRequest}
+import controllers.formats.response.{GenericScheduleFormat, HostDataFormat, ScheduleListDataFormat}
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
 import play.api.libs.json._
@@ -43,11 +43,11 @@ object HttpFormats {
 
   implicit val errorListResponseWrite: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
 
-  implicit val genericScheduleWrite: Writes[GenericSchedule] = Json.writes[GenericSchedule]
+  implicit val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
 
-  implicit val scheduleDatesWrite: Writes[ScheduleData] = Json.writes[ScheduleData]
+  implicit val scheduleDatesWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
 
-  implicit val hostDataWrite: Writes[HostData] = Json.writes[HostData]
+  implicit val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
 
   implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
 
@@ -100,15 +100,11 @@ object HttpFormats {
     }
   }
 
-  implicit val createAppointmentRequestRead: Reads[CreateAppointmentRequest] = Json.reads[CreateAppointmentRequest]
-
   implicit val appointmentDataRead: Reads[AppointmentData] = Json.reads[AppointmentData]
 
-  implicit val loginDataRead: Reads[LoginData] = Json.reads[LoginData]
+  implicit val loginDataRead: Reads[LoginRequest] = Json.reads[LoginRequest]
 
-  implicit val userInputDataRead: Reads[UserInputData] = Json.reads[UserInputData]
+  implicit val userInputDataRead: Reads[RegistrationRequest] = Json.reads[RegistrationRequest]
 
-  implicit val defaultScheduleDataRead: Reads[DefaultScheduleData] = Json.reads[DefaultScheduleData]
-
-  implicit val customScheduleDataRead: Reads[CustomScheduleData] = Json.reads[CustomScheduleData]
+  implicit val customScheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
 }

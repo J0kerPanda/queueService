@@ -12,7 +12,7 @@ object RepeatSchedule {
 
   type RepeatScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place FROM "DefaultSchedule""""
+  private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place FROM "RepeatSchedule""""
 
   def insert(repeatSchedule: RepeatSchedule): ConnectionIO[RepeatScheduleId] = ???
 
@@ -29,4 +29,4 @@ case class RepeatScheduleData(hostId: UserId,
                               appointmentDuration: Period,
                               place: String)
 
-case class RepeatSchedule(id: ScheduleId, data: DefaultScheduleData) extends IdEntity[ScheduleId, DefaultScheduleData]
+case class RepeatSchedule(id: ScheduleId, data: RepeatScheduleData) extends IdEntity[ScheduleId, RepeatScheduleData]

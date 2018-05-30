@@ -27,7 +27,7 @@ class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) 
           User.selectById(id.toInt)
           .transact(cu.transactor)
           .unsafeRunSync()
-          .map(u => AuthUser(u.id, Nil, Nil))
+          .collect { case u if !u.data.isBlocked => AuthUser(u.id, Nil, Nil) }
         case _ =>
           None
       }
