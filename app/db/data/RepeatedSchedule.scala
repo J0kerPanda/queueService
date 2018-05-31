@@ -66,7 +66,7 @@ object RepeatedSchedule {
       case head :: tail =>
         val transformed = NonEmptyList.of(head, tail :_*)
         for {
-          gen <- Schedule.updateBatch(transformed.flatMap { rs =>
+          gen <- Schedule.insertBatch(transformed.flatMap { rs =>
             val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
             generateSchedules(rs, startDate, dateLimit, NonEmptyList.of(generateSchedule(rs, startDate)))
           })

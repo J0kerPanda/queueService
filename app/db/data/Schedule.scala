@@ -18,13 +18,17 @@ object Schedule {
 
   private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, start, "end", appointmentduration, place) VALUES """
 
+  private val updateSql = sql"""UPDATE "Schedule" AS S """
+
+  private val deleteSql = sql"""DELETE FROM "Schedule" """
+
   def insert(s: ScheduleData): ConnectionIO[Option[ScheduleId]] = {
     (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
 
-  def updateBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
+  def insertBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
     val values = ss
       .map(s =>
         fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
@@ -47,6 +51,14 @@ object Schedule {
     (selectSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to"))
       .query[Schedule]
       .to[List]
+  }
+
+  def blockRepeatedByDate(date: LocalDate): ConnectionIO[Int] = {
+    (updateSql
+      ++ fr"SET isblocked = TRUE "
+      ++ Fragments.whereAnd(fr"date = $date", fr"repeatId IS NOT NULL"))
+      .update
+      .run
   }
 }
 case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[ScheduleId, ScheduleData]

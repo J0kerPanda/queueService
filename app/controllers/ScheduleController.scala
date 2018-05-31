@@ -28,8 +28,12 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
     extractJsObject[ScheduleData] { sd =>
       //todo format -> remove repeatid
 
-      Schedule
-        .insert(sd)
+      val tr = for {
+        _ <- Schedule.blockRepeatedByDate(sd.date)
+        id <- Schedule.insert(sd)
+      } yield id
+
+      tr
         .transact(cu.transactor)
         .attempt
         .unsafeRunSync() match {
@@ -38,7 +42,7 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
           Logger.error("schedule error", err)
           ErrorResponses.invalidScheduleData
 
-        case Right(id) => Created(id.toString)
+        case Right(id) => Created(id.toJson)
       }
     }
   }

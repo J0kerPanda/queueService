@@ -79,6 +79,6 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
   }
 
   def test = Action {
-    Ok(RepeatedSchedule.generateSchedules().transact(cu.transactor).unsafeRunSync().toString())
+    Ok
   }
 }
