@@ -12,7 +12,7 @@ GET     /api/user/:id                   controllers.UserController.get(id: Int)
 
 # Appointment
 POST    /api/appointment/create         controllers.AppointmentController.create
-GET     /api/appointment/list           controllers.AppointmentController.byDate(hostId: Int, date: org.joda.time.LocalDate)
+POST    /api/appointment/list           controllers.AppointmentController.byScheduleIds
 GET     /api/appointment/:id            controllers.AppointmentController.get(id: Long)
 
 # Schedule

@@ -3,10 +3,10 @@ package controllers.util
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.AuthenticatedRequest
 import controllers.errors.ErrorResponses
-import play.api.libs.json.{JsObject, Reads}
+import play.api.libs.json.Reads
 import play.api.mvc.{AnyContent, Request, Result}
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 object ControllerUtils {
 
@@ -15,16 +15,19 @@ object ControllerUtils {
   def extractJsObject[T](extractor: T => Result)(implicit req: Request[AnyContent], r: Reads[T]): Result =
     req.body.asJson match {
 
-      case Some(obj: JsObject) => extractor(obj.as[T])
+      case Some(j) => extractor(j.as[T])
 
       case json => ErrorResponses.badJson(json.toString)
   }
 
-  def extractJsObjectAuth[T](extractor: T => Result)(implicit req: AuthenticatedRequest[AnyContent], r: Reads[T]): Result =
-    req.body.asJson match {
+  def extractJsObjectAuth[T](extractor: T => Future[Result])
+                            (implicit
+                             req: AuthenticatedRequest[AnyContent],
+                             r: Reads[T],
+                             ec: ExecutionContext): Future[Result] = req.body.asJson match {
 
-      case Some(obj: JsObject) => extractor(obj.as[T])
+      case Some(j) => println(j); extractor(j.as[T])
 
-      case json => ErrorResponses.badJson(json.toString)
+      case json => Future.successful(ErrorResponses.badJson(json.toString))
     }
 }

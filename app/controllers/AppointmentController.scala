@@ -2,16 +2,15 @@ package controllers
 
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
-import controllers.errors.ErrorResponses
+import cats.data.NonEmptyList
 import controllers.formats.HttpFormats._
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
+import db.data.Schedule.ScheduleId
 import db.data.{Appointment, AppointmentData}
-import db.data.User.UserId
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
-import org.joda.time.LocalDate
 import play.api.mvc._
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,12 +28,13 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   //todo unique constraint errors
 
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    Future(extractJsObjectAuth[AppointmentData] { req =>
+    extractJsObjectAuth[AppointmentData] { req =>
 
       Appointment.insert(req)
         .transact(cu.transactor)
         .attempt
-        .unsafeRunSync() match {
+        .unsafeToFuture()
+        .map {
 
           case Left(e) =>
             println(e)
@@ -42,7 +42,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
 
           case Right(_) => Ok
       }
-    })
+    }
   }
 
   def get(id: Long): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
@@ -54,10 +54,16 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
-  def byDate(hostId: UserId, date: LocalDate): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-      Appointment.selectByDate(hostId, date)
-        .transact(cu.transactor)
-        .unsafeToFuture()
-        .map(r => Ok(r.toJson))
+  def byScheduleIds: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
+    extractJsObjectAuth[List[ScheduleId]] {
+
+      case Nil => Future.successful(BadRequest) // toto error
+
+      case req =>
+        Appointment.selectScheduleIds(NonEmptyList.of(req.head, req.tail :_*))
+          .transact(cu.transactor)
+          .unsafeToFuture()
+          .map(r => Ok(r.toJson))
+    }
   }
 }

@@ -19,7 +19,6 @@ import io.scalaland.chimney.dsl._
 @Singleton
 class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
 
-  //todo unique constraint errors
   def login = Action { implicit r =>
     extractJsObject[LoginRequest] { ld =>
 
@@ -37,7 +36,8 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
   def register = Action { implicit request =>
     extractJsObject[RegistrationRequest] { inputData =>
 
-      val user = UserData(
+    //todo unique constraint errors
+    val user = UserData(
         firstName = inputData.firstName,
         surname = inputData.surname,
         patronymic = inputData.patronymic,

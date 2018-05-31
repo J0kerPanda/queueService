@@ -16,9 +16,8 @@ object Appointment {
 
   type AppointmentId = Long
 
-  private val selectAppointmentSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment""""
+  private val selectSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment" """
 
-  //todo check date/start/end
   def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
                        start: LocalTime): ConnectionIO[Option[AppointmentId]] = {
@@ -45,19 +44,19 @@ object Appointment {
   }
 
   def selectById(id: AppointmentId): ConnectionIO[Option[Appointment]] = {
-    (selectAppointmentSql ++ fr"WHERE id = $id")
+    (selectSql ++ fr"WHERE id = $id")
       .query[Appointment]
       .option
   }
 
   def selectByIds(ids: NonEmptyList[AppointmentId]): ConnectionIO[List[Appointment]] = {
-    (selectAppointmentSql ++ Fragments.whereAnd(Fragments.in(fr"id", ids)))
+    (selectSql ++ Fragments.whereAnd(Fragments.in(fr"id", ids)))
       .query[Appointment]
       .to[List]
   }
 
-  def selectByDate(hostId: UserId, date: LocalDate): ConnectionIO[List[GenericAppointment]] = {
-    sql"""SELECT visitorid, format('%s %s %s', V.surname, V.firstname, V.patronymic)::VARCHAR(255), start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid"""
+  def selectScheduleIds(scheduleIds: NonEmptyList[ScheduleId]): ConnectionIO[List[GenericAppointment]] = {
+    (sql"""SELECT visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid """ ++ Fragments.whereAnd(Fragments.in(fr"scheduleid", scheduleIds)))
       .query[GenericAppointment]
       .to[List]
   }
@@ -71,8 +70,11 @@ case class AppointmentData(scheduleId: ScheduleId,
 
 case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntity[AppointmentId, AppointmentData]
 
-case class GenericAppointment(visitorId: Option[UserId],
-                              visitorFullName: Option[String],
+case class GenericAppointment(visitorId: UserId,
+                              visitorFirstName: String,
+                              visitorSurname: String,
+                              visitorPatronymic: String,
+                              visitorFullName: String,
                               start: LocalTime,
                               end: LocalTime)
 
