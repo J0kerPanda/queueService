@@ -42,7 +42,7 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
     }
   }
 
-  def createRepeat = Action { implicit r =>
+  def createRepeated = Action { implicit r =>
     extractJsObject[RepeatedScheduleData] { sd =>
 
       RepeatedSchedule
@@ -70,7 +70,7 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
           hostId = hostId,
           period = period,
           schedules = Schedule
-            .selectSchedules(hostId, from, to)
+            .selectInPeriod(hostId, from, to)
             .transact(cu.transactor)
             .unsafeRunSync()
             .map(_.data.into[GenericScheduleFormat].transform)

@@ -12,7 +12,7 @@ object Schedule {
 
   type ScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "Schedule""""
+  private val selectSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "Schedule" """
 
   def insert(s: ScheduleData): ConnectionIO[Option[ScheduleId]] = {
     sql"""INSERT INTO "Schedule" (hostid, date, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
@@ -31,14 +31,6 @@ object Schedule {
       .query[Schedule]
       .to[List]
   }
-
-  def selectByDate(date: LocalDate): ConnectionIO[List[Schedule]] = {
-    (selectSql ++ fr"date = $date")
-      .query[Schedule]
-      .to[List]
-  }
-
-  def selectSchedules(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[Schedule]] = ???
 }
 case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[ScheduleId, ScheduleData]
 

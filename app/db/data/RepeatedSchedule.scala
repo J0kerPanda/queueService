@@ -14,7 +14,11 @@ object RepeatedSchedule {
 
   private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place FROM "RepeatedSchedule""""
 
-  def insert(repeatSchedule: RepeatedScheduleData): ConnectionIO[RepeatScheduleId] = ???
+  def insert(s: RepeatedScheduleData): ConnectionIO[RepeatScheduleId] = {
+    sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
+      .update
+      .withUniqueGeneratedKeys("id")
+  }
 
   def selectBeforeDate(date: LocalDate): ConnectionIO[List[RepeatedSchedule]] = ???
 
