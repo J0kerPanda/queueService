@@ -26,6 +26,7 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
 
   def create = Action { implicit r =>
     extractJsObject[ScheduleData] { sd =>
+      //todo format -> remove repeatid
 
       Schedule
         .insert(sd)

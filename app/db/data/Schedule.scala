@@ -52,7 +52,7 @@ object Schedule {
 case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[ScheduleId, ScheduleData]
 
 case class ScheduleData(hostId: UserId,
-                        repeatId: RepeatedScheduleId,
+                        repeatId: Option[RepeatedScheduleId],
                         date: LocalDate,
                         start: LocalTime,
                         end: LocalTime,

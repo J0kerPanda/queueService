@@ -19,13 +19,15 @@ object RepeatedSchedule {
 
   private val insertSql = sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES """
 
+  private val updateSql = sql"""UPDATE "RepeatedSchedule" AS RS """
+
   def insert(s: RepeatedScheduleData): ConnectionIO[RepeatedScheduleId] = {
     (insertSql ++ fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
 
-  def updateBatch(ss: NonEmptyList[RepeatedScheduleData]):  ConnectionIO[List[RepeatedScheduleId]] = {
+  def insertBatch(ss: NonEmptyList[RepeatedScheduleData]):  ConnectionIO[List[RepeatedScheduleId]] = {
     val values = ss
       .map(s =>
         fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
@@ -35,6 +37,17 @@ object RepeatedSchedule {
       .update
       .withGeneratedKeysWithChunkSize[RepeatedScheduleId]("id")(values.size)
       .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
+  }
+
+  def updateRepeatDates(ss: NonEmptyList[(RepeatedScheduleId, LocalDate)]):  ConnectionIO[Int] = {
+    val values = ss.map(s => fr"(${s._1}, ${s._2}::DATE)")
+
+    (updateSql
+      ++ fr"SET repeatdate = C.repeatdate FROM " ++ values.foldSmash(fr"(VALUES ", fr", ", fr") AS C(id, repeatDate)" )
+      ++ fr"WHERE RS.id = C.id"
+    )
+      .update
+      .run
   }
 
   def selectBeforeDate(date: LocalDate): ConnectionIO[List[RepeatedSchedule]] = {
@@ -57,8 +70,8 @@ object RepeatedSchedule {
             val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
             generateSchedules(rs, startDate, dateLimit, NonEmptyList.of(generateSchedule(rs, startDate)))
           })
-          _ <- updateBatch(transformed.map(rs =>
-            rs.data.copy(repeatDate = getNewRepeatDate(rs.data.repeatDate, rs.data.repeatPeriod, dateLimit)))
+          _ <- updateRepeatDates(
+            transformed.map(rs => (rs.id, getNewRepeatDate(rs.data.repeatDate, rs.data.repeatPeriod, dateLimit)))
           )
         } yield gen
     }
@@ -84,7 +97,7 @@ object RepeatedSchedule {
   private def generateSchedule(rs: RepeatedSchedule, date: LocalDate): ScheduleData = {
     rs.data.into[ScheduleData]
       .withFieldConst(_.date, date)
-      .withFieldConst(_.repeatId, rs.id)
+      .withFieldConst(_.repeatId, Some(rs.id))
       .transform
   }
 

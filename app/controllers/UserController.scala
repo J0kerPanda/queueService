@@ -9,7 +9,7 @@ import controllers.util.ControllerUtils._
 import db.DatabaseFormats.IdEntity
 import db.DbConnectionUtils
 import db.data.User.UserId
-import db.data.{HostMeta, User, UserData}
+import db.data._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
@@ -79,6 +79,6 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
   }
 
   def test = Action {
-    Ok("")
+    Ok(RepeatedSchedule.generateSchedules().transact(cu.transactor).unsafeRunSync().toString())
   }
 }
