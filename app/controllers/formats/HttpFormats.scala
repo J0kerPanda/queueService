@@ -3,6 +3,7 @@ package controllers.formats
 import controllers.errors.{ErrorListResponse, ErrorResponse}
 import controllers.formats.request.{LoginRequest, RegistrationRequest}
 import controllers.formats.response.{GenericScheduleFormat, HostDataFormat, ScheduleListDataFormat}
+import db.DatabaseFormats.IdEntity
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
 import play.api.libs.json._
@@ -29,15 +30,21 @@ object HttpFormats {
     override def writes(p: Period): JsValue = JsString(p.toString())
   }
 
+  implicit def IntEntityWriteConverter[D](obj: IdEntity[Int, D])(implicit w: Writes[D]): JsValue = {
+    JsObject(("id", JsNumber(obj.id)) +: w.writes(obj.data).as[JsObject].fields)
+  }
+
+  implicit def LongEntityWriteConverter[D](obj: IdEntity[Long, D])(implicit w: Writes[D]): JsValue = {
+    JsObject(("id", JsNumber(obj.id)) +: w.writes(obj.data).as[JsObject].fields)
+  }
+
   implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
 
-  implicit val userWrite: Writes[User] = (o: User) => {
-    JsObject(("id", JsNumber(o.id)) +: userDataWrite.writes(o.data).as[JsObject].fields)
-  }
+  implicit val userWrite: Writes[User] = (o: User) => IntEntityWriteConverter(o)
 
   implicit val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
 
-  implicit val appointmentWrite: Writes[Appointment] = Json.writes[Appointment]
+  implicit val appointmentWrite: Writes[Appointment] = (o: Appointment) => LongEntityWriteConverter(o)
 
   implicit val errorResponseWrite: Writes[ErrorResponse] = Json.writes[ErrorResponse]
 
@@ -45,21 +52,21 @@ object HttpFormats {
 
   implicit val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
 
-  implicit val scheduleDatesWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
+  implicit val scheduleListDataWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
 
   implicit val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
 
   implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
 
-  implicit class Converter[T](obj: T)(implicit w: Writes[T]) {
+  implicit class WriteConverter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 
-  implicit class OptionConverter[T](obj: Option[T])(implicit w: Writes[T]) {
+  implicit class OptionWriteConverter[T](obj: Option[T])(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
   }
 
-  implicit class ListConverter[T](objs: List[T])(implicit w: Writes[T]) {
+  implicit class ListWriteConverter[T](objs: List[T])(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(objs)
   }
 
@@ -106,5 +113,7 @@ object HttpFormats {
 
   implicit val userInputDataRead: Reads[RegistrationRequest] = Json.reads[RegistrationRequest]
 
-  implicit val customScheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
+  implicit val scheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
+
+  implicit val repeatedScheduleDataRead: Reads[RepeatedScheduleData] = Json.reads[RepeatedScheduleData]
 }

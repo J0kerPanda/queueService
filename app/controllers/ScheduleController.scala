@@ -8,7 +8,7 @@ import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
 import db.data.User.UserId
-import db.data.{HostMeta, Schedule, ScheduleData}
+import db.data._
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.LocalDate
@@ -28,6 +28,24 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
     extractJsObject[ScheduleData] { sd =>
 
       Schedule
+        .insert(sd)
+        .transact(cu.transactor)
+        .attempt
+        .unsafeRunSync() match {
+
+        case Left(err) =>
+          Logger.error("schedule error", err)
+          ErrorResponses.invalidScheduleData
+
+        case Right(id) => Created(id.toString)
+      }
+    }
+  }
+
+  def createRepeat = Action { implicit r =>
+    extractJsObject[RepeatedScheduleData] { sd =>
+
+      RepeatedSchedule
         .insert(sd)
         .transact(cu.transactor)
         .attempt

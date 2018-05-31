@@ -6,6 +6,7 @@ import controllers.formats.request.{LoginRequest, RegistrationRequest}
 import controllers.formats.response.HostDataFormat
 import controllers.util.AuthUtils._
 import controllers.util.ControllerUtils._
+import db.DatabaseFormats.IdEntity
 import db.DbConnectionUtils
 import db.data.User.UserId
 import db.data.{HostMeta, User, UserData}
@@ -26,7 +27,8 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
         .transact(cu.transactor)
         .unsafeRunSync() match {
 
-          case Some(user) => Ok(user.toJson).addSession(user.id)
+          case Some(user) if !user.data.isBlocked =>
+            Ok(user.toJson).addSession(user.id)
 
           case None => ErrorResponses.loginFailed
       }
@@ -37,7 +39,7 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
     extractJsObject[RegistrationRequest] { inputData =>
 
     //todo unique constraint errors
-    val user = UserData(
+      val user = UserData(
         firstName = inputData.firstName,
         surname = inputData.surname,
         patronymic = inputData.patronymic,

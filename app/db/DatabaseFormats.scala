@@ -9,7 +9,7 @@ import org.postgresql.util.{PGInterval, PGTime}
 
 object DatabaseFormats {
 
-  trait IdEntity[K, V <: (Product with Serializable)] {
+  trait IdEntity[K, V] {
     def id: K
     def data: V
   }

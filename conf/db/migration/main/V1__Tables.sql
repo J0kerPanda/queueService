@@ -30,7 +30,7 @@ CREATE TABLE "HostMeta" (
 
 -- todo intersection constraints?
 ---- Repeat schedule
-CREATE TABLE "RepeatSchedule" (
+CREATE TABLE "RepeatedSchedule" (
   id SERIAL PRIMARY KEY,
   hostId INT REFERENCES "HostMeta"
     ON UPDATE RESTRICT
@@ -49,7 +49,7 @@ CREATE TABLE "Schedule" (
   hostId INT REFERENCES "HostMeta"
     ON UPDATE RESTRICT
     ON DELETE CASCADE,
-  repeatId INT REFERENCES "RepeatSchedule"
+  repeatId INT REFERENCES "RepeatedSchedule"
     ON UPDATE CASCADE
     ON DELETE SET NULL
     NULL,

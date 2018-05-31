@@ -26,7 +26,7 @@ object ControllerUtils {
                              r: Reads[T],
                              ec: ExecutionContext): Future[Result] = req.body.asJson match {
 
-      case Some(j) => println(j); extractor(j.as[T])
+      case Some(j) => extractor(j.as[T])
 
       case json => Future.successful(ErrorResponses.badJson(json.toString))
     }
