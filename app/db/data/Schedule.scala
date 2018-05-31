@@ -48,7 +48,7 @@ object Schedule {
   }
 
   def selectInPeriod(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[Schedule]] = {
-    (selectSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to"))
+    (selectSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to", fr"isblocked = FALSE"))
       .query[Schedule]
       .to[List]
   }

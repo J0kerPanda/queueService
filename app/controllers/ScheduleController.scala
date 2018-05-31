@@ -1,6 +1,7 @@
 package controllers
 
 import akka.actor.ActorSystem
+import cats.free.Free
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.response.{GenericScheduleFormat, ScheduleListDataFormat}
@@ -67,20 +68,28 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
 
   def getSchedules(hostId: UserId): Action[AnyContent] = Action {
 
-    HostMeta.selectById(hostId).transact(cu.transactor).unsafeRunSync().map(_.appointmentPeriod)
-      .map { period =>
-        val from = new LocalDate()
-        val to = from.plus(period.toStandardDays)
-        Ok(ScheduleListDataFormat(
-          hostId = hostId,
-          period = period,
-          schedules = Schedule
+    HostMeta.selectById(hostId)
+      .flatMap[Option[ScheduleListDataFormat]] {
+        case None => Free.pure(None)
+
+        case Some(hm) =>
+
+          val from = new LocalDate()
+          val to = from.plus(hm.appointmentPeriod.toStandardDays)
+          Schedule
             .selectInPeriod(hostId, from, to)
-            .transact(cu.transactor)
-            .unsafeRunSync()
-            .map(_.data.into[GenericScheduleFormat].transform)
-        ).toJson)
+            .map(schedules =>
+              Some(ScheduleListDataFormat(
+                hostId = hostId,
+                period = hm.appointmentPeriod,
+                schedules = schedules.map(_.data.into[GenericScheduleFormat].transform
+              )
+            ))
+          )
       }
+      .transact(cu.transactor)
+      .unsafeRunSync()
+      .map(res => Ok(res.toJson))
       .getOrElse(ErrorResponses.invalidHostUser(hostId))
   }
 
