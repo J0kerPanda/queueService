@@ -1,5 +1,6 @@
 package db.data
 
+import cats.data.NonEmptyList
 import db.DatabaseFormats._
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
@@ -19,6 +20,21 @@ object Schedule {
       .update
       .withUniqueGeneratedKeys("id")
   }
+
+  def updateBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
+    val values = ss
+      .map(s =>
+        fr"${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place}"
+      )
+
+
+    (sql"""INSERT INTO "Schedule" (hostid, date, start, "end", appointmentduration, place) VALUES """
+      ++ values.foldSmash(fr"", fr", ", fr""))
+      .update
+      .withGeneratedKeysWithChunkSize[ScheduleId]("id")(values.size)
+      .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
+  }
+
 
   def select(id: ScheduleId): ConnectionIO[Option[Schedule]] = {
     (selectSql ++ fr"WHERE id = $id")

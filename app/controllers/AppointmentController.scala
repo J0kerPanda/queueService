@@ -59,8 +59,8 @@ class AppointmentController @Inject()(ab: ActionBuilders,
 
       case Nil => Future.successful(BadRequest) // toto error
 
-      case req =>
-        Appointment.selectScheduleIds(NonEmptyList.of(req.head, req.tail :_*))
+      case head :: tail =>
+        Appointment.selectScheduleIds(NonEmptyList.of(head, tail :_*))
           .transact(cu.transactor)
           .unsafeToFuture()
           .map(r => Ok(r.toJson))
