@@ -2,6 +2,7 @@ package db.data
 
 import cats.data.NonEmptyList
 import db.DatabaseFormats._
+import db.data.RepeatedSchedule.RepeatedScheduleId
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
 import doobie._
@@ -13,10 +14,12 @@ object Schedule {
 
   type ScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, date, start, "end", appointmentduration, place FROM "Schedule" """
+  private val selectSql = sql"""SELECT id, hostid, repeatid, date, start, "end", appointmentduration, place FROM "Schedule" """
+
+  private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, start, "end", appointmentduration, place) VALUES """
 
   def insert(s: ScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    sql"""INSERT INTO "Schedule" (hostid, date, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
+    (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -24,12 +27,10 @@ object Schedule {
   def updateBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
     val values = ss
       .map(s =>
-        fr"${s.hostId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place}"
+        fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
       )
 
-
-    (sql"""INSERT INTO "Schedule" (hostid, date, start, "end", appointmentduration, place) VALUES """
-      ++ values.foldSmash(fr"", fr", ", fr""))
+    (insertSql ++ values.foldSmash(fr"", fr", ", fr""))
       .update
       .withGeneratedKeysWithChunkSize[ScheduleId]("id")(values.size)
       .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
@@ -51,6 +52,7 @@ object Schedule {
 case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[ScheduleId, ScheduleData]
 
 case class ScheduleData(hostId: UserId,
+                        repeatId: RepeatedScheduleId,
                         date: LocalDate,
                         start: LocalTime,
                         end: LocalTime,

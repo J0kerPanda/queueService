@@ -8,8 +8,8 @@ import db.data.User.UserId
 import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import org.joda.time.{LocalDate, LocalTime, Period}
 import io.scalaland.chimney.dsl._
+import org.joda.time.{LocalDate, LocalTime, Period}
 
 object RepeatedSchedule {
 
@@ -17,8 +17,10 @@ object RepeatedSchedule {
 
   private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place FROM "RepeatedSchedule" """
 
+  private val insertSql = sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES """
+
   def insert(s: RepeatedScheduleData): ConnectionIO[RepeatedScheduleId] = {
-    sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES (${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"""
+    (insertSql ++ fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -26,11 +28,10 @@ object RepeatedSchedule {
   def updateBatch(ss: NonEmptyList[RepeatedScheduleData]):  ConnectionIO[List[RepeatedScheduleId]] = {
     val values = ss
       .map(s =>
-        fr"${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place}"
+        fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
       )
 
-
-    (sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES """ ++ values.foldSmash(fr"", fr", ", fr""))
+    (insertSql ++ values.foldSmash(fr"", fr", ", fr""))
       .update
       .withGeneratedKeysWithChunkSize[RepeatedScheduleId]("id")(values.size)
       .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
@@ -50,38 +51,41 @@ object RepeatedSchedule {
       case Nil => Free.pure(Nil)
 
       case head :: tail =>
-        val transformed = NonEmptyList.of(head, tail :_*).map(_.data)
+        val transformed = NonEmptyList.of(head, tail :_*)
         for {
-          gen <- Schedule.updateBatch(transformed.flatMap { rsd =>
-            val startDate = rsd.repeatDate.plus(rsd.repeatPeriod)
-            generateSchedules(rsd, startDate, dateLimit, NonEmptyList.of(generateSchedule(rsd, startDate)))
+          gen <- Schedule.updateBatch(transformed.flatMap { rs =>
+            val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
+            generateSchedules(rs, startDate, dateLimit, NonEmptyList.of(generateSchedule(rs, startDate)))
           })
-          _ <- updateBatch(transformed.map(rsd =>
-            rsd.copy(repeatDate = getNewRepeatDate(rsd.repeatDate, rsd.repeatPeriod, dateLimit)))
+          _ <- updateBatch(transformed.map(rs =>
+            rs.data.copy(repeatDate = getNewRepeatDate(rs.data.repeatDate, rs.data.repeatPeriod, dateLimit)))
           )
         } yield gen
     }
   }
 
-  private def generateSchedules(rsd: RepeatedScheduleData,
+  private def generateSchedules(rs: RepeatedSchedule,
                                 currentDate: LocalDate,
                                 dateLimit: LocalDate,
                                 acc: NonEmptyList[ScheduleData]): NonEmptyList[ScheduleData] = {
 
     if (currentDate.isBefore(dateLimit)) {
       generateSchedules(
-        rsd,
-        currentDate.plus(rsd.repeatPeriod),
+        rs,
+        currentDate.plus(rs.data.repeatPeriod),
         dateLimit,
-        generateSchedule(rsd, currentDate.plus(rsd.repeatPeriod)) :: acc
+        generateSchedule(rs, currentDate.plus(rs.data.repeatPeriod)) :: acc
       )
     } else {
       acc.reverse //todo ?
     }
   }
 
-  private def generateSchedule(rsd: RepeatedScheduleData, date: LocalDate): ScheduleData = {
-    rsd.into[ScheduleData].withFieldConst(_.date, date).transform
+  private def generateSchedule(rs: RepeatedSchedule, date: LocalDate): ScheduleData = {
+    rs.data.into[ScheduleData]
+      .withFieldConst(_.date, date)
+      .withFieldConst(_.repeatId, rs.id)
+      .transform
   }
 
   private def getNewRepeatDate(currentDate: LocalDate, repeatPeriod: Period, startDate: LocalDate): LocalDate = {
