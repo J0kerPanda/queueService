@@ -75,20 +75,18 @@ class UserController @Inject()(ab: ActionBuilders,
       r <- HostMeta.insert(HostMeta(id, Period.days(31)))
     } yield r
 
-    tr.transact(cu.transactor).unsafeToFuture().map(i => Ok(i.toString))
+    tr.transact(cu.transactor).unsafeToFuture().map(_ => Ok)
   }
 
-  def get(id: Int) = Action {
-    Ok(User.selectById(id).transact(cu.transactor).unsafeRunSync().toJson)
+  def get(id: Int): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    User.selectById(id).transact(cu.transactor).unsafeToFuture().map(u => Ok(u.toJson))
   }
 
-  def getHosts = Action {
-    Ok(User.selectHosts()
+  def getHosts: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    User.selectHosts()
       .transact(cu.transactor)
-      .unsafeRunSync()
-      .map(u => u.data.into[HostDataFormat].withFieldConst(_.id, u.id).transform)
-      .toJson
-    )
+      .unsafeToFuture()
+      .map(users => Ok(users.map(u => u.data.into[HostDataFormat].withFieldConst(_.id, u.id).transform).toJson))
   }
 
   def test = Action {
