@@ -1,10 +1,13 @@
 package controllers
 
+import akka.actor.ActorSystem
+import be.objectify.deadbolt.scala.ActionBuilders
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.request.{LoginRequest, RegistrationRequest}
 import controllers.formats.response.HostDataFormat
 import controllers.util.AuthUtils._
+import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DatabaseFormats.IdEntity
 import db.DbConnectionUtils
@@ -14,18 +17,28 @@ import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.Period
-import play.api.mvc.{AbstractController, ControllerComponents}
+import play.api.mvc._
 import io.scalaland.chimney.dsl._
 
+import scala.concurrent.ExecutionContext
+
 @Singleton
-class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) extends AbstractController(cc) {
+class UserController @Inject()(ab: ActionBuilders,
+                               bp: PlayBodyParsers,
+                               cu: DbConnectionUtils,
+                               cc: ControllerComponents,
+                               system: ActorSystem) extends AbstractController(cc) {
 
-  def login = Action { implicit r =>
-    extractJsObject[LoginRequest] { ld =>
+  private implicit val _bp: PlayBodyParsers = bp
+  private implicit val _ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
-      User.login(ld.email, ld.password)
+  def login: Action[AnyContent] = Action.async { implicit r =>
+    extractJsObjectAsync[LoginRequest] { lr =>
+
+      User.login(lr.email, lr.password)
         .transact(cu.transactor)
-        .unsafeRunSync() match {
+        .unsafeToFuture()
+        .map {
 
           case Some(user) if !user.data.isBlocked =>
             Ok(user.toJson).addSession(user.id)
@@ -35,16 +48,16 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
     }
   }
 
-  def register = Action { implicit request =>
-    extractJsObject[RegistrationRequest] { inputData =>
+  def register: Action[AnyContent] = Action.async { implicit r =>
+    extractJsObjectAsync[RegistrationRequest] { rr =>
 
-    //todo unique constraint errors
+      //todo unique constraint errors
       val user = UserData(
-        firstName = inputData.firstName,
-        surname = inputData.surname,
-        patronymic = inputData.patronymic,
-        password = inputData.password,
-        email = inputData.email
+        firstName = rr.firstName,
+        surname = rr.surname,
+        patronymic = rr.patronymic,
+        password = rr.password,
+        email = rr.email
       )
 
       val tr: ConnectionIO[Option[User]] = for {
@@ -52,17 +65,17 @@ class UserController @Inject()(cu: DbConnectionUtils, cc: ControllerComponents) 
         u <- User.selectById(id)
       } yield u
 
-      Created(tr.transact(cu.transactor).unsafeRunSync().toJson)
+      tr.transact(cu.transactor).unsafeToFuture().map(u => Created(u.toJson))
     }
   }
 
-  def promote(id: UserId) = Action {
+  def promote(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
     val tr: ConnectionIO[UserId] = for {
       _ <- User.promote(id)
       r <- HostMeta.insert(HostMeta(id, Period.days(31)))
     } yield r
 
-    Ok(tr.transact(cu.transactor).unsafeRunSync().toString)
+    tr.transact(cu.transactor).unsafeToFuture().map(i => Ok(i.toString))
   }
 
   def get(id: Int) = Action {

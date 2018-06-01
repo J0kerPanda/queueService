@@ -74,7 +74,6 @@ case class GenericAppointment(visitorId: UserId,
                               visitorFirstName: String,
                               visitorSurname: String,
                               visitorPatronymic: String,
-                              visitorFullName: String,
                               start: LocalTime,
                               end: LocalTime)
 

@@ -82,10 +82,11 @@ class ScheduleController @Inject()(cu: DbConnectionUtils, cc: ControllerComponen
               Some(ScheduleListDataFormat(
                 hostId = hostId,
                 period = hm.appointmentPeriod,
-                schedules = schedules.map(_.data.into[GenericScheduleFormat].transform
-              )
-            ))
-          )
+                schedules = schedules.map(
+                  s => s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
+                )
+              ))
+            )
       }
       .transact(cu.transactor)
       .unsafeRunSync()
