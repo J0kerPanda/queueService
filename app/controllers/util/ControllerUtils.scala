@@ -29,15 +29,4 @@ object ControllerUtils {
 
       case json => Future.successful(ErrorResponses.badJson(json.toString))
     }
-
-  def extractJsObjectAuth[T](extractor: T => Future[Result])
-                            (implicit
-                             req: AuthenticatedRequest[AnyContent],
-                             r: Reads[T],
-                             ec: ExecutionContext): Future[Result] = req.body.asJson match {
-
-      case Some(j) => extractor(j.as[T])
-
-      case json => Future.successful(ErrorResponses.badJson(json.toString))
-    }
 }

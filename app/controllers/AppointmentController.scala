@@ -28,7 +28,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   //todo unique constraint errors
 
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    extractJsObjectAuth[AppointmentData] { req =>
+    extractJsObjectAsync[AppointmentData] { req =>
 
       Appointment.insert(req)
         .transact(cu.transactor)
@@ -55,7 +55,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   }
 
   def byScheduleIds: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    extractJsObjectAuth[List[ScheduleId]] {
+    extractJsObjectAsync[List[ScheduleId]] {
 
       case Nil => Future.successful(BadRequest) // toto error
 
