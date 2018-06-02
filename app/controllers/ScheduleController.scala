@@ -97,6 +97,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       }
       .transact(cu.transactor)
       .unsafeToFuture()
-      .map(_.map(res => Ok(res.toJson)).getOrElse(ErrorResponses.invalidHostUser(hostId)))
+      .map(_.map(res => { res.schedules.foreach(_.productIterator.foreach(println)); println(res.toJson); Ok(res.toJson) }).getOrElse(ErrorResponses.invalidHostUser(hostId)))
   }
 }

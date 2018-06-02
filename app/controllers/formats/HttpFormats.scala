@@ -38,25 +38,27 @@ object HttpFormats {
     JsObject(("id", JsNumber(obj.id)) +: w.writes(obj.data).as[JsObject].fields)
   }
 
-  implicit val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
+  implicit lazy val userDataWrite: Writes[UserData] = (o: UserData) => Json.writes[UserData].writes(o) - "password"
 
-  implicit val userWrite: Writes[User] = (o: User) => IntEntityWriteConverter(o)
+  implicit lazy val userWrite: Writes[User] = (o: User) => IntEntityWriteConverter(o)
 
-  implicit val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
+  implicit lazy val appointmentDataWrite: Writes[AppointmentData] = Json.writes[AppointmentData]
 
-  implicit val appointmentWrite: Writes[Appointment] = (o: Appointment) => LongEntityWriteConverter(o)
+  implicit lazy val appointmentWrite: Writes[Appointment] = (o: Appointment) => LongEntityWriteConverter(o)
 
-  implicit val errorResponseWrite: Writes[ErrorResponse] = Json.writes[ErrorResponse]
+  implicit lazy val errorResponseWrite: Writes[ErrorResponse] = Json.writes[ErrorResponse]
 
-  implicit val errorListResponseWrite: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
+  implicit lazy val errorListResponseWrite: Writes[ErrorListResponse] = Json.writes[ErrorListResponse]
 
-  implicit val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
+  implicit lazy val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
 
-  implicit val scheduleListDataWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
+  implicit lazy val appointmentIntervalWrite: Writes[AppointmentInterval] = Json.writes[AppointmentInterval]
 
-  implicit val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
+  implicit lazy val scheduleListDataWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
 
-  implicit val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
+  implicit lazy val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
+
+  implicit lazy val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
 
   implicit class WriteConverter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)
@@ -107,13 +109,15 @@ object HttpFormats {
     }
   }
 
-  implicit val appointmentDataRead: Reads[AppointmentData] = Json.reads[AppointmentData]
+  implicit lazy val appointmentDataRead: Reads[AppointmentData] = Json.reads[AppointmentData]
 
-  implicit val loginDataRead: Reads[LoginRequest] = Json.reads[LoginRequest]
+  implicit lazy val loginDataRead: Reads[LoginRequest] = Json.reads[LoginRequest]
 
-  implicit val userInputDataRead: Reads[RegistrationRequest] = Json.reads[RegistrationRequest]
+  implicit lazy val userInputDataRead: Reads[RegistrationRequest] = Json.reads[RegistrationRequest]
 
-  implicit val scheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
+  implicit lazy val appointmentIntervalRead: Reads[AppointmentInterval] = Json.reads[AppointmentInterval]
 
-  implicit val repeatedScheduleDataRead: Reads[RepeatedScheduleData] = Json.reads[RepeatedScheduleData]
+  implicit lazy val repeatedScheduleDataRead: Reads[RepeatedScheduleData] = Json.reads[RepeatedScheduleData]
+
+  implicit lazy val scheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
 }

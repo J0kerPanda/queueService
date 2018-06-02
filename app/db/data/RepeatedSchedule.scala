@@ -15,14 +15,14 @@ object RepeatedSchedule {
 
   type RepeatedScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place FROM "RepeatedSchedule" """
+  private val selectSql = sql"""SELECT id, hostid, repeatdate, repeatperiod, appointmentintervals, appointmentduration, place FROM "RepeatedSchedule" """
 
-  private val insertSql = sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, start, "end", appointmentduration, place) VALUES """
+  private val insertSql = sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, appointmentintervals, appointmentduration, place) VALUES """
 
   private val updateSql = sql"""UPDATE "RepeatedSchedule" AS RS """
 
   def insert(s: RepeatedScheduleData): ConnectionIO[RepeatedScheduleId] = {
-    (insertSql ++ fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
+    (insertSql ++ fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -30,7 +30,7 @@ object RepeatedSchedule {
   def insertBatch(ss: NonEmptyList[RepeatedScheduleData]):  ConnectionIO[List[RepeatedScheduleId]] = {
     val values = ss
       .map(s =>
-        fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
+        fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})"
       )
 
     (insertSql ++ values.foldSmash(fr"", fr", ", fr""))
@@ -115,8 +115,7 @@ case class RepeatedSchedule(id: ScheduleId, data: RepeatedScheduleData) extends 
 case class RepeatedScheduleData(hostId: UserId,
                                 repeatDate: LocalDate,
                                 repeatPeriod: Period,
-                                start: LocalTime,
-                                end: LocalTime,
+                                appointmentIntervals: List[AppointmentInterval],
                                 appointmentDuration: Period,
                                 place: String)
 

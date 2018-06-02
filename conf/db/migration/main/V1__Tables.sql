@@ -47,8 +47,7 @@ CREATE TABLE "RepeatedSchedule" (
     ON DELETE CASCADE,
   repeatDate DATE NOT NULL,
   repeatPeriod INTERVAL NOT NULL DEFAULT interval '7 day',
-  start TIME NOT NULL,
-  "end" TIME NOT NULL CHECK ("end" > start),
+  apppointmentIntervals timerange[] NOT NULL,
   appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL
 );
@@ -64,8 +63,7 @@ CREATE TABLE "Schedule" (
     ON DELETE SET NULL
     NULL,
   date DATE NOT NULL,
-  start time NOT NULL,
-  "end" time NOT NULL CHECK ("end" > start),
+  appointmentIntervals timerange[] NOT NULL,
   appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL,
   isBlocked BOOLEAN NOT NULL DEFAULT FALSE

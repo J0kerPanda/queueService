@@ -2,7 +2,6 @@ package controllers
 
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
-import cats.data.NonEmptyList
 import controllers.formats.HttpFormats._
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
@@ -13,7 +12,7 @@ import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import play.api.mvc._
 
-import scala.concurrent.{ExecutionContext, Future}
+import scala.concurrent.ExecutionContext
 
 @Singleton
 class AppointmentController @Inject()(ab: ActionBuilders,
@@ -54,16 +53,10 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
-  def byScheduleIds: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    extractJsObjectAsync[List[ScheduleId]] {
-
-      case Nil => Future.successful(BadRequest) // toto error
-
-      case head :: tail =>
-        Appointment.selectScheduleIds(NonEmptyList.of(head, tail :_*))
-          .transact(cu.transactor)
-          .unsafeToFuture()
-          .map(r => Ok(r.toJson))
-    }
+  def byScheduleId(id: ScheduleId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    Appointment.selectByScheduleId(id)
+      .transact(cu.transactor)
+      .unsafeToFuture()
+      .map(r => Ok(r.toJson))
   }
 }

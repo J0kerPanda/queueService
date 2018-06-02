@@ -55,8 +55,8 @@ object Appointment {
       .to[List]
   }
 
-  def selectScheduleIds(scheduleIds: NonEmptyList[ScheduleId]): ConnectionIO[List[GenericAppointment]] = {
-    (sql"""SELECT visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid """ ++ Fragments.whereAnd(Fragments.in(fr"scheduleid", scheduleIds)))
+  def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericAppointment]] = {
+    sql"""SELECT visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid WHERE scheduleid = $scheduleId"""
       .query[GenericAppointment]
       .to[List]
   }

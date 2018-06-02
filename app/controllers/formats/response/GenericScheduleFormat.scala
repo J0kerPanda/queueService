@@ -1,11 +1,11 @@
 package controllers.formats.response
 
+import db.data.AppointmentInterval
 import db.data.Schedule.ScheduleId
-import org.joda.time.{LocalDate, LocalTime, Period}
+import org.joda.time.{LocalDate, Period}
 
 case class GenericScheduleFormat(id: ScheduleId,
                                  date: LocalDate,
-                                 start: LocalTime,
-                                 end: LocalTime,
+                                 appointmentIntervals: List[AppointmentInterval],
                                  appointmentDuration: Period,
                                  place: String)

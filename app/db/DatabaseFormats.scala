@@ -2,16 +2,10 @@ package db
 
 import java.sql.{Date, Timestamp}
 
-import cats.data.NonEmptyList
 import db.data.AppointmentInterval
-import doobie.enum.JdbcType
-import doobie.implicits._
-import doobie.postgres.free.Embedded.PGConnection
 import doobie.postgres.implicits.pgEnumStringOpt
 import doobie.util.meta.Meta
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
-import org.postgresql.core.BaseConnection
-import org.postgresql.jdbc.PgArray
 import org.postgresql.util.{PGInterval, PGTime, PGobject}
 
 object DatabaseFormats {
@@ -52,7 +46,6 @@ object DatabaseFormats {
   )
 
   private def parseTimeRange(str: String): AppointmentInterval = {
-    println(str)
     val se = str.drop(1).dropRight(1).split(",")
     AppointmentInterval(LocalTime.parse(se(0)), LocalTime.parse(se(1)))
   }
@@ -77,7 +70,7 @@ object DatabaseFormats {
       .split("\",\"")
       .map(parseTimeRange)
       .toList,
-    aiList => s"{\"${aiList.map(convertToTimeRange).mkString("\",\"")}\"}"
+    aiList => s"""{"${aiList.map(convertToTimeRange).mkString("\",\"")}"}"""
   )
 
   implicit val LocalTimeMeta: Meta[LocalTime] = Meta.TimeMeta.xmap(

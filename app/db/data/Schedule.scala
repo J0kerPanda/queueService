@@ -8,22 +8,22 @@ import db.data.User.UserId
 import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
-import org.joda.time.{LocalDate, LocalTime, Period}
+import org.joda.time.{LocalDate, Period}
 
 object Schedule {
 
   type ScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, repeatid, date, start, "end", appointmentduration, place FROM "Schedule" """
+  private val selectSql = sql"""SELECT id, hostid, repeatid, date, appointmentintervals, appointmentduration, place FROM "Schedule" """
 
-  private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, start, "end", appointmentduration, place) VALUES """
+  private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, appointmentintervals, appointmentduration, place) VALUES """
 
   private val updateSql = sql"""UPDATE "Schedule" AS S """
 
   private val deleteSql = sql"""DELETE FROM "Schedule" """
 
   def insert(s: ScheduleData): ConnectionIO[Option[ScheduleId]] = {
-    (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})")
+    (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -31,7 +31,7 @@ object Schedule {
   def insertBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
     val values = ss
       .map(s =>
-        fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.start}, ${s.end}, ${s.appointmentDuration}, ${s.place})"
+        fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})"
       )
 
     (insertSql ++ values.foldSmash(fr"", fr", ", fr""))
@@ -66,7 +66,6 @@ case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[Schedul
 case class ScheduleData(hostId: UserId,
                         repeatId: Option[RepeatedScheduleId],
                         date: LocalDate,
-                        start: LocalTime,
-                        end: LocalTime,
+                        appointmentIntervals: List[AppointmentInterval],
                         appointmentDuration: Period,
                         place: String)
