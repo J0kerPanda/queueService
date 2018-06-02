@@ -80,7 +80,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
         case None => Free.pure(None)
 
         case Some(hm) =>
-
           val from = new LocalDate()
           val to = from.plus(hm.appointmentPeriod.toStandardDays)
           Schedule
@@ -97,6 +96,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       }
       .transact(cu.transactor)
       .unsafeToFuture()
-      .map(_.map(res => { res.schedules.foreach(_.productIterator.foreach(println)); println(res.toJson); Ok(res.toJson) }).getOrElse(ErrorResponses.invalidHostUser(hostId)))
+      .map(_.map(res => Ok(res.toJson)).getOrElse(ErrorResponses.invalidHostUser(hostId)))
   }
 }
