@@ -90,6 +90,15 @@ class UserController @Inject()(ab: ActionBuilders,
   }
 
   def test = Action {
+    import db.DatabaseFormats._
+    import doobie._
+    import doobie.implicits._
+    sql"""SELECT appointmentintervals FROM "Schedule""""
+      .query[List[AppointmentInterval]]
+      .to[List]
+      .transact(cu.transactor)
+      .unsafeRunSync()
+      .foreach(println)
     Ok
   }
 }

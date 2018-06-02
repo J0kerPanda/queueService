@@ -99,6 +99,4 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
       .map(_.map(res => Ok(res.toJson)).getOrElse(ErrorResponses.invalidHostUser(hostId)))
   }
-
-  //todo add default, remove default -> composition
 }
