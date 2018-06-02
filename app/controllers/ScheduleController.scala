@@ -89,8 +89,8 @@ class ScheduleController @Inject()(ab: ActionBuilders,
                 hostId = hostId,
                 period = hm.appointmentPeriod,
                 schedules = schedules.map(
-                  s => s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
-                )
+                  s => s.data.date -> s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
+                ).toMap
               ))
             )
       }

@@ -15,19 +15,19 @@ object HttpFormats {
   // Write formats
 
   implicit object localTimeWrite extends Writes[LocalTime] {
-    override def writes(time: LocalTime): JsValue = JsString(time.toString())
+    override def writes(time: LocalTime): JsString = JsString(time.toString())
   }
 
   implicit object localDateWrite extends Writes[LocalDate] {
-    override def writes(date: LocalDate): JsValue = JsString(date.toString())
+    override def writes(date: LocalDate): JsString = JsString(date.toString())
   }
 
   implicit object dateTimeWrite extends Writes[DateTime] {
-    override def writes(dt: DateTime): JsValue = JsString(dt.toString())
+    override def writes(dt: DateTime): JsString = JsString(dt.toString())
   }
 
   implicit object periodWrite extends Writes[Period] {
-    override def writes(p: Period): JsValue = JsString(p.toString())
+    override def writes(p: Period): JsString = JsString(p.toString())
   }
 
   implicit def IntEntityWriteConverter[D](obj: IdEntity[Int, D])(implicit w: Writes[D]): JsValue = {
@@ -53,6 +53,12 @@ object HttpFormats {
   implicit lazy val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
 
   implicit lazy val appointmentIntervalWrite: Writes[AppointmentInterval] = Json.writes[AppointmentInterval]
+
+  implicit object scheduleMapWrite extends Writes[Map[LocalDate, GenericScheduleFormat]] {
+    override def writes(o: Map[LocalDate, GenericScheduleFormat]): JsObject = JsObject(
+      o.map { case (k, v) => localDateWrite.writes(k).value -> genericScheduleWrite.writes(v) }
+    )
+  }
 
   implicit lazy val scheduleListDataWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
 
