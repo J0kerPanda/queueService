@@ -1,16 +1,14 @@
 package db.data
 
-import cats.data.NonEmptyList
 import cats.free.Free
 import db.DatabaseFormats._
 import db.data.Appointment.AppointmentId
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
-import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.postgres.implicits._
-import org.joda.time.{LocalDate, LocalTime}
+import org.joda.time.LocalTime
 
 object Appointment {
 
@@ -28,7 +26,6 @@ object Appointment {
       case Some(d) => Appointment.insert(AppointmentData(
         scheduleId,
         visitorId,
-        d.data.date,
         start,
         start.plus(d.data.appointmentDuration)
       )).map(Some(_))
@@ -38,7 +35,7 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (scheduleid, visitorId, date, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.date}, ${a.start}, ${a.end})"""
+    sql"""INSERT INTO "Appointment" (scheduleid, visitorId, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.start}, ${a.end})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
@@ -47,12 +44,6 @@ object Appointment {
     (selectSql ++ fr"WHERE id = $id")
       .query[Appointment]
       .option
-  }
-
-  def selectByIds(ids: NonEmptyList[AppointmentId]): ConnectionIO[List[Appointment]] = {
-    (selectSql ++ Fragments.whereAnd(Fragments.in(fr"id", ids)))
-      .query[Appointment]
-      .to[List]
   }
 
   def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericAppointment]] = {
@@ -64,7 +55,6 @@ object Appointment {
 
 case class AppointmentData(scheduleId: ScheduleId,
                            visitorId: UserId,
-                           date: LocalDate,
                            start: LocalTime,
                            end: LocalTime)
 
