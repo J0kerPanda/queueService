@@ -59,7 +59,7 @@ object Appointment {
   }
 
   def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericAppointment]] = {
-    sql"""SELECT visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" JOIN "User" AS V ON V.id = "Appointment".visitorid WHERE scheduleid = $scheduleId"""
+    sql"""SELECT A.id, visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" AS A JOIN "User" AS V ON V.id = A.visitorid WHERE scheduleid = $scheduleId"""
       .query[GenericAppointment]
       .to[List]
   }
@@ -72,7 +72,8 @@ case class AppointmentData(scheduleId: ScheduleId,
 
 case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntity[AppointmentId, AppointmentData]
 
-case class GenericAppointment(visitorId: UserId,
+case class GenericAppointment(id: AppointmentId,
+                              visitorId: UserId,
                               visitorFirstName: String,
                               visitorSurname: String,
                               visitorPatronymic: String,
