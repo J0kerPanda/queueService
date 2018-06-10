@@ -14,10 +14,11 @@ object Appointment {
 
   type AppointmentId = Long
 
-  private val selectSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment" """
+  private val selectSql = sql"""SELECT "id", scheduleid, visitorId, hostId, start, "end" FROM "Appointment" """
 
   def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
+                       hostId: UserId,
                        start: LocalTime): ConnectionIO[Option[AppointmentId]] = {
 
    Schedule
@@ -26,6 +27,7 @@ object Appointment {
       case Some(d) => Appointment.insert(AppointmentData(
         scheduleId,
         visitorId,
+        hostId,
         start,
         start.plus(d.data.appointmentDuration)
       )).map(Some(_))
@@ -35,13 +37,13 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (scheduleid, visitorId, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.start}, ${a.end})"""
+    sql"""INSERT INTO "Appointment" (scheduleid, visitorid, hostid, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.hostId}, ${a.start}, ${a.end})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
 
   def checkAppointmentUser(id: AppointmentId, userId: UserId): ConnectionIO[Option[Boolean]] = {
-    sql"""SELECT (visitorid = $userId OR hostid = $userId) FROM "Appointment" AS A JOIN "Schedule" S ON A.scheduleid = S.id WHERE A.id = $id"""
+    sql"""SELECT (visitorid = $userId OR hostid = $userId) FROM "Appointment""""
       .query[Boolean]
       .option
   }
@@ -58,6 +60,12 @@ object Appointment {
       .option
   }
 
+  def selectByUserId(id: UserId): ConnectionIO[List[Appointment]] = {
+    (selectSql ++ fr"WHERE visitorId = $id")
+      .query[Appointment]
+      .to[List]
+  }
+
   def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericAppointment]] = {
     sql"""SELECT A.id, visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" AS A JOIN "User" AS V ON V.id = A.visitorid WHERE scheduleid = $scheduleId"""
       .query[GenericAppointment]
@@ -67,6 +75,7 @@ object Appointment {
 
 case class AppointmentData(scheduleId: ScheduleId,
                            visitorId: UserId,
+                           hostId: UserId,
                            start: LocalTime,
                            end: LocalTime)
 
