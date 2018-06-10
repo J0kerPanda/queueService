@@ -9,7 +9,7 @@ import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import io.scalaland.chimney.dsl._
-import org.joda.time.{LocalDate, LocalTime, Period}
+import org.joda.time.{LocalDate, Period}
 
 object RepeatedSchedule {
 

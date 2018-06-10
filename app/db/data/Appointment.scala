@@ -40,6 +40,18 @@ object Appointment {
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
 
+  def checkAppointmentUser(id: AppointmentId, userId: UserId): ConnectionIO[Option[Boolean]] = {
+    sql"""SELECT (visitorid = $userId OR hostid = $userId) FROM "Appointment" AS A JOIN "Schedule" S ON A.scheduleid = S.id WHERE A.id = $id"""
+      .query[Boolean]
+      .option
+  }
+
+  def delete(id: AppointmentId): ConnectionIO[Int] = {
+    sql"""DELETE FROM "Appointment" WHERE id = $id"""
+      .update()
+      .run
+  }
+
   def selectById(id: AppointmentId): ConnectionIO[Option[Appointment]] = {
     (selectSql ++ fr"WHERE id = $id")
       .query[Appointment]

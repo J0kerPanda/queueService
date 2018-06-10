@@ -2,10 +2,13 @@ package controllers
 
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
+import cats.free.Free
+import controllers.auth.AuthUser
 import controllers.formats.HttpFormats._
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
+import db.data.Appointment.AppointmentId
 import db.data.Schedule.ScheduleId
 import db.data.{Appointment, AppointmentData}
 import doobie.implicits._
@@ -44,12 +47,25 @@ class AppointmentController @Inject()(ab: ActionBuilders,
     }
   }
 
-  def get(id: Long): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+  def get(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
     Appointment.selectById(id)
       .transact(cu.transactor)
       .map { r =>
         Ok(r.toJson).withSession(new Session())
       }
+      .unsafeToFuture()
+  }
+
+  def cancel(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
+    Appointment.checkAppointmentUser(id, r.subject.get.asInstanceOf[AuthUser].id)
+      .flatMap[Result] {
+        case Some(true) => Appointment.delete(id).map(_ => Ok)
+
+        case Some(false) => Free.pure(Forbidden)
+
+        case None => Free.pure(NotFound)
+      }
+      .transact(cu.transactor)
       .unsafeToFuture()
   }
 

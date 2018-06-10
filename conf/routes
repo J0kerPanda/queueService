@@ -12,6 +12,7 @@ GET     /api/user/:id                   controllers.UserController.get(id: Int)
 
 # Appointment
 POST    /api/appointment/create         controllers.AppointmentController.create
+POST    /api/appointment/delete/:id     controllers.AppointmentController.cancel(id: Long)
 GET     /api/appointment/list           controllers.AppointmentController.byScheduleId(scheduleId: Int)
 GET     /api/appointment/:id            controllers.AppointmentController.get(id: Long)
 

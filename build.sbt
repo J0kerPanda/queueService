@@ -50,9 +50,4 @@ libraryDependencies += "be.objectify" %% "deadbolt-scala" % Version.deadbolt
 //Chimney
 libraryDependencies += "io.scalaland" %% "chimney" % Version.chimney
 
-
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-
-
       
