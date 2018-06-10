@@ -5,7 +5,6 @@ import be.objectify.deadbolt.scala.ActionBuilders
 import cats.free.Free
 import controllers.auth.AuthUser
 import controllers.formats.HttpFormats._
-import controllers.formats.request.CreateAppointmentRequest
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
@@ -33,28 +32,20 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   //todo unique constraint errors
 
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    extractJsObjectAsync[CreateAppointmentRequest] { req =>
+    extractJsObjectAsync[AppointmentData] { req =>
 
-      Schedule.select(req.scheduleId)
-        .flatMap[Result] {
-          case Some(s) =>
-            Appointment
-              .insert(req.into[AppointmentData].withFieldConst(_.hostId, s.data.hostId).transform)
-              .map(_ => Ok)
-
-          case None =>
-            Free.pure(BadRequest)
-        }
+      Appointment.insert(req)
         .transact(cu.transactor)
         .attempt
+        .unsafeToFuture()
         .map {
+
           case Left(e) =>
             println(e)
             BadRequest //todo error
 
-          case Right(res) => res
+          case Right(_) => Ok
         }
-        .unsafeToFuture()
     }
   }
 

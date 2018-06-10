@@ -78,9 +78,6 @@ CREATE TABLE "Appointment" (
   visitorId INT NOT NULL REFERENCES "User" (id)
     ON UPDATE RESTRICT
     ON DELETE RESTRICT,
-  hostId INT NOT NULL REFERENCES "HostMeta" (id)
-    ON UPDATE RESTRICT
-    ON DELETE RESTRICT,
   date DATE NOT NULL,
   start TIME NOT NULL,
   "end" TIME NOT NULL CHECK ("end" > start)

@@ -8,13 +8,13 @@ import db.data.User.UserId
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import doobie.postgres.implicits._
-import org.joda.time.LocalTime
+import org.joda.time.{LocalDate, LocalTime}
 
 object Appointment {
 
   type AppointmentId = Long
 
-  private val selectSql = sql"""SELECT "id", scheduleid, visitorId, hostId, start, "end" FROM "Appointment" """
+  private val selectSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment" """
 
   def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
@@ -27,7 +27,6 @@ object Appointment {
       case Some(d) => Appointment.insert(AppointmentData(
         scheduleId,
         visitorId,
-        hostId,
         start,
         start.plus(d.data.appointmentDuration)
       )).map(Some(_))
@@ -37,13 +36,13 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (scheduleid, visitorid, hostid, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.hostId}, ${a.start}, ${a.end})"""
+    sql"""INSERT INTO "Appointment" (scheduleid, visitorid, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.start}, ${a.end})"""
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
 
   def checkAppointmentUser(id: AppointmentId, userId: UserId): ConnectionIO[Option[Boolean]] = {
-    sql"""SELECT (visitorid = $userId OR hostid = $userId) FROM "Appointment""""
+    sql"""SELECT (visitorid = $userId OR hostid = $userId) FROM "Appointment" AS A JOIN "Schedule" S ON A.scheduleid = S.id WHERE A.id = $id"""
       .query[Boolean]
       .option
   }
@@ -60,9 +59,9 @@ object Appointment {
       .option
   }
 
-  def selectByVisitorId(id: UserId): ConnectionIO[List[GenericHostAppointment]] = {
-    sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, start, "end" FROM "Appointment" AS A JOIN "User" AS U ON U.id = A.hostid WHERE visitorid = $id"""
-      .query[GenericHostAppointment]
+  def selectByVisitorId(id: UserId): ConnectionIO[List[HostAppointment]] = {
+    sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, date, start, "end" FROM "Appointment" AS A JOIN "Schedule" AS S ON A.scheduleid = S.id JOIN "User" AS U ON U.id = S.hostid WHERE visitorid = $id"""
+      .query[HostAppointment]
       .to[List]
   }
 
@@ -75,7 +74,6 @@ object Appointment {
 
 case class AppointmentData(scheduleId: ScheduleId,
                            visitorId: UserId,
-                           hostId: UserId,
                            start: LocalTime,
                            end: LocalTime)
 
@@ -89,12 +87,13 @@ case class GenericVisitorAppointment(id: AppointmentId,
                                      start: LocalTime,
                                      end: LocalTime)
 
-case class GenericHostAppointment(id: AppointmentId,
-                                  hostId: UserId,
-                                  hostFirstName: String,
-                                  hostSurname: String,
-                                  hostPatronymic: String,
-                                  start: LocalTime,
-                                  end: LocalTime)
+case class HostAppointment(id: AppointmentId,
+                           hostId: UserId,
+                           hostFirstName: String,
+                           hostSurname: String,
+                           hostPatronymic: String,
+                           date: LocalDate,
+                           start: LocalTime,
+                           end: LocalTime)
 
 
