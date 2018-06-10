@@ -80,8 +80,8 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
-  def byUserId(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-    Appointment.selectByUserId(id)
+  def byVisitorId(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    Appointment.selectByVisitorId(id)
       .transact(cu.transactor)
       .unsafeToFuture()
       .map(r => Ok(r.toJson))

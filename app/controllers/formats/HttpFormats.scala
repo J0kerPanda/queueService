@@ -64,7 +64,9 @@ object HttpFormats {
 
   implicit lazy val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
 
-  implicit lazy val genericAppointmentWrite: Writes[GenericAppointment] = Json.writes[GenericAppointment]
+  implicit lazy val genericVisitorAppointmentWrite: Writes[GenericVisitorAppointment] = Json.writes[GenericVisitorAppointment]
+
+  implicit lazy val genericHostAppointmentWrite: Writes[GenericHostAppointment] = Json.writes[GenericHostAppointment]
 
   implicit class WriteConverter[T](obj: T)(implicit w: Writes[T]) {
     def toJson: JsValue = Json.toJson(obj)

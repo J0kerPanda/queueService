@@ -60,15 +60,15 @@ object Appointment {
       .option
   }
 
-  def selectByUserId(id: UserId): ConnectionIO[List[Appointment]] = {
-    (selectSql ++ fr"WHERE visitorId = $id")
-      .query[Appointment]
+  def selectByVisitorId(id: UserId): ConnectionIO[List[GenericHostAppointment]] = {
+    sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, start, "end" FROM "Appointment" AS A JOIN "User" AS U ON U.id = A.hostid WHERE visitorid = $id"""
+      .query[GenericHostAppointment]
       .to[List]
   }
 
-  def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericAppointment]] = {
+  def selectByScheduleId(scheduleId: ScheduleId): ConnectionIO[List[GenericVisitorAppointment]] = {
     sql"""SELECT A.id, visitorid, V.firstname, V.surname, V.patronymic, start, "end" FROM "Appointment" AS A JOIN "User" AS V ON V.id = A.visitorid WHERE scheduleid = $scheduleId"""
-      .query[GenericAppointment]
+      .query[GenericVisitorAppointment]
       .to[List]
   }
 }
@@ -81,11 +81,20 @@ case class AppointmentData(scheduleId: ScheduleId,
 
 case class Appointment(id: AppointmentId, data: AppointmentData) extends IdEntity[AppointmentId, AppointmentData]
 
-case class GenericAppointment(id: AppointmentId,
-                              visitorId: UserId,
-                              visitorFirstName: String,
-                              visitorSurname: String,
-                              visitorPatronymic: String,
-                              start: LocalTime,
-                              end: LocalTime)
+case class GenericVisitorAppointment(id: AppointmentId,
+                                     visitorId: UserId,
+                                     visitorFirstName: String,
+                                     visitorSurname: String,
+                                     visitorPatronymic: String,
+                                     start: LocalTime,
+                                     end: LocalTime)
+
+case class GenericHostAppointment(id: AppointmentId,
+                                  hostId: UserId,
+                                  hostFirstName: String,
+                                  hostSurname: String,
+                                  hostPatronymic: String,
+                                  start: LocalTime,
+                                  end: LocalTime)
+
 
