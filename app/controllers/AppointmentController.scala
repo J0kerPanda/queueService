@@ -72,7 +72,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   }
 
   def byVisitorId(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-    Appointment.selectByVisitorId(id, new LocalDate())
+    Appointment.selectByVisitorId(id, LocalDate.now())
       .transact(cu.transactor)
       .unsafeToFuture()
       .map(r => Ok(r.toJson))

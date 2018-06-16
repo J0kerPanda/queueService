@@ -50,28 +50,30 @@ object RepeatedSchedule {
       .run
   }
 
-  def selectBeforeDate(date: LocalDate): ConnectionIO[List[RepeatedSchedule]] = {
-    (selectSql ++ Fragments.whereAnd(fr"repeatDate < $date"))
+  def selectAll(): ConnectionIO[List[RepeatedSchedule]] = {
+    selectSql
       .query[RepeatedSchedule]
       .to[List]
   }
 
   def generateSchedules(): ConnectionIO[List[ScheduleId]] = {
-    val dateLimit = LocalDate.now().plusDays(1)
-
-    selectBeforeDate(dateLimit).flatMap {
+    selectAll().flatMap {
 
       case Nil => Free.pure(Nil)
 
       case head :: tail =>
-        val transformed = NonEmptyList.of(head, tail :_*)
+        val repeatedSchedules = NonEmptyList.of(head, tail :_*)
         for {
-          gen <- Schedule.insertBatch(transformed.flatMap { rs =>
+          dateLimits <- HostMeta
+            .selectByIds(repeatedSchedules.map(_.data.hostId))
+            .map(_.map(m => m.id -> LocalDate.now().plus(m.appointmentPeriod)).toMap)
+          gen <- Schedule.insertBatch(repeatedSchedules.flatMap { rs =>
             val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
-            generateSchedules(rs, startDate, dateLimit, NonEmptyList.of(generateSchedule(rs, startDate)))
+            generateSchedules(rs, startDate, dateLimits(rs.data.hostId), NonEmptyList.of(generateSchedule(rs, startDate)))
           })
           _ <- updateRepeatDates(
-            transformed.map(rs => (rs.id, getNewRepeatDate(rs.data.repeatDate, rs.data.repeatPeriod, dateLimit)))
+            repeatedSchedules
+              .map(rs => (rs.id, getNewRepeatDate(rs.data.repeatDate, rs.data.repeatPeriod, dateLimits(rs.data.hostId))))
           )
         } yield gen
     }

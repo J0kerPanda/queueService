@@ -80,7 +80,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
         case None => Free.pure(None)
 
         case Some(hm) =>
-          val from = new LocalDate()
+          val from = LocalDate.now()
           val to = from.plus(hm.appointmentPeriod.toStandardDays)
           Schedule
             .selectInPeriod(hostId, from, to)

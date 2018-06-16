@@ -1,5 +1,6 @@
 package db.data
 
+import cats.data.NonEmptyList
 import db.DatabaseFormats._
 import db.data.User.UserId
 import doobie._
@@ -20,6 +21,12 @@ object HostMeta {
     (selectHostMetaSql ++ fr"WHERE id = $id")
       .query[HostMeta]
       .option
+  }
+
+  def selectByIds(ids: NonEmptyList[UserId]): ConnectionIO[List[HostMeta]] = {
+    (selectHostMetaSql ++ Fragments.whereAnd(Fragments.in(fr"id", ids)))
+      .query[HostMeta]
+      .to[List]
   }
 }
 
