@@ -11,11 +11,11 @@ import db.DbConnectionUtils
 import db.data.Appointment.AppointmentId
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
-import db.data.{Appointment, AppointmentData, Schedule}
+import db.data.{Appointment, AppointmentData}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
+import org.joda.time.LocalDate
 import play.api.mvc._
-import io.scalaland.chimney.dsl._
 
 import scala.concurrent.ExecutionContext
 
@@ -72,7 +72,7 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   }
 
   def byVisitorId(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-    Appointment.selectByVisitorId(id)
+    Appointment.selectByVisitorId(id, new LocalDate())
       .transact(cu.transactor)
       .unsafeToFuture()
       .map(r => Ok(r.toJson))

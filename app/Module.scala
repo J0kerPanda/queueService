@@ -1,6 +1,7 @@
 import java.time.Clock
 
 import com.google.inject.AbstractModule
+import jobs.ScheduleGenerator
 
 /**
  * This class is a Guice module that tells Guice how to bind several
@@ -17,5 +18,6 @@ class Module extends AbstractModule {
   override def configure(): Unit = {
     // Use the system clock as the default implementation of Clock
     bind(classOf[Clock]).toInstance(Clock.systemDefaultZone)
+    bind(classOf[ScheduleGenerator]).asEagerSingleton()
   }
 }

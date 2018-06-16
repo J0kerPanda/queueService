@@ -59,8 +59,8 @@ object Appointment {
       .option
   }
 
-  def selectByVisitorId(id: UserId): ConnectionIO[List[HostAppointment]] = {
-    sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, date, start, "end" FROM "Appointment" AS A JOIN "Schedule" AS S ON A.scheduleid = S.id JOIN "User" AS U ON U.id = S.hostid WHERE visitorid = $id"""
+  def selectByVisitorId(id: UserId, from: LocalDate): ConnectionIO[List[HostAppointment]] = {
+    sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, date, start, "end" FROM "Appointment" AS A JOIN "Schedule" AS S ON A.scheduleid = S.id JOIN "User" AS U ON U.id = S.hostid WHERE visitorid = $id AND date >= $from"""
       .query[HostAppointment]
       .to[List]
   }
