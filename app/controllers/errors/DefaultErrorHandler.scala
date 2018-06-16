@@ -14,7 +14,11 @@ class DefaultErrorHandler extends HttpErrorHandler {
   private val jsonPathPrefix = "obj."
 
   def onClientError(request: RequestHeader, statusCode: Int, message: String): Future[Result] = {
-    Future.successful(Status(statusCode)("A client error occurred: " + message))
+    if (message.nonEmpty) {
+      Future.successful(Status(statusCode)(s"A client error occured: $message"))
+    } else {
+      Future.successful(Status(statusCode))
+    }
   }
 
   def onServerError(request: RequestHeader, exception: Throwable): Future[Result] = exception match {
