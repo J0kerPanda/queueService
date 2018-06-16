@@ -3,6 +3,7 @@ package controllers
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
 import cats.free.Free
+import controllers.auth.Roles
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.response.{GenericScheduleFormat, ScheduleListDataFormat}
@@ -30,8 +31,8 @@ class ScheduleController @Inject()(ab: ActionBuilders,
   private implicit val _bp: PlayBodyParsers = bp
   private implicit val _ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
-  //todo check that is host? -> formats remove hostid
-  def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
+  //todo formats remove hostid
+  def create: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     extractJsObjectAsync[ScheduleData] { sd =>
       //todo format -> remove repeatid
 
@@ -55,8 +56,9 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
-  //todo check that is host -> formats remove hostid
-  def createRepeated: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
+  //todo formats remove hostid
+  //todo check no repeated for same date exist
+  def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     extractJsObjectAsync[RepeatedScheduleData] { sd =>
 
       RepeatedSchedule

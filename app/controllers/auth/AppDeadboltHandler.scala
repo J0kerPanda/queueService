@@ -1,11 +1,12 @@
 package controllers.auth
 
 import akka.actor.ActorSystem
-import be.objectify.deadbolt.scala.models.Subject
+import be.objectify.deadbolt.scala.models.{Role, Subject}
 import be.objectify.deadbolt.scala.{AuthenticatedRequest, DeadboltHandler, DynamicResourceHandler}
+import controllers.auth.Roles.Host
 import controllers.util.{AuthUtils, ControllerUtils}
 import db.DbConnectionUtils
-import db.data.User
+import db.data.{User, UserData}
 import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import play.api.mvc.{Request, Result, _}
@@ -13,7 +14,7 @@ import play.api.mvc.{Request, Result, _}
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) extends DeadboltHandler {
+class AppDeadboltHandler @Inject()(cu: DbConnectionUtils, system: ActorSystem) extends DeadboltHandler {
 
   private implicit val ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
@@ -27,7 +28,8 @@ class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) 
           User.selectById(id.toInt)
           .transact(cu.transactor)
           .unsafeRunSync()
-          .collect { case u if !u.data.isBlocked => AuthUser(u.id, Nil, Nil) }
+          .collect { case u if !u.data.isBlocked => AuthUser(u.id, extractRoles(u.data), Nil) }
+
         case _ =>
           None
       }
@@ -38,4 +40,8 @@ class AppDeadboltHandler @Inject() (cu: DbConnectionUtils, system: ActorSystem) 
 
   override def getDynamicResourceHandler[A](request: Request[A]): Future[Option[DynamicResourceHandler]] =
     Future.successful(None)
+
+  private def extractRoles(userData: UserData): List[Role] = {
+    Option(Host).filter(_ => userData.isHost).toList
+  }
 }
