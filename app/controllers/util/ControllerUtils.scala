@@ -1,7 +1,6 @@
 package controllers.util
 
 import akka.actor.ActorSystem
-import be.objectify.deadbolt.scala.AuthenticatedRequest
 import controllers.errors.ErrorResponses
 import play.api.libs.json.Reads
 import play.api.mvc.{AnyContent, Request, Result}
@@ -20,8 +19,7 @@ object ControllerUtils {
       case json => ErrorResponses.badJson(json.toString)
   }
 
-  def extractJsObjectAsync[T](extractor: T => Future[Result])
-                             (implicit req: Request[AnyContent], r: Reads[T], ec: ExecutionContext): Future[Result] =
+  def extractJsObjectAsync[T](extractor: T => Future[Result])(implicit req: Request[AnyContent], r: Reads[T]): Future[Result] =
 
     req.body.asJson match {
 

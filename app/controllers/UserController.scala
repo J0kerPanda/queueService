@@ -9,7 +9,6 @@ import controllers.formats.response.HostDataFormat
 import controllers.util.AuthUtils._
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
-import db.DatabaseFormats.IdEntity
 import db.DbConnectionUtils
 import db.data.User.UserId
 import db.data._

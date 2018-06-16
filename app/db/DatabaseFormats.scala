@@ -3,7 +3,6 @@ package db
 import java.sql.{Date, Timestamp}
 
 import db.data.AppointmentInterval
-import doobie.postgres.implicits.pgEnumStringOpt
 import doobie.util.meta.Meta
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
 import org.postgresql.util.{PGInterval, PGTime, PGobject}

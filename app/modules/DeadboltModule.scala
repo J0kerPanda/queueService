@@ -1,8 +1,7 @@
 package modules
 
 import be.objectify.deadbolt.scala.cache.HandlerCache
-import be.objectify.deadbolt.scala.filters.AuthorizedRoutes
-import controllers.auth.{AppAuthorizedRoutes, AppHandlerCache}
+import controllers.auth.AppHandlerCache
 import play.api.inject.{Binding, Module}
 import play.api.{Configuration, Environment}
 

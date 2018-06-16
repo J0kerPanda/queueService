@@ -2,7 +2,17 @@ name := "queueService"
 
 version := "1.0"
 
-scalacOptions += "-Ypartial-unification"
+scalacOptions ++= Seq(
+  "-language:implicitConversions",
+  "-language:reflectiveCalls",
+  "-feature",
+  "-unchecked",
+  "-deprecation",
+  "-Ypartial-unification",
+  "-Yno-adapted-args",
+  "-Ywarn-dead-code",
+  "-Ywarn-unused"
+)
       
 lazy val `queueservice` = (project in file(".")).enablePlugins(PlayScala).settings(
   routesImport += "controllers.formats.HttpBinders._"

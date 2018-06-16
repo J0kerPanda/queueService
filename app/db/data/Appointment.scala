@@ -18,7 +18,6 @@ object Appointment {
 
   def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
-                       hostId: UserId,
                        start: LocalTime): ConnectionIO[Option[AppointmentId]] = {
 
    Schedule
