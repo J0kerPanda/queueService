@@ -24,6 +24,7 @@ class AppDeadboltHandler @Inject()(cu: DbConnectionUtils, system: ActorSystem) e
     request.subject.orElse {
       request.session.get(AuthUtils.UserIdKey) match {
         case Some(id) =>
+          //todo invalidating sessions of blocked users
           //todo cache?
           User.selectById(id.toInt)
           .transact(cu.transactor)

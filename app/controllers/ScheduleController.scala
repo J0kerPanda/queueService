@@ -51,7 +51,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
           Logger.error("schedule error", err)
           ErrorResponses.invalidScheduleData
 
-        case Right(id) => Created(id.toJson)
+        case Right(id) => Created
       }
     }
   }
@@ -72,7 +72,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
           Logger.error("schedule error", err)
           ErrorResponses.invalidScheduleData
 
-        case Right(id) => Created(id.toString)
+        case Right(id) => Created
       }
     }
   }
