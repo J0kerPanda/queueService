@@ -22,7 +22,7 @@ object Schedule {
 
   private val deleteSql = sql"""DELETE FROM "Schedule" """
 
-  def insert(s: ScheduleData): ConnectionIO[Option[ScheduleId]] = {
+  def insert(s: ScheduleData): ConnectionIO[ScheduleId] = {
     (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
