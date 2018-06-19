@@ -63,8 +63,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
-  //todo formats remove hostid
-  //todo check no repeated for same date exist
   def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     extractJsObjectAsync[RepeatedScheduleData] { sd =>
 
