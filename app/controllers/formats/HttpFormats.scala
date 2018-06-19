@@ -1,7 +1,7 @@
 package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
-import controllers.formats.request.{LoginRequest, RegistrationRequest}
+import controllers.formats.request.{CreateScheduleRequest, LoginRequest, RegistrationRequest}
 import controllers.formats.response.{GenericScheduleFormat, HostDataFormat, ScheduleListDataFormat}
 import db.DatabaseFormats.IdEntity
 import db.data._
@@ -127,5 +127,5 @@ object HttpFormats {
 
   implicit lazy val repeatedScheduleDataRead: Reads[RepeatedScheduleData] = Json.reads[RepeatedScheduleData]
 
-  implicit lazy val scheduleDataRead: Reads[ScheduleData] = Json.reads[ScheduleData]
+  implicit lazy val scheduleDataRead: Reads[CreateScheduleRequest] = Json.reads[CreateScheduleRequest]
 }
