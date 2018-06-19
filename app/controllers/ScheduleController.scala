@@ -37,7 +37,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     extractJsObjectAsync[CreateScheduleRequest] { sd =>
       val user = r.subject.get.asInstanceOf[AuthUser]
 
-      val tr = for {
+      (for {
         _ <- Schedule.blockRepeatedByDate(sd.date)
         _ <- Schedule.insert(
           sd.into[ScheduleData]
@@ -46,9 +46,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
             .transform
         )
         schedules <- selectSchedules(user.id)
-      } yield schedules
-
-      tr
+      } yield schedules)
         .transact(cu.transactor)
         .attempt
         .unsafeToFuture()
@@ -60,6 +58,34 @@ class ScheduleController @Inject()(ab: ActionBuilders,
 
         case Right(data) => Ok(data.toJson)
       }
+    }
+  }
+
+  def update: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
+    extractJsObjectAsync[GenericScheduleFormat] { gs =>
+      val user = r.subject.get.asInstanceOf[AuthUser]
+
+      Schedule.select(gs.id)
+        .flatMap[Option[GenericScheduleFormat]] {
+          case Some(s) if s.data.hostId == user.id =>
+            val updated = s.data.copy(
+              appointmentIntervals = gs.appointmentIntervals,
+              appointmentDuration = gs.appointmentDuration,
+              place = gs.place,
+              isBlocked = gs.isBlocked
+            )
+            Schedule.update(Schedule(gs.id, updated))
+              .map(_ => Some(updated.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform))
+
+          case _ => Free.pure(None)
+        }
+        .map {
+          case Some(res) => Ok(res.toJson)
+
+          case None => BadRequest
+        }
+        .transact(cu.transactor)
+        .unsafeToFuture()
     }
   }
 

@@ -40,7 +40,7 @@ object Schedule {
       .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
   }
 
-  def update(s: Schedule): ConnectionIO[ScheduleId] = {
+  def update(s: Schedule): ConnectionIO[Int] = {
     val d = s.data
     (updateSql
       ++ fr"SET hostId = ${d.hostId}"

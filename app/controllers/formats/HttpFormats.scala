@@ -128,4 +128,6 @@ object HttpFormats {
   implicit lazy val repeatedScheduleDataRead: Reads[RepeatedScheduleData] = Json.reads[RepeatedScheduleData]
 
   implicit lazy val scheduleDataRead: Reads[CreateScheduleRequest] = Json.reads[CreateScheduleRequest]
+
+  implicit lazy val genericScheduleRead: Reads[GenericScheduleFormat] = Json.reads[GenericScheduleFormat]
 }
