@@ -66,7 +66,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       val user = r.subject.get.asInstanceOf[AuthUser]
 
       Schedule.select(gs.id)
-        .flatMap[Option[GenericScheduleFormat]] {
+        .flatMap[Option[ScheduleListDataFormat]] {
           case Some(s) if s.data.hostId == user.id =>
             val updated = s.data.copy(
               appointmentIntervals = gs.appointmentIntervals,
@@ -74,8 +74,11 @@ class ScheduleController @Inject()(ab: ActionBuilders,
               place = gs.place,
               isBlocked = gs.isBlocked
             )
-            Schedule.update(Schedule(gs.id, updated))
-              .map(_ => Some(updated.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform))
+
+            for {
+              _ <- Schedule.update(Schedule(gs.id, updated))
+              schedules <- selectSchedules(user.id)
+            } yield schedules
 
           case _ => Free.pure(None)
         }

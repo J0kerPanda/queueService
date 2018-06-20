@@ -43,12 +43,12 @@ object Schedule {
   def update(s: Schedule): ConnectionIO[Int] = {
     val d = s.data
     (updateSql
-      ++ fr"SET hostId = ${d.hostId}"
-      ++ fr"repeatId = ${d.repeatId} "
-      ++ fr"date = ${d.date} "
-      ++ fr"appointmentIntervals = ${d.appointmentIntervals} "
-      ++ fr"appointmentDuration = ${d.appointmentDuration} "
-      ++ fr"place = ${d.place} "
+      ++ fr"SET hostId = ${d.hostId}, "
+      ++ fr"repeatId = ${d.repeatId}, "
+      ++ fr"date = ${d.date}, "
+      ++ fr"appointmentIntervals = ${d.appointmentIntervals}::timerange[], "
+      ++ fr"appointmentDuration = ${d.appointmentDuration}, "
+      ++ fr"place = ${d.place}, "
       ++ fr"isBlocked = ${d.isBlocked} "
       ++ fr"WHERE id = ${s.id}"
     )
