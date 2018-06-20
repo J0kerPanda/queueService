@@ -56,6 +56,11 @@ object Schedule {
       .run
   }
 
+  def delete(id: ScheduleId): ConnectionIO[Int] = {
+    (deleteSql ++ fr"WHERE id = $id")
+      .update
+      .run
+  }
 
   def select(id: ScheduleId): ConnectionIO[Option[Schedule]] = {
     (selectSql ++ fr"WHERE id = $id")

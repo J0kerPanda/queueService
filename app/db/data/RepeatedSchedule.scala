@@ -5,7 +5,6 @@ import cats.free.Free
 import db.DatabaseFormats._
 import db.data.Schedule.ScheduleId
 import db.data.User.UserId
-import doobie._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
 import io.scalaland.chimney.dsl._
@@ -20,6 +19,8 @@ object RepeatedSchedule {
   private val insertSql = sql"""INSERT INTO "RepeatedSchedule" (hostid, repeatdate, repeatperiod, appointmentintervals, appointmentduration, place) VALUES """
 
   private val updateSql = sql"""UPDATE "RepeatedSchedule" AS RS """
+
+  private val deleteSql = sql"""DELETE FROM "RepeatedSchedule" """
 
   def insert(s: RepeatedScheduleData): ConnectionIO[RepeatedScheduleId] = {
     (insertSql ++ fr"(${s.hostId}, ${s.repeatDate}, ${s.repeatPeriod}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})")
@@ -37,6 +38,12 @@ object RepeatedSchedule {
       .update
       .withGeneratedKeysWithChunkSize[RepeatedScheduleId]("id")(values.size)
       .compile.fold(List[ScheduleId]())((acc, id) => id :: acc)
+  }
+
+  def delete(id: ScheduleId): ConnectionIO[Int] = {
+    (deleteSql ++ fr"WHERE id = $id")
+      .update
+      .run
   }
 
   def updateRepeatDates(ss: NonEmptyList[(RepeatedScheduleId, LocalDate)]):  ConnectionIO[Int] = {

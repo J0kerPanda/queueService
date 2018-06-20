@@ -11,6 +11,7 @@ import controllers.formats.response.{GenericScheduleFormat, ScheduleListDataForm
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
+import db.data.Schedule.ScheduleId
 import db.data.User.UserId
 import db.data._
 import doobie.free.connection.ConnectionIO
@@ -92,9 +93,28 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
+  def delete(scheduleId: ScheduleId): Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { r =>
+    val user = r.subject.get.asInstanceOf[AuthUser]
+
+    Schedule.select(scheduleId)
+      .flatMap[Int] {
+        case Some(s) if (s.id == scheduleId) && (s.data.hostId == user.id) => Schedule.delete(scheduleId)
+        case _ => Free.pure(0)
+      }
+      .flatMap[Option[ScheduleListDataFormat]] {
+        case 0 => Free.pure(None)
+        case _ => selectSchedules(scheduleId)
+      }
+      .map {
+        case Some(res) => Ok(res.toJson)
+        case None => BadRequest
+      }
+      .transact(cu.transactor)
+      .unsafeToFuture()
+  }
+
   def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     extractJsObjectAsync[RepeatedScheduleData] { sd =>
-
       RepeatedSchedule
         .insert(sd)
         .transact(cu.transactor)

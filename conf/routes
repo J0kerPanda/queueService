@@ -20,5 +20,6 @@ GET     /api/appointment/:id            controllers.AppointmentController.get(id
 # Schedule
 POST    /api/schedule/create            controllers.ScheduleController.create
 POST    /api/schedule/update            controllers.ScheduleController.update
+POST    /api/schedule/delete/:id        controllers.ScheduleController.delete(id: Int)
 POST    /api/schedule/repeated/create   controllers.ScheduleController.createRepeated
 GET     /api/schedule/host/:hostId      controllers.ScheduleController.getSchedules(hostId: Int)
