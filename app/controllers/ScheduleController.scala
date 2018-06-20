@@ -103,10 +103,10 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       }
       .flatMap[Option[ScheduleListDataFormat]] {
         case 0 => Free.pure(None)
-        case _ => selectSchedules(scheduleId)
+        case _ => selectSchedules(user.id)
       }
       .map {
-        case Some(res) => Ok(res.toJson)
+        case Some(res) =>  Ok(res.toJson)
         case None => BadRequest
       }
       .transact(cu.transactor)
