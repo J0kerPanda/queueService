@@ -114,6 +114,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
   }
 
   def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
+    //todo check repeated date
     extractJsObjectAsync[RepeatedScheduleData] { sd =>
       RepeatedSchedule
         .insert(sd)
@@ -142,22 +143,22 @@ class ScheduleController @Inject()(ab: ActionBuilders,
   private def selectSchedules(hostId: UserId): ConnectionIO[Option[ScheduleListDataFormat]] = {
     HostMeta.selectById(hostId)
       .flatMap[Option[ScheduleListDataFormat]] {
-      case None => Free.pure(None)
+        case None => Free.pure(None)
 
-      case Some(hm) =>
-        val from = LocalDate.now()
-        val to = from.plus(hm.appointmentPeriod.toStandardDays)
-        Schedule
-          .selectInPeriod(hostId, from, to)
-          .map(schedules =>
-            Some(ScheduleListDataFormat(
-              hostId = hostId,
-              period = hm.appointmentPeriod,
-              schedules = schedules.map(
-                s => s.data.date -> s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
-              ).toMap
-            ))
-          )
+        case Some(hm) =>
+          val from = LocalDate.now()
+          val to = from.plus(hm.appointmentPeriod.toStandardDays)
+          Schedule
+            .selectInPeriod(hostId, from, to)
+            .map(schedules =>
+              Some(ScheduleListDataFormat(
+                hostId = hostId,
+                period = hm.appointmentPeriod,
+                schedules = schedules.map(
+                  s => s.data.date -> s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
+                ).toMap
+              ))
+            )
     }
   }
 }
