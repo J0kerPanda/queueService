@@ -5,6 +5,7 @@ import be.objectify.deadbolt.scala.ActionBuilders
 import cats.free.Free
 import controllers.auth.AuthUser
 import controllers.formats.HttpFormats._
+import controllers.formats.request.CreateAppointmentRequest
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
@@ -16,6 +17,7 @@ import doobie.implicits._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.LocalDate
 import play.api.mvc._
+import io.scalaland.chimney.dsl._
 
 import scala.concurrent.ExecutionContext
 
@@ -32,19 +34,19 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   //todo unique constraint errors
 
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    extractJsObjectAsync[AppointmentData] { req =>
+    extractJsObjectAsync[CreateAppointmentRequest] { req =>
+      val user = r.subject.get.asInstanceOf[AuthUser]
 
-      Appointment.insert(req)
+      Appointment
+        .insert(req.into[AppointmentData].withFieldConst(_.visitorId, user.id).transform)
+        .flatMap(_ => Appointment.selectByScheduleId(req.scheduleId))
         .transact(cu.transactor)
         .attempt
         .unsafeToFuture()
         .map {
+          case Left(_) => BadRequest
 
-          case Left(e) =>
-            println(e)
-            BadRequest //todo error
-
-          case Right(_) => Ok
+          case Right(res) => Ok(res.toJson)
         }
     }
   }
@@ -59,13 +61,17 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   }
 
   def cancel(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
-    Appointment.checkAppointmentUser(id, r.subject.get.asInstanceOf[AuthUser].id)
+    val user = r.subject.get.asInstanceOf[AuthUser]
+
+    Appointment.selectById(id)
       .flatMap[Result] {
-        case Some(true) => Appointment.delete(id).map(_ => Ok)
+        case Some(a) if a.data.visitorId == user.id =>
+          Appointment
+            .delete(id)
+            .flatMap(_ => Appointment.selectByScheduleId(a.data.scheduleId))
+            .map(r => Ok(r.toJson))
 
-        case Some(false) => Free.pure(Forbidden)
-
-        case None => Free.pure(NotFound)
+        case None => Free.pure(BadRequest)
       }
       .transact(cu.transactor)
       .unsafeToFuture()
