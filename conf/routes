@@ -24,4 +24,5 @@ POST    /api/schedule/update                    controllers.ScheduleController.u
 POST    /api/schedule/delete/:id                controllers.ScheduleController.delete(id: Int)
 POST    /api/schedule/repeated/create           controllers.ScheduleController.createRepeated
 GET     /api/schedule/repeated/host/:hostId     controllers.ScheduleController.getRepeatedSchedules(hostId: Int)
+POST    /api/schedule/repeated/delete/:id       controllers.ScheduleController.deleteRepeated(id: Int)
 

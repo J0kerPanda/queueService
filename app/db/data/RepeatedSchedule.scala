@@ -28,6 +28,12 @@ object RepeatedSchedule {
       .withUniqueGeneratedKeys("id")
   }
 
+  def select(id: ScheduleId): ConnectionIO[Option[RepeatedSchedule]] = {
+    (selectSql ++ fr"WHERE id = $id")
+      .query[RepeatedSchedule]
+      .option
+  }
+
   def selectByHostId(hostId: UserId): ConnectionIO[List[RepeatedSchedule]] = {
     (selectSql ++ fr"WHERE hostId = $hostId")
       .query[RepeatedSchedule]

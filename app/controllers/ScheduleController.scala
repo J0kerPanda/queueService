@@ -154,6 +154,25 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       .map(res => Ok(res.toJson))
   }
 
+  def deleteRepeated(scheduleId: ScheduleId): Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { r =>
+    val user = r.subject.get.asInstanceOf[AuthUser]
+
+    RepeatedSchedule.select(scheduleId)
+      .flatMap[Int] {
+        case Some(s) if (s.id == scheduleId) && (s.data.hostId == user.id) => RepeatedSchedule.delete(scheduleId)
+        case _ => Free.pure(0)
+      }
+      .flatMap[Option[RepeatedScheduleListDataFormat]] {
+        case 0 => Free.pure(None)
+        case _ => selectRepeatedSchedules(user.id).map(Some(_))
+      }
+      .map {
+        case Some(res) => Ok(res.toJson)
+        case None => BadRequest
+      }
+      .transact(cu.transactor)
+      .unsafeToFuture()
+  }
 
   private def selectSchedules(hostId: UserId): ConnectionIO[Option[ScheduleListDataFormat]] = {
     HostMeta.selectById(hostId)
