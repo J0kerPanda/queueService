@@ -164,7 +164,10 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       }
       .flatMap[Option[RepeatedScheduleListDataFormat]] {
         case 0 => Free.pure(None)
-        case _ => selectRepeatedSchedules(user.id).map(Some(_))
+        case _ => for {
+          _ <- Schedule.removeRepeatId(scheduleId)
+          res <- selectRepeatedSchedules(user.id).map(Some(_))
+        } yield res
       }
       .map {
         case Some(res) => Ok(res.toJson)

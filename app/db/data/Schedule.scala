@@ -73,6 +73,12 @@ object Schedule {
       .to[List]
   }
 
+  def removeRepeatId(repeatId: ScheduleId): ConnectionIO[Int] = {
+    (updateSql ++ fr"SET repeatId = NULL WHERE repeatId = $repeatId")
+      .update
+      .run
+  }
+
   def selectOccupiedDates(from: LocalDate): ConnectionIO[List[(UserId, LocalDate)]] = {
     sql"""SELECT hostid, date FROM "Schedule" WHERE date >= $from"""
       .query[(UserId, LocalDate)]
