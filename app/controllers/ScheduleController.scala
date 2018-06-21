@@ -147,6 +147,14 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
+  def getRepeatedSchedules(hostId: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    selectRepeatedSchedules(hostId)
+      .transact(cu.transactor)
+      .unsafeToFuture()
+      .map(res => Ok(res.toJson))
+  }
+
+
   private def selectSchedules(hostId: UserId): ConnectionIO[Option[ScheduleListDataFormat]] = {
     HostMeta.selectById(hostId)
       .flatMap[Option[ScheduleListDataFormat]] {

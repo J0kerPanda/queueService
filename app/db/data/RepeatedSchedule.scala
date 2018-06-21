@@ -29,7 +29,7 @@ object RepeatedSchedule {
   }
 
   def selectByHostId(hostId: UserId): ConnectionIO[List[RepeatedSchedule]] = {
-    (selectSql ++ fr"WHERE id = $hostId")
+    (selectSql ++ fr"WHERE hostId = $hostId")
       .query[RepeatedSchedule]
       .to[List]
   }

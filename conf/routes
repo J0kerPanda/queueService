@@ -1,25 +1,27 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET     /api/test                       controllers.UserController.test
+GET     /api/test                               controllers.UserController.test
 
 # User
-POST    /api/user/login                 controllers.UserController.login
-POST    /api/user/register              controllers.UserController.register
-POST    /api/user/promote               controllers.UserController.promote(id: Int)
-GET     /api/user/hosts                 controllers.UserController.getHosts
-GET     /api/user/:id                   controllers.UserController.get(id: Int)
+POST    /api/user/login                         controllers.UserController.login
+POST    /api/user/register                      controllers.UserController.register
+POST    /api/user/promote                       controllers.UserController.promote(id: Int)
+GET     /api/user/hosts                         controllers.UserController.getHosts
+GET     /api/user/:id                           controllers.UserController.get(id: Int)
 
 # Appointment
-POST    /api/appointment/create         controllers.AppointmentController.create
-POST    /api/appointment/cancel/:id     controllers.AppointmentController.cancel(id: Long)
-GET     /api/appointment/list           controllers.AppointmentController.byScheduleId(scheduleId: Int)
-GET     /api/appointment/visitor        controllers.AppointmentController.byVisitorId(id: Int)
-GET     /api/appointment/:id            controllers.AppointmentController.get(id: Long)
+POST    /api/appointment/create                 controllers.AppointmentController.create
+POST    /api/appointment/cancel/:id             controllers.AppointmentController.cancel(id: Long)
+GET     /api/appointment/list                   controllers.AppointmentController.byScheduleId(scheduleId: Int)
+GET     /api/appointment/visitor                controllers.AppointmentController.byVisitorId(id: Int)
+GET     /api/appointment/:id                    controllers.AppointmentController.get(id: Long)
 
 # Schedule
-POST    /api/schedule/create            controllers.ScheduleController.create
-POST    /api/schedule/update            controllers.ScheduleController.update
-POST    /api/schedule/delete/:id        controllers.ScheduleController.delete(id: Int)
-POST    /api/schedule/repeated/create   controllers.ScheduleController.createRepeated
-GET     /api/schedule/host/:hostId      controllers.ScheduleController.getSchedules(hostId: Int)
+POST    /api/schedule/create                    controllers.ScheduleController.create
+GET     /api/schedule/host/:hostId              controllers.ScheduleController.getSchedules(hostId: Int)
+POST    /api/schedule/update                    controllers.ScheduleController.update
+POST    /api/schedule/delete/:id                controllers.ScheduleController.delete(id: Int)
+POST    /api/schedule/repeated/create           controllers.ScheduleController.createRepeated
+GET     /api/schedule/repeated/host/:hostId     controllers.ScheduleController.getRepeatedSchedules(hostId: Int)
+
