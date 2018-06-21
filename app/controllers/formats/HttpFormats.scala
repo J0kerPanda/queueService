@@ -2,7 +2,7 @@ package controllers.formats
 
 import controllers.errors.{ErrorListResponse, ErrorResponse}
 import controllers.formats.request.{CreateScheduleRequest, LoginRequest, RegistrationRequest}
-import controllers.formats.response.{GenericScheduleFormat, HostDataFormat, ScheduleListDataFormat}
+import controllers.formats.response._
 import db.DatabaseFormats.IdEntity
 import db.data._
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -52,6 +52,8 @@ object HttpFormats {
 
   implicit lazy val genericScheduleWrite: Writes[GenericScheduleFormat] = Json.writes[GenericScheduleFormat]
 
+  implicit lazy val genericRepeatedScheduleWrite: Writes[GenericRepeatedScheduleFormat] = Json.writes[GenericRepeatedScheduleFormat]
+
   implicit lazy val appointmentIntervalWrite: Writes[AppointmentInterval] = Json.writes[AppointmentInterval]
 
   implicit object scheduleMapWrite extends Writes[Map[LocalDate, GenericScheduleFormat]] {
@@ -61,6 +63,8 @@ object HttpFormats {
   }
 
   implicit lazy val scheduleListDataWrite: Writes[ScheduleListDataFormat] = Json.writes[ScheduleListDataFormat]
+
+  implicit lazy val repeatedScheduleListDataWrite: Writes[RepeatedScheduleListDataFormat] = Json.writes[RepeatedScheduleListDataFormat]
 
   implicit lazy val hostDataWrite: Writes[HostDataFormat] = Json.writes[HostDataFormat]
 

@@ -76,6 +76,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
         .flatMap[Option[ScheduleListDataFormat]] {
           case Some(s) if s.data.hostId == user.id =>
             val updated = s.data.copy(
+              repeatId = None,
               appointmentIntervals = gs.appointmentIntervals,
               appointmentDuration = gs.appointmentDuration,
               place = gs.place
@@ -121,19 +122,23 @@ class ScheduleController @Inject()(ab: ActionBuilders,
   def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     //todo check repeated date
     extractJsObjectAsync[RepeatedScheduleData] { sd =>
-      RepeatedSchedule
-        .insert(sd)
+      val user = r.subject.get.asInstanceOf[AuthUser]
+
+      (for {
+        _ <- RepeatedSchedule.insert(sd)
+        res <- selectRepeatedSchedules(user.id)
+      } yield res)
         .transact(cu.transactor)
         .attempt
         .unsafeToFuture()
         .map {
 
-        case Left(err) =>
-          Logger.error("schedule error", err)
-          ErrorResponses.invalidScheduleData
+          case Left(err) =>
+            Logger.error("schedule error", err)
+            ErrorResponses.invalidScheduleData
 
-        case Right(id) => Created(id.toString)
-      }
+          case Right(res) => Ok(res.toJson)
+        }
     }
   }
 
