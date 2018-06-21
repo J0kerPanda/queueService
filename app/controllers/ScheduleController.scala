@@ -6,7 +6,7 @@ import cats.free.Free
 import controllers.auth.{AuthUser, Roles}
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.CreateScheduleRequest
+import controllers.formats.request.{CreateRepeatedScheduleRequest, CreateScheduleRequest}
 import controllers.formats.response.{GenericRepeatedScheduleFormat, GenericScheduleFormat, RepeatedScheduleListDataFormat, ScheduleListDataFormat}
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
@@ -121,11 +121,16 @@ class ScheduleController @Inject()(ab: ActionBuilders,
 
   def createRepeated: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     //todo check repeated date
-    extractJsObjectAsync[RepeatedScheduleData] { sd =>
+    extractJsObjectAsync[CreateRepeatedScheduleRequest] { sd =>
       val user = r.subject.get.asInstanceOf[AuthUser]
 
       (for {
-        _ <- RepeatedSchedule.insert(sd)
+        _ <- RepeatedSchedule.insert(
+          sd.into[RepeatedScheduleData]
+            .withFieldConst(_.hostId, user.id)
+            .transform
+        )
+        _ <- RepeatedSchedule.generateSchedules()
         res <- selectRepeatedSchedules(user.id)
       } yield res)
         .transact(cu.transactor)
