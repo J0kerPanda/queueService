@@ -7,5 +7,4 @@ import org.joda.time.Period
 case class GenericScheduleFormat(id: ScheduleId,
                                  appointmentIntervals: List[AppointmentInterval],
                                  appointmentDuration: Period,
-                                 place: String,
-                                 isBlocked: Boolean)
+                                 place: String)

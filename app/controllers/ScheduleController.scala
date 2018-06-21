@@ -7,7 +7,7 @@ import controllers.auth.{AuthUser, Roles}
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
 import controllers.formats.request.CreateScheduleRequest
-import controllers.formats.response.{GenericScheduleFormat, ScheduleListDataFormat}
+import controllers.formats.response.{GenericRepeatedScheduleFormat, GenericScheduleFormat, RepeatedScheduleListDataFormat, ScheduleListDataFormat}
 import controllers.util.ControllerUtils
 import controllers.util.ControllerUtils._
 import db.DbConnectionUtils
@@ -39,7 +39,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       val user = r.subject.get.asInstanceOf[AuthUser]
 
       (for {
-        _ <- Schedule.blockRepeatedByDate(sd.date)
         _ <- Schedule.insert(
           sd.into[ScheduleData]
             .withFieldConst(_.hostId, user.id)
@@ -62,6 +61,13 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
+  def getSchedules(hostId: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+    selectSchedules(hostId)
+      .transact(cu.transactor)
+      .unsafeToFuture()
+      .map(_.map(res => Ok(res.toJson)).getOrElse(ErrorResponses.invalidHostUser(hostId)))
+  }
+
   def update: Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() { implicit r =>
     extractJsObjectAsync[GenericScheduleFormat] { gs =>
       val user = r.subject.get.asInstanceOf[AuthUser]
@@ -72,8 +78,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
             val updated = s.data.copy(
               appointmentIntervals = gs.appointmentIntervals,
               appointmentDuration = gs.appointmentDuration,
-              place = gs.place,
-              isBlocked = gs.isBlocked
+              place = gs.place
             )
 
             for {
@@ -132,14 +137,6 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     }
   }
 
-  def getSchedules(hostId: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-
-    selectSchedules(hostId)
-      .transact(cu.transactor)
-      .unsafeToFuture()
-      .map(_.map(res => Ok(res.toJson)).getOrElse(ErrorResponses.invalidHostUser(hostId)))
-  }
-
   private def selectSchedules(hostId: UserId): ConnectionIO[Option[ScheduleListDataFormat]] = {
     HostMeta.selectById(hostId)
       .flatMap[Option[ScheduleListDataFormat]] {
@@ -160,5 +157,15 @@ class ScheduleController @Inject()(ab: ActionBuilders,
               ))
             )
     }
+  }
+
+  private def selectRepeatedSchedules(hostId: UserId): ConnectionIO[RepeatedScheduleListDataFormat] = {
+    RepeatedSchedule.selectByHostId(hostId)
+      .map(res => RepeatedScheduleListDataFormat(
+        hostId = hostId,
+        schedules = res.map(
+          s => s.data.repeatDate -> s.data.into[GenericRepeatedScheduleFormat].withFieldConst(_.id, s.id).transform)
+          .toMap
+      ))
   }
 }

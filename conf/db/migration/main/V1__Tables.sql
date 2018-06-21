@@ -69,7 +69,7 @@ CREATE TABLE "Schedule" (
   appointmentDuration INTERVAL NOT NULL DEFAULT interval '30 minutes',
   place VARCHAR(255) NOT NULL,
   isBlocked BOOLEAN NOT NULL DEFAULT FALSE,
-  CONSTRAINT host_date_unique UNIQUE (hostId, date, isBlocked)
+  CONSTRAINT host_date_unique UNIQUE (hostId, date)
 );
 
 ---- Appointment

@@ -14,16 +14,16 @@ object Schedule {
 
   type ScheduleId = Int
 
-  private val selectSql = sql"""SELECT id, hostid, repeatid, date, appointmentintervals, appointmentduration, place, isBlocked FROM "Schedule" """
+  private val selectSql = sql"""SELECT id, hostid, repeatid, date, appointmentintervals, appointmentduration, place FROM "Schedule" """
 
-  private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, appointmentintervals, appointmentduration, place, isblocked) VALUES """
+  private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, appointmentintervals, appointmentduration, place) VALUES """
 
   private val updateSql = sql"""UPDATE "Schedule" AS S """
 
   private val deleteSql = sql"""DELETE FROM "Schedule" """
 
   def insert(s: ScheduleData): ConnectionIO[ScheduleId] = {
-    (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place}, ${s.isBlocked})")
+    (insertSql ++ fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})")
       .update
       .withUniqueGeneratedKeys("id")
   }
@@ -31,7 +31,7 @@ object Schedule {
   def insertBatch(ss: NonEmptyList[ScheduleData]): ConnectionIO[List[ScheduleId]] = {
     val values = ss
       .map(s =>
-        fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place}. ${s.isBlocked})"
+        fr"(${s.hostId}, ${s.repeatId}, ${s.date}, ${s.appointmentIntervals}::timerange[], ${s.appointmentDuration}, ${s.place})"
       )
 
     (insertSql ++ values.foldSmash(fr"", fr", ", fr""))
@@ -49,7 +49,6 @@ object Schedule {
       ++ fr"appointmentIntervals = ${d.appointmentIntervals}::timerange[], "
       ++ fr"appointmentDuration = ${d.appointmentDuration}, "
       ++ fr"place = ${d.place}, "
-      ++ fr"isBlocked = ${d.isBlocked} "
       ++ fr"WHERE id = ${s.id}"
     )
       .update
@@ -69,17 +68,15 @@ object Schedule {
   }
 
   def selectInPeriod(hostId: UserId, from: LocalDate, to: LocalDate): ConnectionIO[List[Schedule]] = {
-    (selectSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to", fr"isblocked = FALSE"))
+    (selectSql ++ Fragments.whereAnd(fr"hostId = $hostId", fr"date >= $from", fr"date < $to"))
       .query[Schedule]
       .to[List]
   }
 
-  def blockRepeatedByDate(date: LocalDate): ConnectionIO[Int] = {
-    (updateSql
-      ++ fr"SET isblocked = TRUE "
-      ++ Fragments.whereAnd(fr"date = $date", fr"repeatId IS NOT NULL"))
-      .update
-      .run
+  def selectOccupiedDates(from: LocalDate): ConnectionIO[List[(UserId, LocalDate)]] = {
+    sql"""SELECT hostid, date FROM "Schedule" WHERE date >= $from"""
+      .query[(UserId, LocalDate)]
+      .to[List]
   }
 }
 case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[ScheduleId, ScheduleData]
@@ -89,5 +86,4 @@ case class ScheduleData(hostId: UserId,
                         date: LocalDate,
                         appointmentIntervals: List[AppointmentInterval],
                         appointmentDuration: Period,
-                        place: String,
-                        isBlocked: Boolean = false)
+                        place: String)
