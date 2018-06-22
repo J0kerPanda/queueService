@@ -60,7 +60,7 @@ object Appointment {
 
   def deleteOutOfTimeAppointments(scheduleId: ScheduleId, appointmentIntervals: NonEmptyList[AppointmentInterval]): ConnectionIO[Int] = {
     val condition = appointmentIntervals
-      .map(i => frstart < ${i.start} OR "end" > ${i.end}""")
+      .map(i => fr"""start < ${i.start} OR "end" > ${i.end}""")
       .foldSmash(fr"", fr" OR ", fr"")
 
     (deleteSql ++ Fragments.whereAnd(fr"scheduleId = $scheduleId", condition))
