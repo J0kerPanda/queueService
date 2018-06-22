@@ -133,7 +133,7 @@ case class RepeatedSchedule(id: ScheduleId, data: RepeatedScheduleData) extends 
 case class RepeatedScheduleData(hostId: UserId,
                                 repeatDate: LocalDate,
                                 repeatPeriod: Period,
-                                appointmentIntervals: List[AppointmentInterval],
+                                appointmentIntervals: NonEmptyList[AppointmentInterval],
                                 appointmentDuration: Period,
                                 place: String)
 

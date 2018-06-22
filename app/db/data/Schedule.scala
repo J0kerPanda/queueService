@@ -90,6 +90,6 @@ case class Schedule(id: ScheduleId, data: ScheduleData) extends IdEntity[Schedul
 case class ScheduleData(hostId: UserId,
                         repeatId: Option[RepeatedScheduleId],
                         date: LocalDate,
-                        appointmentIntervals: List[AppointmentInterval],
+                        appointmentIntervals: NonEmptyList[AppointmentInterval],
                         appointmentDuration: Period,
                         place: String)

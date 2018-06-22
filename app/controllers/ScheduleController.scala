@@ -2,6 +2,7 @@ package controllers
 
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
+import cats.data.NonEmptyList
 import cats.free.Free
 import controllers.auth.{AuthUser, Roles}
 import controllers.errors.ErrorResponses
@@ -22,7 +23,7 @@ import org.joda.time.LocalDate
 import play.api.Logger
 import play.api.mvc._
 
-import scala.concurrent.ExecutionContext
+import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
 class ScheduleController @Inject()(ab: ActionBuilders,
@@ -38,25 +39,30 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     extractJsObjectAsync[CreateScheduleRequest] { sd =>
       val user = r.subject.get.asInstanceOf[AuthUser]
 
-      (for {
-        _ <- Schedule.insert(
-          sd.into[ScheduleData]
-            .withFieldConst(_.hostId, user.id)
-            .withFieldConst(_.repeatId, None)
-            .transform
-        )
-        schedules <- selectSchedules(user.id)
-      } yield schedules)
-        .transact(cu.transactor)
-        .attempt
-        .unsafeToFuture()
-        .map {
+      if (sd.appointmentIntervals.isEmpty) {
+        Future.successful(BadRequest)
+      } else {
+        (for {
+          _ <- Schedule.insert(
+            sd.into[ScheduleData]
+              .withFieldConst(_.hostId, user.id)
+              .withFieldConst(_.repeatId, None)
+              .withFieldConst(_.appointmentIntervals, NonEmptyList.fromListUnsafe(sd.appointmentIntervals))
+              .transform
+          )
+          schedules <- selectSchedules(user.id)
+        } yield schedules)
+          .transact(cu.transactor)
+          .attempt
+          .unsafeToFuture()
+          .map {
 
-        case Left(err) =>
-          Logger.error("schedule error", err)
-          ErrorResponses.invalidScheduleData
+            case Left(err) =>
+              Logger.error("schedule error", err)
+              ErrorResponses.invalidScheduleData
 
-        case Right(data) => Ok(data.toJson)
+            case Right(data) => Ok(data.toJson)
+          }
       }
     }
   }
@@ -72,12 +78,16 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     extractJsObjectAsync[GenericScheduleFormat] { gs =>
       val user = r.subject.get.asInstanceOf[AuthUser]
 
-      Schedule.select(gs.id)
-        .flatMap[Option[ScheduleListDataFormat]] {
-          case Some(s) if s.data.hostId == user.id =>
+      if (gs.appointmentIntervals.isEmpty) {
+        Future.successful(BadRequest)
+      } else {
+
+        Schedule.select(gs.id)
+          .flatMap[Option[ScheduleListDataFormat]] {
+          case Some(s) if s.data.hostId == user.id && gs.appointmentIntervals.nonEmpty =>
             val updated = s.data.copy(
               repeatId = None,
-              appointmentIntervals = gs.appointmentIntervals,
+              appointmentIntervals = NonEmptyList.fromListUnsafe(gs.appointmentIntervals),
               appointmentDuration = gs.appointmentDuration,
               place = gs.place
             )
@@ -89,13 +99,14 @@ class ScheduleController @Inject()(ab: ActionBuilders,
 
           case _ => Free.pure(None)
         }
-        .map {
-          case Some(res) => Ok(res.toJson)
+          .map {
+            case Some(res) => Ok(res.toJson)
 
-          case None => BadRequest
-        }
-        .transact(cu.transactor)
-        .unsafeToFuture()
+            case None => BadRequest
+          }
+          .transact(cu.transactor)
+          .unsafeToFuture()
+      }
     }
   }
 
@@ -124,26 +135,31 @@ class ScheduleController @Inject()(ab: ActionBuilders,
     extractJsObjectAsync[CreateRepeatedScheduleRequest] { sd =>
       val user = r.subject.get.asInstanceOf[AuthUser]
 
-      (for {
-        _ <- RepeatedSchedule.insert(
-          sd.into[RepeatedScheduleData]
-            .withFieldConst(_.hostId, user.id)
-            .transform
-        )
-        _ <- RepeatedSchedule.generateSchedules()
-        res <- selectRepeatedSchedules(user.id)
-      } yield res)
-        .transact(cu.transactor)
-        .attempt
-        .unsafeToFuture()
-        .map {
+      if (sd.appointmentIntervals.isEmpty) {
+        Future.successful(BadRequest)
+      } else {
+        (for {
+          _ <- RepeatedSchedule.insert(
+            sd.into[RepeatedScheduleData]
+              .withFieldConst(_.hostId, user.id)
+              .withFieldConst(_.appointmentIntervals, NonEmptyList.fromListUnsafe(sd.appointmentIntervals))
+              .transform
+          )
+          _ <- RepeatedSchedule.generateSchedules()
+          res <- selectRepeatedSchedules(user.id)
+        } yield res)
+          .transact(cu.transactor)
+          .attempt
+          .unsafeToFuture()
+          .map {
 
-          case Left(err) =>
-            Logger.error("schedule error", err)
-            ErrorResponses.invalidScheduleData
+            case Left(err) =>
+              Logger.error("schedule error", err)
+              ErrorResponses.invalidScheduleData
 
-          case Right(res) => Ok(res.toJson)
-        }
+            case Right(res) => Ok(res.toJson)
+          }
+      }
     }
   }
 
@@ -192,7 +208,10 @@ class ScheduleController @Inject()(ab: ActionBuilders,
                 hostId = hostId,
                 period = hm.appointmentPeriod,
                 schedules = schedules.map(
-                  s => s.data.date -> s.data.into[GenericScheduleFormat].withFieldConst(_.id, s.id).transform
+                  s => s.data.date -> s.data.into[GenericScheduleFormat]
+                    .withFieldConst(_.id, s.id)
+                    .withFieldConst(_.appointmentIntervals, s.data.appointmentIntervals.toList)
+                    .transform
                 ).toMap
               ))
             )
@@ -204,8 +223,11 @@ class ScheduleController @Inject()(ab: ActionBuilders,
       .map(res => RepeatedScheduleListDataFormat(
         hostId = hostId,
         schedules = res.map(
-          s => s.data.repeatDate -> s.data.into[GenericRepeatedScheduleFormat].withFieldConst(_.id, s.id).transform)
-          .toMap
+          s => s.data.repeatDate -> s.data.into[GenericRepeatedScheduleFormat]
+            .withFieldConst(_.id, s.id)
+            .withFieldConst(_.appointmentIntervals, s.data.appointmentIntervals.toList)
+            .transform
+        ).toMap
       ))
   }
 }

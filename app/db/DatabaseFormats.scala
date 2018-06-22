@@ -2,6 +2,7 @@ package db
 
 import java.sql.{Date, Timestamp}
 
+import cats.data.NonEmptyList
 import db.data.AppointmentInterval
 import doobie.util.meta.Meta
 import org.joda.time.{DateTime, LocalDate, LocalTime, Period}
@@ -63,13 +64,17 @@ object DatabaseFormats {
     }
   )
 
-  implicit val AppointmentIntervalArrayMeta: Meta[List[AppointmentInterval]] = Meta.StringMeta.xmap(
-    _ // {"[...]","[...]", ...}
-      .drop(2).dropRight(2) //drop {" "}
-      .split("\",\"")
-      .map(parseTimeRange)
-      .toList,
-    aiList => s"""{"${aiList.map(convertToTimeRange).mkString("\",\"")}"}"""
+  implicit val AppointmentIntervalArrayMeta: Meta[NonEmptyList[AppointmentInterval]] = Meta.StringMeta.xmap(
+    str => {
+      val parsedList = str // {"[...]","[...]", ...}
+        .drop(2).dropRight(2) //drop {" "}
+        .split("\",\"")
+        .map(parseTimeRange)
+        .toList
+
+      NonEmptyList.fromListUnsafe(parsedList)
+    },
+    aiList => s"""{"${aiList.map(convertToTimeRange).toList.mkString("\",\"")}"}"""
   )
 
   implicit val LocalTimeMeta: Meta[LocalTime] = Meta.TimeMeta.xmap(

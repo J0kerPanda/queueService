@@ -1,5 +1,6 @@
 package db.data
 
+import cats.data.NonEmptyList
 import cats.free.Free
 import db.DatabaseFormats._
 import db.data.Appointment.AppointmentId
@@ -13,7 +14,11 @@ object Appointment {
 
   type AppointmentId = Long
 
+  private val insertSql = sql"""INSERT INTO "Appointment" (scheduleid, visitorid, start, "end") VALUES """
+
   private val selectSql = sql"""SELECT "id", scheduleid, visitorId, start, "end" FROM "Appointment" """
+
+  private val deleteSql = sql"""DELETE FROM "Appointment" """
 
   def createBySchedule(visitorId: UserId,
                        scheduleId: ScheduleId,
@@ -34,13 +39,13 @@ object Appointment {
   }
 
   def insert(a: AppointmentData): ConnectionIO[AppointmentId] = {
-    sql"""INSERT INTO "Appointment" (scheduleid, visitorid, start, "end") VALUES (${a.scheduleId}, ${a.visitorId}, ${a.start}, ${a.end})"""
+    (insertSql ++ fr"(${a.scheduleId}, ${a.visitorId}, ${a.start}, ${a.end})")
       .update()
       .withUniqueGeneratedKeys[AppointmentId]("id")
   }
 
   def delete(id: AppointmentId): ConnectionIO[Int] = {
-    sql"""DELETE FROM "Appointment" WHERE id = $id"""
+    (deleteSql ++ fr"WHERE id = $id")
       .update()
       .run
   }
@@ -51,9 +56,9 @@ object Appointment {
       .option
   }
 
-  def selectByVisitorId(id: UserId, from: LocalDate): ConnectionIO[List[HostAppointment]] = {
+  def selectByVisitorId(id: UserId, from: LocalDate): ConnectionIO[List[GenericHostAppointment]] = {
     sql"""SELECT A.id, hostid, U.firstname, U.surname, U.patronymic, date, start, "end" FROM "Appointment" AS A JOIN "Schedule" AS S ON A.scheduleid = S.id JOIN "User" AS U ON U.id = S.hostid WHERE visitorid = $id AND date >= $from"""
-      .query[HostAppointment]
+      .query[GenericHostAppointment]
       .to[List]
   }
 
@@ -79,13 +84,13 @@ case class GenericVisitorAppointment(id: AppointmentId,
                                      start: LocalTime,
                                      end: LocalTime)
 
-case class HostAppointment(id: AppointmentId,
-                           hostId: UserId,
-                           hostFirstName: String,
-                           hostSurname: String,
-                           hostPatronymic: String,
-                           date: LocalDate,
-                           start: LocalTime,
-                           end: LocalTime)
+case class GenericHostAppointment(id: AppointmentId,
+                                  hostId: UserId,
+                                  hostFirstName: String,
+                                  hostSurname: String,
+                                  hostPatronymic: String,
+                                  date: LocalDate,
+                                  start: LocalTime,
+                                  end: LocalTime)
 
 
