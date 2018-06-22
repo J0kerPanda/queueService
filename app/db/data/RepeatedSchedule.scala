@@ -70,18 +70,16 @@ object RepeatedSchedule {
             .map(_.map(m => m.id -> LocalDate.now().plus(m.appointmentPeriod)).toMap)
           excludedDates <- Schedule.selectOccupiedDates(LocalDate.now())
               .map(_.groupBy(_._1)
-                .map {
-                  case (k, v) => k -> v.map(_._2).toSet
-                }
-                .toMap
+                .mapValues(_.map(_._2).toSet)
+                .withDefaultValue(Set())
               )
           gen <- Free.pure[ConnectionOp, NonEmptyList[RepeatedSchedule]](repeatedSchedules)
             .map(
               _.flatMap { rs =>
-                  val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
-                  generateSchedules(rs, startDate, dateLimits(rs.data.hostId), NonEmptyList.of(generateSchedule(rs, startDate)))
-                }
-                .filter(d => !excludedDates(d.hostId).contains(d.date))
+                val startDate = rs.data.repeatDate.plus(rs.data.repeatPeriod)
+                generateSchedules(rs, startDate, dateLimits(rs.data.hostId), NonEmptyList.of(generateSchedule(rs, startDate)))
+              }
+              .filter(d => !excludedDates(d.hostId).contains(d.date))
             )
             .flatMap[List[ScheduleId]] {
               case h :: t => Schedule.insertBatch(NonEmptyList.of(h, t :_*))
