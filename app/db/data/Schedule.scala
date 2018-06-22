@@ -18,7 +18,7 @@ object Schedule {
 
   private val insertSql = sql"""INSERT INTO "Schedule" (hostid, repeatid, date, appointmentintervals, appointmentduration, place) VALUES """
 
-  private val updateSql = sql"""UPDATE "Schedule" AS S """
+  private val updateSql = sql"""UPDATE "Schedule" """
 
   private val deleteSql = sql"""DELETE FROM "Schedule" """
 

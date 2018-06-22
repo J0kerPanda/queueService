@@ -16,6 +16,8 @@ object Appointment {
 
   private val insertSql = sql"""INSERT INTO "Appointment" (scheduleid, visitorid, start, "end", visited) VALUES """
 
+  private val updateSql = sql"""UPDATE "Appointment" """
+
   private val selectSql = sql"""SELECT "id", scheduleid, visitorId, start, "end", visited FROM "Appointment" """
 
   private val deleteSql = sql"""DELETE FROM "Appointment" """
@@ -50,9 +52,15 @@ object Appointment {
       .to[List]
   }
 
+  def complete(id: AppointmentId): ConnectionIO[Int] = {
+    (updateSql ++ fr"SET visited = TRUE WHERE id = $id")
+      .update
+      .run
+  }
+
   def deleteOutOfTimeAppointments(scheduleId: ScheduleId, appointmentIntervals: NonEmptyList[AppointmentInterval]): ConnectionIO[Int] = {
     val condition = appointmentIntervals
-      .map(i => fr"""start < ${i.start} OR "end" > ${i.end}""")
+      .map(i => frstart < ${i.start} OR "end" > ${i.end}""")
       .foldSmash(fr"", fr" OR ", fr"")
 
     (deleteSql ++ Fragments.whereAnd(fr"scheduleId = $scheduleId", condition))

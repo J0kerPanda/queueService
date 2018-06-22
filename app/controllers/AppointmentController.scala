@@ -60,6 +60,23 @@ class AppointmentController @Inject()(ab: ActionBuilders,
       .unsafeToFuture()
   }
 
+  def complete(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
+    val user = r.subject.get.asInstanceOf[AuthUser]
+
+    Appointment.selectById(id)
+      .flatMap[Result] {
+        case Some(a) if a.data.visitorId == user.id =>
+          Appointment
+            .complete(id)
+            .flatMap(_ => Appointment.selectByScheduleId(a.data.scheduleId))
+            .map(r => Ok(r.toJson))
+
+        case None => Free.pure(BadRequest)
+      }
+      .transact(cu.transactor)
+      .unsafeToFuture()
+  }
+
   def cancel(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
     val user = r.subject.get.asInstanceOf[AuthUser]
 
