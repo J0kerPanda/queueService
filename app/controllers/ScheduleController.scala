@@ -47,7 +47,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
             sd.into[ScheduleData]
               .withFieldConst(_.hostId, user.id)
               .withFieldConst(_.repeatId, None)
-              .withFieldConst(_.appointmentIntervals, NonEmptyList.fromListUnsafe(sd.appointmentIntervals))
+              .withFieldConst(_.appointmentIntervals, mergeAppointments(sd.appointmentIntervals))
               .transform
           )
           schedules <- selectSchedules(user.id)
@@ -87,7 +87,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
           case Some(s) if s.data.hostId == user.id && gs.appointmentIntervals.nonEmpty =>
             val updated = s.data.copy(
               repeatId = None,
-              appointmentIntervals = NonEmptyList.fromListUnsafe(gs.appointmentIntervals),
+              appointmentIntervals = mergeAppointments(gs.appointmentIntervals),
               appointmentDuration = gs.appointmentDuration,
               place = gs.place
             )
@@ -143,7 +143,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
           _ <- RepeatedSchedule.insert(
             sd.into[RepeatedScheduleData]
               .withFieldConst(_.hostId, user.id)
-              .withFieldConst(_.appointmentIntervals, NonEmptyList.fromListUnsafe(sd.appointmentIntervals))
+              .withFieldConst(_.appointmentIntervals, mergeAppointments(sd.appointmentIntervals))
               .transform
           )
           _ <- RepeatedSchedule.generateSchedules()
@@ -230,5 +230,17 @@ class ScheduleController @Inject()(ab: ActionBuilders,
             .transform
         ).toMap
       ))
+  }
+
+  private def mergeAppointments(appointmentIntervals: List[AppointmentInterval]): NonEmptyList[AppointmentInterval] = {
+    val sorted = appointmentIntervals.sortWith((e1, e2) => e1.start.isBefore(e2.start))
+
+    sorted.tail.foldLeft(NonEmptyList.of(sorted.head)) { (acc, el) =>
+      if (el.start.isBefore(acc.head.end)) {
+        NonEmptyList.of(acc.head.copy(end = el.end), acc.tail :_*)
+      } else {
+        el :: acc
+      }
+    }
   }
 }
