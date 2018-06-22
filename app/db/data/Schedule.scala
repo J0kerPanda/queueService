@@ -48,7 +48,7 @@ object Schedule {
       ++ fr"date = ${d.date}, "
       ++ fr"appointmentIntervals = ${d.appointmentIntervals}::timerange[], "
       ++ fr"appointmentDuration = ${d.appointmentDuration}, "
-      ++ fr"place = ${d.place}, "
+      ++ fr"place = ${d.place} "
       ++ fr"WHERE id = ${s.id}"
     )
       .update

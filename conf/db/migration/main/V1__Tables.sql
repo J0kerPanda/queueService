@@ -82,5 +82,6 @@ CREATE TABLE "Appointment" (
     ON UPDATE RESTRICT
     ON DELETE RESTRICT,
   start TIME NOT NULL,
-  "end" TIME NOT NULL CHECK ("end" > start)
+  "end" TIME NOT NULL CHECK ("end" > start),
+  visited BOOLEAN NOT NULL DEFAULT FALSE
 );
