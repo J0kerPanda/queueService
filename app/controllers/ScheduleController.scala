@@ -94,6 +94,7 @@ class ScheduleController @Inject()(ab: ActionBuilders,
 
             for {
               _ <- Schedule.update(Schedule(gs.id, updated))
+              _ <- Appointment.deleteOutOfTimeAppointments(gs.id, updated.appointmentIntervals)
               schedules <- selectSchedules(user.id)
             } yield schedules
 
