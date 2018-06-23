@@ -42,12 +42,6 @@ object User {
       .query[User]
       .option
   }
-
-  def selectByIds(ids: NonEmptyList[UserId], isBlocked: Boolean = false): ConnectionIO[List[User]] = {
-    (selectUserSql ++ Fragments.whereAnd(fr"isblocked = $isBlocked", Fragments.in(fr"id", ids)))
-      .query[User]
-      .to[List]
-  }
 }
 
 case class UserData(firstName: String,

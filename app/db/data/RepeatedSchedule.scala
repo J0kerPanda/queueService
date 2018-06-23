@@ -106,7 +106,7 @@ object RepeatedSchedule {
         generateSchedule(rs, currentDate.plus(rs.data.repeatPeriod)) :: acc
       )
     } else {
-      acc.reverse //todo ?
+      acc.reverse
     }
   }
 

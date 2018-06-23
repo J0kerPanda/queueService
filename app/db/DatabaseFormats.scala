@@ -15,7 +15,6 @@ object DatabaseFormats {
     def data: V
   }
 
-  //todo handling psql codes!
   implicit val DateTimeMeta: Meta[DateTime] = Meta[Timestamp].xmap(
     ts => new DateTime(ts.getTime),
     dt => new java.sql.Timestamp(dt.getMillis)

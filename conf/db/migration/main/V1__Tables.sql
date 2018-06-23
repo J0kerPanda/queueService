@@ -28,7 +28,6 @@ CREATE TABLE "HostMeta" (
   appointmentPeriod INTERVAL NOT NULL DEFAULT '31 day'
 );
 
--- todo intersection constraints?
 -- TimeRange
 CREATE OR REPLACE FUNCTION time_subtype_diff(x time, y time) RETURNS float8 AS $$
   SELECT EXTRACT(EPOCH FROM (x - y))
@@ -52,7 +51,6 @@ CREATE TABLE "RepeatedSchedule" (
   place VARCHAR(255) NOT NULL
 );
 
-CREATE UNIQUE INDEX host_day_unique_idx ON "RepeatedSchedule"(hostId, EXTRACT(isodow from repeatdate));
 
 ---- Schedule
 CREATE TABLE "Schedule" (

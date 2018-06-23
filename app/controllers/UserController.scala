@@ -50,7 +50,6 @@ class UserController @Inject()(ab: ActionBuilders,
   def register: Action[AnyContent] = Action.async { implicit r =>
     extractJsObjectAsync[RegistrationRequest] { rr =>
 
-      //todo unique constraint errors
       val user = UserData(
         firstName = rr.firstName,
         surname = rr.surname,

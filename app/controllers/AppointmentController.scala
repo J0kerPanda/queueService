@@ -31,8 +31,6 @@ class AppointmentController @Inject()(ab: ActionBuilders,
   private implicit val _bp: PlayBodyParsers = bp
   private implicit val _ec: ExecutionContext = ControllerUtils.getExecutionContext(system)
 
-  //todo unique constraint errors
-
   def create: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
     extractJsObjectAsync[CreateAppointmentRequest] { req =>
       val user = r.subject.get.asInstanceOf[AuthUser]
