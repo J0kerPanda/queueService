@@ -5,7 +5,6 @@
 POST    /api/user/login                         controllers.UserController.login
 POST    /api/user/promote                       controllers.UserController.promote(id: Int)
 GET     /api/user/hosts                         controllers.UserController.getHosts
-GET     /api/user/:id                           controllers.UserController.get(id: Int)
 
 # Appointment
 POST    /api/appointment/create                 controllers.AppointmentController.create
@@ -13,7 +12,6 @@ POST    /api/appointment/cancel/:id             controllers.AppointmentControlle
 POST    /api/appointment/complete/:id           controllers.AppointmentController.complete(id: Long)
 GET     /api/appointment/list                   controllers.AppointmentController.byScheduleId(scheduleId: Int)
 GET     /api/appointment/visitor                controllers.AppointmentController.byVisitorId(id: Int)
-GET     /api/appointment/:id                    controllers.AppointmentController.get(id: Long)
 
 # Schedule
 POST    /api/schedule/create                    controllers.ScheduleController.create

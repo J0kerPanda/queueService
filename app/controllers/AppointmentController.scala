@@ -49,15 +49,6 @@ class AppointmentController @Inject()(ab: ActionBuilders,
     }
   }
 
-  def get(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-    Appointment.selectById(id)
-      .transact(cu.transactor)
-      .map { r =>
-        Ok(r.toJson).withSession(new Session())
-      }
-      .unsafeToFuture()
-  }
-
   def complete(id: AppointmentId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() { implicit r =>
     val user = r.subject.get.asInstanceOf[AuthUser]
 

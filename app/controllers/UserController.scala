@@ -57,10 +57,6 @@ class UserController @Inject()(ab: ActionBuilders,
     tr.transact(cu.transactor).unsafeToFuture().map(_ => Ok)
   }
 
-  def get(id: Int): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
-    User.selectById(id).transact(cu.transactor).unsafeToFuture().map(u => Ok(u.toJson))
-  }
-
   def getHosts: Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
     User.selectHosts()
       .transact(cu.transactor)
