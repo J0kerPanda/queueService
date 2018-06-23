@@ -2,9 +2,10 @@ package controllers
 
 import akka.actor.ActorSystem
 import be.objectify.deadbolt.scala.ActionBuilders
+import controllers.auth.Roles
 import controllers.errors.ErrorResponses
 import controllers.formats.HttpFormats._
-import controllers.formats.request.{LoginRequest, RegistrationRequest}
+import controllers.formats.request.LoginRequest
 import controllers.formats.response.HostDataFormat
 import controllers.util.AuthUtils._
 import controllers.util.ControllerUtils
@@ -14,10 +15,10 @@ import db.data.User.UserId
 import db.data._
 import doobie.free.connection.ConnectionIO
 import doobie.implicits._
+import io.scalaland.chimney.dsl._
 import javax.inject.{Inject, Singleton}
 import org.joda.time.Period
 import play.api.mvc._
-import io.scalaland.chimney.dsl._
 
 import scala.concurrent.ExecutionContext
 
@@ -47,27 +48,7 @@ class UserController @Inject()(ab: ActionBuilders,
     }
   }
 
-  def register: Action[AnyContent] = Action.async { implicit r =>
-    extractJsObjectAsync[RegistrationRequest] { rr =>
-
-      val user = UserData(
-        firstName = rr.firstName,
-        surname = rr.surname,
-        patronymic = rr.patronymic,
-        password = rr.password,
-        email = rr.email
-      )
-
-      val tr: ConnectionIO[Option[User]] = for {
-        id <- User.insert(user)
-        u <- User.selectById(id)
-      } yield u
-
-      tr.transact(cu.transactor).unsafeToFuture().map(u => Created(u.toJson))
-    }
-  }
-
-  def promote(id: UserId): Action[AnyContent] = ab.SubjectPresentAction().defaultHandler() {
+  def promote(id: UserId): Action[AnyContent] = ab.RestrictAction(Roles.Host.name).defaultHandler() {
     val tr: ConnectionIO[UserId] = for {
       _ <- User.promote(id)
       r <- HostMeta.insert(HostMeta(id, Period.days(31)))

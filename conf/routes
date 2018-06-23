@@ -1,11 +1,8 @@
 # Routes
 # This file defines all application routes (Higher priority routes first)
 # ~~~~
-GET     /api/test                               controllers.UserController.test
-
 # User
 POST    /api/user/login                         controllers.UserController.login
-POST    /api/user/register                      controllers.UserController.register
 POST    /api/user/promote                       controllers.UserController.promote(id: Int)
 GET     /api/user/hosts                         controllers.UserController.getHosts
 GET     /api/user/:id                           controllers.UserController.get(id: Int)
